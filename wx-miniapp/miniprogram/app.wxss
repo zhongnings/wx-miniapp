@@ -1,0 +1,24 @@
+/* 全局样式 - 隐藏所有 scroll-view 的滚动条 */
+scroll-view {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE 10+ */
+}
+
+scroll-view::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+scroll-view::-webkit-scrollbar-track {
+  display: none !important;
+  background: transparent !important;
+}
+
+scroll-view::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+}
+

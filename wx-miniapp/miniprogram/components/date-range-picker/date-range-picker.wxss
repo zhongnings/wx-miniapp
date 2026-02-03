@@ -1,0 +1,212 @@
+/* 日期范围选择器样式 */
+.date-range-picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.date-range-picker-container {
+  width: 90%;
+  max-width: 600rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 标题栏 */
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 40rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.header-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.close-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.close-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.9);
+}
+
+/* 内容区域 */
+.picker-content {
+  padding: 40rpx;
+}
+
+.date-item {
+  margin-bottom: 32rpx;
+}
+
+.date-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.label-text {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.required-mark {
+  color: #ff4d4f;
+  margin-left: 8rpx;
+  font-size: 28rpx;
+}
+
+.date-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  border: 2rpx solid #e8e8e8;
+  font-size: 28rpx;
+  transition: all 0.3s;
+}
+
+.date-input.has-value {
+  color: #333;
+  background: #fff;
+  border-color: #1890ff;
+}
+
+.date-input.placeholder {
+  color: #999;
+}
+
+.calendar-icon {
+  font-size: 32rpx;
+  opacity: 0.6;
+}
+
+/* 长期有效选项 */
+.long-term-option {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  background: #f0f7ff;
+  border-radius: 12rpx;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-text {
+  margin-left: 16rpx;
+  font-size: 28rpx;
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* 提示信息 */
+.date-tip {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 24rpx;
+  padding: 20rpx;
+  background: #fffbe6;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #faad14;
+}
+
+.tip-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: #8c6d1f;
+  line-height: 1.6;
+}
+
+/* 底部按钮 */
+.picker-footer {
+  display: flex;
+  padding: 24rpx 40rpx 40rpx;
+  gap: 24rpx;
+}
+
+.footer-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.cancel-btn:active {
+  background: #e8e8e8;
+  transform: scale(0.98);
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.confirm-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+

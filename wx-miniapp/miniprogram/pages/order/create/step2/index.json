@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "借款人信息",
+  "navigationBarBackgroundColor": "#ff6f6f",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "backgroundColor": "#f5f5f5",
+  "usingComponents": {
+    "region-picker": "../../../../components/region-picker/region-picker"
+  }
+}
+

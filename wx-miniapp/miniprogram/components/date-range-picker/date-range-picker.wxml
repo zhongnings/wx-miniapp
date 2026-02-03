@@ -1,0 +1,78 @@
+<!-- 日期范围选择器组件 -->
+<view class="date-range-picker-mask" wx:if="{{show}}" catchtap="onMaskTap" catchtouchmove="stopScroll">
+  <view class="date-range-picker-container" catchtap="stopPropagation">
+    <!-- 标题栏 -->
+    <view class="picker-header">
+      <text class="header-title">{{title}}</text>
+      <text class="close-btn" catchtap="onClose">✕</text>
+    </view>
+
+    <!-- 日期选择区域 -->
+    <view class="picker-content">
+      <!-- 生效日期 -->
+      <view class="date-item">
+        <view class="date-label">
+          <text class="label-text">生效日期</text>
+          <text class="required-mark" wx:if="{{required}}">*</text>
+        </view>
+        <picker 
+          mode="date" 
+          value="{{startDate}}" 
+          start="{{minDate}}"
+          end="{{maxDate}}"
+          bindchange="onStartDateChange"
+        >
+          <view class="date-input {{startDate ? 'has-value' : 'placeholder'}}">
+            <text>{{startDate || '请选择生效日期'}}</text>
+            <text class="calendar-icon">📅</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 有效期 -->
+      <view class="date-item">
+        <view class="date-label">
+          <text class="label-text">有效期</text>
+          <text class="required-mark" wx:if="{{required}}">*</text>
+        </view>
+        <picker 
+          mode="date" 
+          value="{{endDate}}" 
+          start="{{startDate || minDate}}"
+          end="{{maxDate}}"
+          bindchange="onEndDateChange"
+        >
+          <view class="date-input {{endDate ? 'has-value' : 'placeholder'}}">
+            <text>{{endDate || '请选择有效期'}}</text>
+            <text class="calendar-icon">📅</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 长期有效选项 -->
+      <view class="long-term-option" wx:if="{{showLongTerm}}">
+        <label class="checkbox-label">
+          <checkbox 
+            checked="{{isLongTerm}}" 
+            bindtap="onLongTermChange"
+            color="#1890ff"
+          />
+          <text class="checkbox-text">长期有效</text>
+        </label>
+      </view>
+
+      <!-- 提示信息 -->
+      <view class="date-tip" wx:if="{{tip}}">
+        <text class="tip-icon">ℹ️</text>
+        <text class="tip-text">{{tip}}</text>
+      </view>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="picker-footer">
+      <button class="footer-btn cancel-btn" bindtap="onClose">取消</button>
+      <button class="footer-btn confirm-btn" bindtap="onConfirm">确定</button>
+    </view>
+  </view>
+</view>
+

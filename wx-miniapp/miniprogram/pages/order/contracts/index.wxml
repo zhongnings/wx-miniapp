@@ -1,0 +1,51 @@
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="goBack">
+      <text class="navbar-icon">〈</text>
+    </view>
+    <view class="navbar-title">合同协议</view>
+  </view>
+
+  <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <!-- 签署列表标题 -->
+    <view class="section-title">签署列表</view>
+    
+    <!-- 合同列表 -->
+    <block wx:for="{{contracts}}" wx:key="id">
+      <view class="contract-card">
+        <!-- 合同名称和状态 -->
+        <view class="contract-header">
+          <text class="contract-name">{{item.name}}</text>
+          <text class="status-badge {{item.status === '已签' ? 'signed' : 'unsigned'}}">{{item.status}}</text>
+        </view>
+        
+        <!-- 签署人信息 -->
+        <view class="signer-info">签署人：{{item.signer}}</view>
+        
+        <!-- 操作按钮 -->
+        <view class="action-buttons">
+          <button class="action-btn preview-btn" data-url="{{item.pdfUrl}}" bindtap="onPreview">预览</button>
+          <button class="action-btn urge-btn" data-id="{{item.id}}" bindtap="onUrgeSign">催签</button>
+          <button class="action-btn qrcode-btn" data-id="{{item.id}}" data-url="{{item.qrCodeUrl}}" bindtap="onShowQRCode">签署二维码</button>
+        </view>
+      </view>
+    </block>
+    
+    <view wx:if="{{!contracts.length}}" class="empty">暂无合同</view>
+  </scroll-view>
+
+  <!-- 二维码弹窗 -->
+  <view class="qrcode-modal {{showQRCodeModal ? '' : 'hide'}}" bindtap="closeQRCodeModal">
+    <view class="qrcode-content" catchtap="stopPropagation">
+      <text class="qrcode-title">签署二维码</text>
+      <image class="qrcode-image" src="{{qrCodeUrl}}" mode="aspectFit" wx:if="{{qrCodeUrl}}"></image>
+      <text class="qrcode-tip">请使用微信扫描二维码进行签署</text>
+      <view class="qrcode-actions">
+        <button class="qrcode-btn cancel" bindtap="closeQRCodeModal">关闭</button>
+        <button class="qrcode-btn save" bindtap="saveQRCode">保存到相册</button>
+      </view>
+    </view>
+  </view>
+</view>
+

@@ -1,0 +1,73 @@
+<view class="register-container">
+  <!-- <view class="custom-navbar">
+    <view class="navbar-content">
+      <view class="navbar-left" bindtap="goBack">
+        <text class="navbar-icon">〈</text>
+      </view>
+      <view class="navbar-title">金斗云</view>
+    </view>
+  </view> -->
+
+  <view class="logo-section">
+    <view class="logo-cloud-large">☁️</view>
+    <view class="logo-cloud-small">☁️</view>
+    <view class="app-title">金斗云</view>
+    <view class="welcome-text">欢迎注册账号信息</view>
+  </view>
+
+  <view class="register-form">
+    <view class="form-title">账号注册</view>
+    <view class="form-subtitle">请填写登录账号和密码</view>
+
+    <form bindsubmit="onSubmit">
+      <view class="form-group">
+        <view class="input-wrapper">
+          <text class="input-icon">👤</text>
+          <input
+            class="form-input"
+            name="username"
+            placeholder="请输入登录账号"
+            maxlength="50"
+          />
+        </view>
+      </view>
+
+      <view class="form-group">
+        <view class="input-wrapper">
+          <text class="input-icon">🔒</text>
+          <input
+            class="form-input"
+            name="password"
+            password="true"
+            placeholder="请输入密码"
+            maxlength="50"
+          />
+        </view>
+      </view>
+
+      <view class="form-group">
+        <view class="input-wrapper">
+          <text class="input-icon">🔒</text>
+          <input
+            class="form-input"
+            name="confirmPassword"
+            password="true"
+            placeholder="请再次输入密码"
+            maxlength="50"
+          />
+        </view>
+      </view>
+
+      <button
+        class="register-button {{!loading ? 'active' : 'disabled'}}"
+        formType="submit"
+        disabled="{{loading}}"
+        loading="{{loading}}"
+      >
+        {{loading ? '注册中...' : '立即注册'}}
+      </button>
+    </form>
+  </view>
+</view>
+
+

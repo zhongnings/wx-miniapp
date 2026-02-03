@@ -1,0 +1,139 @@
+<!-- 省市区选择器组件 -->
+<view class="region-picker-mask {{show ? 'show' : ''}}" bindtap="hide" catchtouchmove="stopScroll">
+  <view class="region-picker-container" catchtap="stopPropagation">
+    <view class="region-picker-header">
+      <text class="region-picker-title">{{title}}</text>
+      <text class="region-picker-close" bindtap="hide">×</text>
+    </view>
+    
+    <!-- 搜索框 -->
+    <view class="region-search-box">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="region-search-input" 
+        placeholder="搜索省/市/区" 
+        value="{{regionSearchKeyword}}"
+        bindinput="onRegionSearchInput"
+        confirm-type="search"
+      />
+      <text class="search-clear" wx:if="{{regionSearchKeyword}}" bindtap="clearRegionSearch">×</text>
+    </view>
+
+    <!-- 已选路径显示 -->
+    <view class="region-breadcrumb" wx:if="{{selectedProvince || selectedCity || selectedDistrict}}">
+      <text class="breadcrumb-item" wx:if="{{selectedProvince}}" bindtap="resetRegionToProvince">{{selectedProvince}}</text>
+      <text class="breadcrumb-separator" wx:if="{{selectedProvince && (selectedCity || selectedDistrict)}}">›</text>
+      <text class="breadcrumb-item" wx:if="{{selectedCity}}" bindtap="resetRegionToCity">{{selectedCity}}</text>
+    </view>
+
+    <!-- 地区列表容器 -->
+    <view class="region-content-wrapper">
+      <!-- 左侧：地区列表 -->
+      <scroll-view 
+        class="region-list" 
+        scroll-y="true" 
+        enhanced="true" 
+        show-scrollbar="{{false}}"
+        scroll-into-view="{{regionScrollIntoView}}"
+        scroll-with-animation="true"
+        catchtouchmove="stopScroll"
+      >
+        <!-- 搜索模式：显示搜索结果 -->
+        <block wx:if="{{regionSearchKeyword}}">
+          <view 
+            class="region-item {{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict ? 'selected' : ''}}"
+            wx:for="{{regionSearchResults}}" 
+            wx:key="code"
+            data-code="{{item.code}}"
+            data-name="{{item.name}}"
+            data-full-name="{{item.fullName}}"
+            data-level="{{item.level}}"
+            bindtap="onRegionItemTap"
+          >
+            <text class="region-item-name">{{item.fullName}}</text>
+            <text class="region-item-check" wx:if="{{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict}}">✓</text>
+          </view>
+          <view class="region-empty" wx:if="{{regionSearchResults.length === 0}}">
+            <text>未找到相关地区</text>
+          </view>
+        </block>
+
+        <!-- 省份列表（按首字母分组） -->
+        <block wx:elif="{{regionCurrentLevel === 'province'}}">
+          <view 
+            class="region-group" 
+            wx:for="{{regionProvinceGroups}}" 
+            wx:key="letter"
+            id="region-group-{{item.letter === '*' ? 'star' : item.letter}}"
+          >
+            <view class="region-group-header">
+              <text wx:if="{{item.isGaoTai}}">*</text>
+              <text wx:else>{{item.letter}}</text>
+            </view>
+            <view 
+              class="region-item {{province.name === selectedProvince ? 'selected' : ''}}"
+              wx:for="{{item.provinces}}" 
+              wx:for-item="province"
+              wx:key="code"
+              data-code="{{province.code}}"
+              data-name="{{province.name}}"
+              data-full-name="{{province.name}}"
+              data-level="province"
+              bindtap="onRegionItemTap"
+            >
+              <text class="region-item-name">{{province.name}}</text>
+              <text class="region-item-check" wx:if="{{province.name === selectedProvince}}">✓</text>
+            </view>
+          </view>
+        </block>
+
+        <!-- 城市列表 -->
+        <block wx:elif="{{regionCurrentLevel === 'city'}}">
+          <view 
+            class="region-item {{item.fullName === selectedCity ? 'selected' : ''}}"
+            wx:for="{{regionCityList}}" 
+            wx:key="code"
+            data-code="{{item.code}}"
+            data-name="{{item.name}}"
+            data-full-name="{{item.fullName}}"
+            data-level="city"
+            bindtap="onRegionItemTap"
+          >
+            <text class="region-item-name">{{item.fullName}}</text>
+            <text class="region-item-check" wx:if="{{item.fullName === selectedCity}}">✓</text>
+          </view>
+        </block>
+
+        <!-- 区县列表 -->
+        <block wx:elif="{{regionCurrentLevel === 'district'}}">
+          <view 
+            class="region-item {{item.name === selectedDistrict ? 'selected' : ''}}"
+            wx:for="{{regionDistrictList}}" 
+            wx:key="code"
+            data-code="{{item.code}}"
+            data-name="{{item.name}}"
+            data-full-name="{{item.fullName}}"
+            data-level="district"
+            bindtap="onRegionItemTap"
+          >
+            <text class="region-item-name">{{item.name}}</text>
+            <text class="region-item-check" wx:if="{{item.name === selectedDistrict}}">✓</text>
+          </view>
+        </block>
+      </scroll-view>
+
+      <!-- 右侧：首字母索引（仅在省份列表时显示） -->
+      <view class="region-index-bar" wx:if="{{regionCurrentLevel === 'province' && !regionSearchKeyword}}">
+        <view 
+          class="region-index-item {{regionIndexActive === item ? 'active' : ''}}"
+          wx:for="{{regionIndexLetters}}" 
+          wx:key="*this"
+          data-letter="{{item}}"
+          bindtap="scrollToRegionGroup"
+        >
+          {{item}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

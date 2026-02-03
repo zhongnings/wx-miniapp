@@ -1,0 +1,143 @@
+<view class="order-list-container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="menu-icon" bindtap="showMenu">
+      <text class="icon-text">🏠</text>
+    </view>
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input 
+        class="search-input" 
+        placeholder="请输入搜索关键词" 
+        value="{{keyword}}" 
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+    </view>
+  </view>
+
+  <!-- 标签页和状态筛选 -->
+  <view class="tabs-section">
+    <view class="tabs">
+      <view 
+        class="tab {{tab==='manage'?'active':''}}" 
+        data-tab="manage" 
+        bindtap="onTabChange"
+      >
+        订单管理
+        <view class="badge">{{manageCount}}</view>
+      </view>
+      <view 
+        class="tab {{tab==='history'?'active':''}}" 
+        data-tab="history" 
+        bindtap="onTabChange"
+      >
+        历史订单
+        <view class="badge">{{historyCount}}</view>
+      </view>
+    </view>
+    <view class="status-filter" bindtap="showStatusPicker">
+      <text>{{currentStatusLabel}}</text>
+      <text class="arrow">▼</text>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <scroll-view 
+    class="order-list" 
+    scroll-y="true"
+    enhanced="true" 
+    show-scrollbar="{{false}}" 
+    bindscrolltolower="onScrollToLower"
+    lower-threshold="100"
+  >
+    <block wx:for="{{orders}}" wx:key="id">
+      <view class="order-item">
+        <view class="order-row">
+          <text class="label">借款人：</text>
+          <text class="value">{{item.borrowerName || '未填写'}}</text>
+          <view class="status-link" wx:if="{{item.statusLabel}}" bindtap="goDetail" data-id="{{item.id}}">
+            {{item.statusLabel}} >
+          </view>
+        </view>
+        <view class="order-row">
+          <text class="label">借款金额：</text>
+          <text class="amount">{{item.loanAmount || '0.00'}}</text>
+          <text class="unit">(元)</text>
+        </view>
+        <view class="order-row">
+          <text class="label">借款时间：</text>
+          <text class="value">{{item.loanDate || '-'}}</text>
+        </view>
+        <view class="order-row order-no-row" bindtap="goDetail" data-id="{{item.id}}">
+          <text class="label">订单编号：</text>
+          <text class="value order-no">{{item.orderNo || '-'}}</text>
+          <view class="order-actions">
+            <text class="action-icon copy-icon" catchtap="copyOrderNo" data-no="{{item.orderNo}}">📋</text>
+            <text class="action-icon delete-icon" catchtap="deleteOrder" data-id="{{item.id}}">🗑️</text>
+          </view>
+        </view>
+      </view>
+    </block>
+    <view class="empty-tip" wx:if="{{orders.length === 0 && !loading}}">没有更多啦~</view>
+    <view class="loading-tip" wx:if="{{loading}}">加载中...</view>
+    <view class="no-more-tip" wx:if="{{!hasMore && orders.length > 0}}">没有更多了</view>
+  </scroll-view>
+
+  <!-- 右下角浮动按钮 -->
+  <view class="fab" bindtap="onCreateOrder">
+    <view class="fab-icon-wrapper">
+      <view class="fab-icon-circle">
+        <text class="fab-icon">✓</text>
+      </view>
+    </view>
+    <text class="fab-divider">|</text>
+    <text class="fab-text">新建订单</text>
+  </view>
+
+  <!-- 状态选择器 -->
+  <view class="status-picker-mask {{showStatusPicker ? 'show' : ''}}" bindtap="hideStatusPicker">
+    <view class="status-picker" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-cancel" bindtap="hideStatusPicker">取消</text>
+        <text class="picker-title">请选择状态</text>
+        <text class="picker-confirm" bindtap="confirmStatus">确认</text>
+      </view>
+      <view class="picker-content">
+        <view 
+          class="picker-item {{selectedStatus === item.value ? 'selected' : ''}}"
+          wx:for="{{statusOptions}}" 
+          wx:key="value"
+          data-value="{{item.value}}"
+          bindtap="selectStatus"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 菜单抽屉 -->
+  <view class="menu-drawer {{showMenuDrawer ? 'show' : ''}}" bindtap="hideMenu">
+    <view class="menu-content" catchtap="stopPropagation">
+      <view class="menu-header">
+        <text class="menu-title">选择菜单</text>
+        <text class="menu-close" bindtap="hideMenu">×</text>
+      </view>
+      <view class="menu-list">
+        <view 
+          class="menu-item {{currentMenu === item.key ? 'active' : ''}}"
+          wx:for="{{menuList}}" 
+          wx:key="key"
+          data-key="{{item.key}}"
+          data-path="{{item.path}}"
+          bindtap="onMenuClick"
+        >
+          <text class="menu-text">{{item.label}}</text>
+          <text class="menu-check" wx:if="{{currentMenu === item.key}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

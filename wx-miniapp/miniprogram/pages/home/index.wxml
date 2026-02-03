@@ -1,0 +1,31 @@
+<view class="home-container">
+  <!-- 主内容区域 -->
+  <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <view class="welcome-section">
+      <text class="welcome-text">欢迎使用贷款管理系统</text>
+    </view>
+  </scroll-view>
+
+  <!-- 菜单抽屉 -->
+  <view class="menu-drawer {{showMenuDrawer ? 'show' : ''}}" bindtap="hideMenu">
+    <view class="menu-content" catchtap="stopPropagation">
+      <view class="menu-header">
+        <text class="menu-title">选择菜单</text>
+        <text class="menu-close" bindtap="hideMenu">×</text>
+      </view>
+      <view class="menu-list">
+        <view 
+          class="menu-item {{currentMenu === item.key ? 'active' : ''}}"
+          wx:for="{{menuList}}" 
+          wx:key="key"
+          data-key="{{item.key}}"
+          data-path="{{item.path}}"
+          bindtap="onMenuClick"
+        >
+          <text class="menu-text">{{item.label}}</text>
+          <text class="menu-check" wx:if="{{currentMenu === item.key}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,84 @@
+{
+    "name" : "益信通",
+    "appid" : "__UNI__F34AA66",
+    "description" : "益信通贷款管理系统",
+    "versionName" : "1.0.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "app-plus" : {
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-app",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
+        },
+        "modules" : {},
+        "distribute" : {
+            "android" : {
+                "permissions" : []
+            },
+            "ios" : {},
+            "sdkConfigs" : {}
+        }
+    },
+    "quickapp" : {},
+    "mp-weixin" : {
+        "appid" : "wx17abb46c748b3702",
+        "setting" : {
+            "urlCheck" : false,
+            "es6" : true,
+            "postcss" : true,
+            "minified" : true
+        },
+        "usingComponents" : true
+    },
+    "mp-alipay" : {
+        "usingComponents" : true
+    },
+    "mp-baidu" : {
+        "usingComponents" : true
+    },
+    "mp-toutiao" : {
+        "usingComponents" : true
+    },
+    "h5" : {
+        "title" : "益信通",
+        "template" : "./index.html",
+        "router" : {
+            "mode" : "hash",
+            "base" : "/"
+        },
+        "publicPath" : "./",
+        "optimization" : {
+            "treeShaking" : {
+                "enable" : true
+            }
+        },
+        "devServer" : {
+            "port" : 8080,
+            "disableHostCheck" : true,
+            "proxy" : {
+                "/api" : {
+                    "target" : "http://localhost:8081",
+                    "changeOrigin" : true,
+                    "secure" : false
+                },
+                "/auth" : {
+                    "target" : "http://localhost:8081",
+                    "changeOrigin" : true,
+                    "secure" : false
+                },
+                "/agreements" : {
+                    "target" : "http://localhost:8081",
+                    "changeOrigin" : true,
+                    "secure" : false
+                }
+            }
+        }
+    },
+    "locale" : "zh-Hans",
+    "fallbackLocale" : "zh-Hans"
+}

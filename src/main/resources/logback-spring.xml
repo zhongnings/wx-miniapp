@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+    <!-- 日志根目录 -->
+    <property name="LOG_HOME" value="/opt/wxapp-backend/logs"/>
+    <!-- 单个日志文件最大 50MB，按天滚动，最多保留 30 天 -->
+    <property name="MAX_FILE_SIZE" value="50MB"/>
+    <property name="MAX_HISTORY" value="30"/>
+
+    <!--
+        控制台输出（开发环境是 Windows + JDK8 时，终端底层编码通常还是 GBK，
+        即使设置了 -Dfile.encoding=UTF-8，控制台仍可能出现中文乱码。
+        这里专门把控制台编码改为 GBK，日志文件仍然保持 UTF-8，
+        这样：
+        - 控制台（VS Code Debug Console / PowerShell）中文正常
+        - 日志文件 app.log 中文也是正常 UTF-8，方便在 Linux/生产环境查看
+    -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>GBK</charset>
+            <!-- <charset>UTF-8</charset> -->
+        </encoder>
+    </appender>
+
+    <!-- 文件输出（按天 + 大小滚动） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/app.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 每天生成新文件，文件名包含日期和索引 -->
+            <fileNamePattern>${LOG_HOME}/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 单个文件最大 50MB -->
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            <!-- 保留 30 天 -->
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <!-- 总大小上限，可按需调整，这里设置为 3GB -->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 应用日志配置 -->
+    <logger name="com.example.loanminiapp" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Root logger 只处理其他包的日志 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
+

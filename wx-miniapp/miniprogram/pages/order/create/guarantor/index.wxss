@@ -1,0 +1,642 @@
+.guarantor-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  /* padding-bottom: 128rpx; */
+}
+
+/* 内容区域 */
+.content {
+  height: calc(100vh - 128rpx);
+  padding-bottom: 180rpx; /* 底部按钮高度 + 额外空间，确保最后一个字段不被遮挡 */
+}
+
+/* 区块 */
+.section {
+  background: #ffffff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 10rpx;
+}
+
+.section-title.required::before {
+  content: '*';
+  color: #ff6f6f;
+  margin-right: 8rpx;
+}
+
+.section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 30rpx;
+}
+
+/* 类型选择 */
+.type-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.type-row .section-title {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.type-selector {
+  display: flex;
+  gap: 40rpx;
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  font-size: 28rpx;
+  color: #666;
+  cursor: pointer;
+}
+
+.type-option.active {
+  color: #ff6f6f;
+}
+
+.radio {
+  width: 36rpx;
+  height: 36rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 50%;
+  position: relative;
+}
+
+.radio.checked {
+  border-color: #ff6f6f;
+}
+
+.radio.checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20rpx;
+  height: 20rpx;
+  background: #ff6f6f;
+  border-radius: 50%;
+}
+
+/* 身份证上传 */
+.upload-section {
+  background: #ffffff;
+  margin: 20rpx auto;
+  margin-left: 1%;
+  width: 98%;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.section-header .section-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.section-header .section-subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 0;
+}
+
+.id-upload-wrapper {
+  display: flex;
+  gap: 20rpx;
+}
+
+.id-upload-item {
+  flex: 1;
+  position: relative;
+}
+
+.id-image-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.id-image {
+  width: 95%;
+  height: 220rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+  border: 2rpx dashed #ddd;
+}
+
+.delete-icon {
+  position: absolute;
+  top: -20rpx;
+  right: -20rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.delete-icon-text {
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 8rpx;
+}
+
+.upload-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 16rpx;
+}
+
+.id-card-upload {
+  display: flex;
+  gap: 20rpx;
+}
+
+.upload-item {
+  flex: 1;
+  height: 240rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 12rpx;
+  overflow: hidden;
+  position: relative;
+}
+
+.id-card-image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  background: #fafafa;
+}
+
+.camera-icon {
+  font-size: 60rpx;
+  color: #ff6f6f;
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 营业执照上传 */
+.business-license-upload {
+  display: flex;
+  justify-content: center;
+}
+
+.upload-item-large {
+  width: 100%;
+  border: 2rpx dashed #ddd;
+  border-radius: 12rpx;
+  /* background: #f5f5f5; */
+  padding: 20rpx;
+}
+
+.license-container {
+  width: 500rpx;
+  height: 320rpx;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 12rpx;
+}
+
+.upload-item-large .id-image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.license-image {
+  width: 100%;
+  height: 100%;
+}
+
+/* 附件上传样式（参考step6） */
+.form-section {
+  background: #ffffff;
+  margin: 20rpx auto;
+  margin-left: 1%;
+  width: 98%;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.label-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.label-group {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.upload-status {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.upload-button {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
+  background: #fff;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.upload-button::after {
+  border: none;
+}
+
+.upload-icons {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.upload-icon {
+  font-size: 32rpx;
+  color: #666;
+}
+
+.upload-arrow {
+  font-size: 24rpx;
+  color: #666;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.upload-button .upload-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.attachment-list {
+  margin-top: 20rpx;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.attachment-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-delete {
+  margin-left: 20rpx;
+  padding: 8rpx;
+}
+
+.attachment-delete .delete-icon-text {
+  font-size: 32rpx;
+  color: #999;
+}
+
+/* 表单项 */
+.form-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: #ffffff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+/* 去除下框线 */
+.form-item.no-border {
+  border-bottom: none;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.form-label.required::before {
+  content: '*';
+  color: #ff6f6f;
+  margin-right: 8rpx;
+}
+
+/* 为没有必填项的字段添加占位样式，保持对齐 */
+.form-label.form-label-placeholder::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+.form-input {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.form-input::placeholder {
+  color: #ccc;
+}
+
+.form-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.form-value .placeholder {
+  color: #ccc;
+}
+
+.arrow {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 底部按钮 */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-top: 1rpx solid #f0f0f0;
+  z-index: 999;
+}
+
+.save-button {
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #ff6f6f 0%, #ee5a6f 100%);
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 44rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-button::after {
+  border: none;
+}
+
+/* 公证材料区域 - 重新设计 */
+.notary-section {
+  background: #ffffff;
+  margin: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* 标题行 */
+.notary-title-row {
+  padding: 30rpx 30rpx 0rpx 30rpx;
+}
+
+.notary-main-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+/* 为标题添加占位符，保持与form-label对齐 */
+.notary-main-title::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+/* 内容行 - 类似form-item */
+.notary-content-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: #fff;
+}
+
+/* 左侧标签 */
+.notary-field-label {
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+  min-width: 200rpx;
+}
+
+.notary-field-label.required::before {
+  content: '*';
+  color: #ff6f6f;
+  margin-right: 8rpx;
+}
+
+/* 右侧组 - 与form-value保持一致 */
+.notary-right-group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.notary-field-status {
+  font-size: 28rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+/* 上传按钮 */
+.notary-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 16rpx;
+  background: #f5f5f5;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  color: #666;
+  font-size: 26rpx;
+  line-height: 1;
+  flex-shrink: 0;
+  max-width: 200rpx;
+  margin: 0;
+}
+
+.notary-upload-btn::after {
+  border: none;
+}
+
+/* 图标容器（重叠效果） */
+.notary-btn-icons {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.notary-btn-cloud {
+  font-size: 28rpx;
+  color: #999;
+  position: absolute;
+}
+
+.notary-btn-arrow {
+  font-size: 20rpx;
+  color: #999;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.notary-btn-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 附件列表 */
+.notary-file-list {
+  padding: 20rpx 30rpx 30rpx 30rpx;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* 状态文本 */
+.notary-status-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  padding-left: 30rpx;
+}
+
+/* 为状态文本添加占位符，保持与form-label对齐 */
+.notary-status-text::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+.notary-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.notary-file-item:last-child {
+  margin-bottom: 0;
+}
+
+.notary-file-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #ff6f6f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notary-file-delete {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notary-delete-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%);
+  /* 上面的 filter 会将白色图标变成灰色 #999 */
+}
+
+/* 禁用滚动 */
+.guarantor-container.scroll-disabled {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.guarantor-container.scroll-disabled .content {
+  overflow: hidden;
+  height: calc(100vh - 128rpx);
+}

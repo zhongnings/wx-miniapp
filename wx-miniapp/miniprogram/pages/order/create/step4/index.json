@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "担保人信息",
+  "navigationBarBackgroundColor": "#ff6f6f",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {}
+}

@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "担保人",
+  "navigationBarBackgroundColor": "#ff6f6f",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "region-picker": "../../../../components/region-picker/region-picker",
+    "date-range-picker": "../../../../components/date-range-picker/date-range-picker"
+  }
+}
+

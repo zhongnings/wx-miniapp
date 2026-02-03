@@ -1,0 +1,76 @@
+<view class="login-container">
+  <!-- Logo 和欢迎区域 -->
+  <view class="logo-section">
+    <view class="logo-cloud-large">☁️</view>
+    <view class="logo-cloud-small">☁️</view>
+    <view class="app-title">益信通</view>
+    <view class="welcome-text">欢迎登录益信通系统</view>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form">
+    <view class="form-title {{loginType === 'account' ? 'active' : ''}}" bindtap="switchLoginType">账号登录</view>
+    <view class="form-subtitle">点击切换 账号登录</view>
+
+    <form bindsubmit="onSubmit">
+      <!-- 用户名输入 -->
+      <view class="form-group">
+        <view class="input-wrapper">
+          <text class="input-icon">👤</text>
+          <input 
+            class="form-input" 
+            name="username" 
+            placeholder="请输入用户名"
+            value="{{username}}"
+            maxlength="50"
+          />
+        </view>
+      </view>
+
+      <!-- 密码输入 -->
+      <view class="form-group">
+        <view class="input-wrapper">
+          <text class="input-icon">🔒</text>
+          <input 
+            class="form-input" 
+            name="password" 
+            password="{{!showPassword}}"
+            placeholder="请输入密码"
+            value="{{password}}"
+            maxlength="50"
+          />
+          <view class="password-toggle" bindtap="togglePassword">
+            <text class="toggle-icon">{{showPassword ? '🙈' : '👁️'}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 忘记密码 / 注册 -->
+      <view class="forgot-password">
+        <text class="forgot-link" bindtap="onForgotPassword">忘记密码</text>
+        <text class="forgot-link register-link" bindtap="goRegister">注册账号</text>
+      </view>
+
+      <!-- 用户协议 -->
+      <view class="agreement-section">
+        <checkbox-group bindchange="onAgreeChange">
+          <label class="agreement-label">
+            <checkbox value="agree" checked="{{agreeTerms}}" class="agreement-checkbox" />
+            <text class="agreement-text">我已知晓并同意<text class="link-text" catchtap="onUserAgreement">《用户协议》</text>和<text class="link-text" catchtap="onPrivacyPolicy">《隐私协议》</text>
+            </text>
+          </label>
+        </checkbox-group>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button 
+        class="login-button {{agreeTerms && !loading ? 'active' : 'disabled'}}"
+        formType="submit"
+        disabled="{{!agreeTerms || loading}}"
+        loading="{{loading}}"
+      >
+        {{loading ? '登录中...' : '账号登录'}}
+      </button>
+    </form>
+  </view>
+</view>

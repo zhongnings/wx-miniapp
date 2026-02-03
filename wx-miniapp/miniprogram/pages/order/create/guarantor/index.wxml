@@ -1,0 +1,388 @@
+<view class="guarantor-container {{showRegionPicker ? 'scroll-disabled' : ''}}">
+  <!-- 内容区域 -->
+  <scroll-view class="content" scroll-y="true" enhanced="true" show-scrollbar="{{false}}">
+    <!-- 类型选择 -->
+    <view class="section">
+      <view class="type-row">
+        <view class="section-title">类型</view>
+        <view class="type-selector">
+          <view class="type-option {{borrowerType === 'personal' ? 'active' : ''}}" bindtap="selectType" data-type="personal">
+            <view class="radio {{borrowerType === 'personal' ? 'checked' : ''}}"></view>
+            <text>个人</text>
+          </view>
+          <view class="type-option {{borrowerType === 'company' ? 'active' : ''}}" bindtap="selectType" data-type="company">
+            <view class="radio {{borrowerType === 'company' ? 'checked' : ''}}"></view>
+            <text>对公</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 个人信息 -->
+    <block wx:if="{{borrowerType === 'personal'}}">
+      <!-- 上传身份证照片 -->
+      <view class="upload-section">
+        <view class="section-header">
+          <text class="section-title">上传身份证照片</text>
+          <text class="section-subtitle">证件照片仅用于实名认证</text>
+        </view>
+        <view class="id-upload-wrapper">
+          <view class="id-upload-item">
+            <view class="id-image-wrapper">
+              <image 
+                class="id-image" 
+                src="{{idCardFront || idFrontPlaceholder}}" 
+                mode="aspectFill"
+                bindtap="uploadIdCardFront"
+              />
+              <view 
+                class="delete-icon" 
+                wx:if="{{idCardFront}}"
+                catchtap="deleteIdCardFront"
+              >
+                <text class="delete-icon-text">×</text>
+              </view>
+            </view>
+            <view class="upload-tip" bindtap="uploadIdCardFront">点击上传 证件正面（人像面）</view>
+          </view>
+          <view class="id-upload-item">
+            <view class="id-image-wrapper">
+              <image 
+                class="id-image" 
+                src="{{idCardBack || idBackPlaceholder}}" 
+                mode="aspectFill"
+                bindtap="uploadIdCardBack"
+              />
+              <view 
+                class="delete-icon" 
+                wx:if="{{idCardBack}}"
+                catchtap="deleteIdCardBack"
+              >
+                <text class="delete-icon-text">×</text>
+              </view>
+            </view>
+            <view class="upload-tip" bindtap="uploadIdCardBack">点击上传 证件反面（国徽面）</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 证件类型 -->
+      <view class="form-item" bindtap="selectIdType">
+        <view class="form-label required">证件类型</view>
+        <view class="form-value">
+          <text class="{{idType ? '' : 'placeholder'}}">{{idType || '身份证'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 姓名 -->
+      <view class="form-item">
+        <view class="form-label required">姓名</view>
+        <input class="form-input" placeholder="请填写姓名" value="{{name}}" bindinput="onNameInput" />
+      </view>
+
+      <!-- 手机号 -->
+      <view class="form-item">
+        <view class="form-label required">手机号</view>
+        <input class="form-input" type="number" placeholder="请填写手机号码" value="{{phone}}" bindinput="onPhoneInput" maxlength="11" />
+      </view>
+
+      <!-- 证件号码 -->
+      <view class="form-item">
+        <view class="form-label required">证件号码</view>
+        <input class="form-input" placeholder="请填写证件号码" value="{{idNumber}}" bindinput="onIdNumberInput" />
+      </view>
+
+      <!-- 证件生效日期 -->
+      <view class="form-item">
+        <view class="form-label required">证件生效日期</view>
+        <picker mode="date" value="{{idStartDate}}" bindchange="onIdStartDateChange">
+          <view class="form-value">
+            <text class="{{idStartDate ? '' : 'placeholder'}}">{{idStartDate || '请选择证件生效日期'}}</text>
+            <text class="arrow">〉</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 证件有效期 -->
+      <view class="form-item">
+        <view class="form-label required">证件有效期</view>
+        <picker mode="date" value="{{idEndDate === '长期' ? '' : idEndDate}}" bindchange="onIdEndDateChange">
+          <view class="form-value">
+            <text class="{{idEndDate ? '' : 'placeholder'}}">{{idEndDate || '长期'}}</text>
+            <text class="arrow">〉</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 证件地址 -->
+      <view class="form-item">
+        <view class="form-label required">证件地址</view>
+        <input class="form-input" placeholder="请填写证件地址" value="{{idAddress}}" bindinput="onIdAddressInput" />
+      </view>
+
+      <!-- 居住地省市区 -->
+      <view class="form-item" bindtap="selectResidenceArea">
+        <view class="form-label required">居住地省市区</view>
+        <view class="form-value">
+          <text class="{{residenceArea ? '' : 'placeholder'}}">{{residenceArea || '请选择居住地省市区'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 详细地址 -->
+      <view class="form-item">
+        <view class="form-label required">详细地址</view>
+        <input class="form-input" placeholder="XX路XX区XX号" value="{{detailAddress}}" bindinput="onDetailAddressInput" />
+      </view>
+
+      <!-- 与主借人关系 -->
+      <view class="form-item" bindtap="selectRelationship">
+        <view class="form-label required">与主借人关系</view>
+        <view class="form-value">
+          <text class="{{relationship ? '' : 'placeholder'}}">{{relationship || '请选择与主借人关系'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 婚姻状况 -->
+      <view class="form-item" bindtap="selectMaritalStatus">
+        <view class="form-label required">婚姻状况</view>
+        <view class="form-value">
+          <text class="{{maritalStatus ? '' : 'placeholder'}}">{{maritalStatus || '请选择婚姻状况'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 对公信息 -->
+    <block wx:if="{{borrowerType === 'company'}}">
+      <!-- 上传营业执照 -->
+      <view class="upload-section">
+        <view class="section-header">
+          <text class="section-title">上传营业执照</text>
+        </view>
+        <view class="business-license-upload">
+          <view class="upload-item-large">
+            <view class="license-container">
+              <view class="id-image-wrapper">
+                <image 
+                  class="license-image" 
+                  src="{{businessLicense || businessLicensePlaceholder}}" 
+                  mode="aspectFill"
+                  bindtap="uploadBusinessLicense"
+                />
+                <view 
+                  class="delete-icon" 
+                  wx:if="{{businessLicense}}"
+                  catchtap="deleteBusinessLicense"
+                >
+                  <text class="delete-icon-text">×</text>
+                </view>
+              </view>
+            </view>
+            <view class="upload-tip" bindtap="uploadBusinessLicense">点击上传 营业执照</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 公司名称 -->
+      <view class="form-item">
+        <view class="form-label required">公司名称</view>
+        <input class="form-input" placeholder="请填写公司名称" value="{{companyName}}" bindinput="onCompanyNameInput" />
+      </view>
+
+      <!-- 公司信用代码 -->
+      <view class="form-item">
+        <view class="form-label required">公司信用代码</view>
+        <input class="form-input" placeholder="请填写公司信用代码" value="{{companyCreditCode}}" bindinput="onCompanyCreditCodeInput" />
+      </view>
+
+      <!-- 注册地省市区 -->
+      <view class="form-item" bindtap="selectCompanyArea">
+        <view class="form-label required">注册地省市区</view>
+        <view class="form-value">
+          <text class="{{companyArea ? '' : 'placeholder'}}">{{companyArea || '请选择注册地省市区'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 详细地址 -->
+      <view class="form-item">
+        <view class="form-label required">详细地址</view>
+        <input class="form-input" placeholder="XX路XX区XX号" value="{{companyAddress}}" bindinput="onCompanyAddressInput" />
+      </view>
+
+      <!-- 经办人手机号 -->
+      <view class="form-item">
+        <view class="form-label required">经办人手机号</view>
+        <input class="form-input" type="number" placeholder="请填写经办人手机号" value="{{agentPhone}}" bindinput="onAgentPhoneInput" maxlength="11" />
+      </view>
+
+      <!-- 上传身份证照片 -->
+      <view class="upload-section">
+        <view class="section-header">
+          <text class="section-title">上传身份证照片</text>
+          <text class="section-subtitle">证件照片仅用于实名认证</text>
+        </view>
+        <view class="id-upload-wrapper">
+          <view class="id-upload-item">
+            <view class="id-image-wrapper">
+              <image 
+                class="id-image" 
+                src="{{agentIdCardFront || idFrontPlaceholder}}" 
+                mode="aspectFill"
+                bindtap="uploadAgentIdCardFront"
+              />
+              <view 
+                class="delete-icon" 
+                wx:if="{{agentIdCardFront}}"
+                catchtap="deleteAgentIdCardFront"
+              >
+                <text class="delete-icon-text">×</text>
+              </view>
+            </view>
+            <view class="upload-tip" bindtap="uploadAgentIdCardFront">点击上传 证件正面（人像面）</view>
+          </view>
+          <view class="id-upload-item">
+            <view class="id-image-wrapper">
+              <image 
+                class="id-image" 
+                src="{{agentIdCardBack || idBackPlaceholder}}" 
+                mode="aspectFill"
+                bindtap="uploadAgentIdCardBack"
+              />
+              <view 
+                class="delete-icon" 
+                wx:if="{{agentIdCardBack}}"
+                catchtap="deleteAgentIdCardBack"
+              >
+                <text class="delete-icon-text">×</text>
+              </view>
+            </view>
+            <view class="upload-tip" bindtap="uploadAgentIdCardBack">点击上传 证件反面（国徽面）</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 证件类型 -->
+      <view class="form-item" bindtap="selectAgentIdType">
+        <view class="form-label required">证件类型</view>
+        <view class="form-value">
+          <text class="{{agentIdType ? '' : 'placeholder'}}">{{agentIdType || '身份证'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 姓名 -->
+      <view class="form-item">
+        <view class="form-label required">姓名</view>
+        <input class="form-input" placeholder="请填写姓名" value="{{agentName}}" bindinput="onAgentNameInput" />
+      </view>
+
+      <!-- 手机号 -->
+      <view class="form-item">
+        <view class="form-label required">手机号</view>
+        <input class="form-input" type="number" placeholder="请填写手机号码" value="{{agentPhone2}}" bindinput="onAgentPhone2Input" maxlength="11" />
+      </view>
+
+      <!-- 证件号码 -->
+      <view class="form-item">
+        <view class="form-label required">证件号码</view>
+        <input class="form-input" placeholder="请填写证件号码" value="{{agentIdNumber}}" bindinput="onAgentIdNumberInput" />
+      </view>
+
+      <!-- 证件生效日期 -->
+      <view class="form-item">
+        <view class="form-label required">证件生效日期</view>
+        <picker mode="date" value="{{agentIdStartDate}}" bindchange="onAgentIdStartDateChange">
+          <view class="form-value">
+            <text class="{{agentIdStartDate ? '' : 'placeholder'}}">{{agentIdStartDate || '请选择证件生效日期'}}</text>
+            <text class="arrow">〉</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 证件有效期 -->
+      <view class="form-item">
+        <view class="form-label required">证件有效期</view>
+        <picker mode="date" value="{{agentIdEndDate === '长期' ? '' : agentIdEndDate}}" bindchange="onAgentIdEndDateChange">
+          <view class="form-value">
+            <text class="{{agentIdEndDate ? '' : 'placeholder'}}">{{agentIdEndDate || '长期'}}</text>
+            <text class="arrow">〉</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 证件地址 -->
+      <view class="form-item">
+        <view class="form-label required">证件地址</view>
+        <input class="form-input" placeholder="请填写证件地址" value="{{agentIdAddress}}" bindinput="onAgentIdAddressInput" />
+      </view>
+
+      <!-- 与主借人关系 -->
+      <view class="form-item" bindtap="selectCompanyRelationship">
+        <view class="form-label required">与主借人关系</view>
+        <view class="form-value">
+          <text class="{{companyRelationship ? '' : 'placeholder'}}">{{companyRelationship || '请选择与主借人关系'}}</text>
+          <text class="arrow">〉</text>
+        </view>
+      </view>
+
+      <!-- 上传公证材料 - 重新设计布局 -->
+      <view class="notary-section">
+        <!-- 标题行 -->
+        <view class="notary-title-row">
+          <text class="notary-main-title">上传公证材料</text>
+        </view>
+        
+        <!-- 内容行 - 类似form-item结构 -->
+        <view class="notary-content-row">
+          <view class="form-label required">法人证明书</view>
+          <view class="form-value">
+            <view class="notary-upload-btn" bindtap="uploadNotaryDocument">
+              <view class="notary-btn-icons">
+                <text class="notary-btn-cloud">☁</text>
+                <text class="notary-btn-arrow">↑</text>
+              </view>
+              <text class="notary-btn-text">附件上传</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 附件列表 -->
+        <view class="notary-file-list">
+          <!-- 未上传状态 -->
+          <view class="notary-status-text" wx:if="{{notaryDocuments.length === 0}}">未上传</view>
+          
+          <!-- 已上传文件列表 -->
+          <block wx:if="{{notaryDocuments.length > 0}}">
+            <block wx:for="{{notaryDocuments}}" wx:key="index">
+              <view class="notary-file-item">
+                <text class="notary-file-name" bindtap="previewNotaryDocument" data-index="{{index}}">{{item.name}}</text>
+                <view class="notary-file-delete" catchtap="deleteNotaryDocument" data-index="{{index}}">
+                  <image class="notary-delete-icon" src="/static/delete_icon.png" mode="aspectFit" />
+                </view>
+              </view>
+            </block>
+          </block>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <!-- 底部保存按钮 -->
+  <view class="footer">
+    <button class="save-button" bindtap="save">保存</button>
+  </view>
+
+  <!-- 省市区选择器组件 -->
+  <region-picker 
+    show="{{showRegionPicker}}" 
+    title="{{regionPickerTitle}}"
+    current-value="{{regionCurrentValue}}"
+    bind:close="onRegionPickerClose"
+    bind:confirm="onRegionPickerConfirm"
+  />
+</view>
+

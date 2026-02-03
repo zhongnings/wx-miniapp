@@ -1,0 +1,344 @@
+<view class="create-order-container {{pageScrollDisabled ? 'scroll-disabled' : ''}}">
+
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-with-animation="false">
+    <view class="form-section">
+      <!-- 受让机构 -->
+      <view class="form-item" bindtap="selectAssigneeOrg">
+        <text class="label required">受让机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.assigneeOrg || '请选择受让机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 小贷机构 -->
+      <view class="form-item" bindtap="selectMicroloanOrg">
+        <text class="label required">小贷机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.channelOrg || '请选择小贷机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 支付渠道 -->
+      <view class="form-item" bindtap="selectPaymentChannel">
+        <text class="label required">支付渠道</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.payMethod || '请选择支付渠道'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 产品类型 -->
+      <view class="form-item" bindtap="selectProductType">
+        <text class="label required">产品类型</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.productType || '请选择产品类型'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 借款人类型 -->
+      <view class="form-item">
+        <text class="label required">借款人类型</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.borrowerCategory === '个人' ? 'active' : ''}}" bindtap="selectBorrowerType" data-type="个人">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>个人</text>
+          </view>
+          <view class="radio-item {{formData.borrowerCategory === '对公' ? 'active' : ''}}" bindtap="selectBorrowerType" data-type="对公">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>对公</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 合同签署方式 -->
+      <view class="form-item">
+        <text class="label required">合同签署方式</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.contractSignMode === '在线签署' ? 'active' : ''}}" bindtap="selectSignMethod" data-method="在线签署">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>在线签署</text>
+          </view>
+          <view class="radio-item {{formData.contractSignMode === '线下签署' ? 'active' : ''}}" bindtap="selectSignMethod" data-method="线下签署">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>线下签署</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 借款金额 -->
+      <view class="form-item">
+        <text class="label required">借款金额</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            placeholder="请填写借款金额" 
+            value="{{formData.loanAmount}}"
+            bindinput="onLoanAmountInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">元</text>
+        </view>
+      </view>
+
+      <!-- 大写金额 -->
+      <view class="form-item">
+        <text class="label">大写金额</text>
+        <text class="value {{formData.loanAmountUppercase ? '' : 'placeholder'}}">{{formData.loanAmountUppercase || '自动识别'}}</text>
+      </view>
+
+      <!-- 借款天数 -->
+      <view class="form-item">
+        <text class="label required">借款天数</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="number" 
+            value="{{formData.loanDays}}"
+            bindinput="onLoanDaysInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">天</text>
+        </view>
+      </view>
+
+      <!-- 借款起始日期 -->
+      <picker mode="date" value="{{formData.startDate}}" bindchange="onStartDateChange" disabled="{{readonly}}">
+        <view class="form-item">
+          <text class="label required">借款起始日期</text>
+          <view class="value-wrapper">
+            <text class="value {{formData.startDate ? '' : 'placeholder'}}">{{formData.startDate || '请选择借款起始日期'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <!-- 借款结束日期 -->
+      <view class="form-item">
+        <text class="label required">借款结束日期</text>
+        <text class="value {{formData.endDate ? '' : 'placeholder'}}">{{formData.endDate || '自动计算'}}</text>
+      </view>
+
+      <!-- 借款年利率 -->
+      <view class="form-item">
+        <text class="label required">借款年利率</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            value="{{formData.annualRate}}"
+            bindinput="onAnnualRateInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">%</text>
+        </view>
+      </view>
+
+      <!-- 签约地（使用公共组件） -->
+      <view class="form-item" bindtap="showRegionPicker">
+        <text class="label required">签约地</text>
+        <view class="value-wrapper">
+          <text class="value {{formData.signPlace ? '' : 'placeholder'}}">{{formData.signPlace || '请选择签约地'}}
+          </text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 借款用途 -->
+      <view class="form-item" bindtap="selectLoanPurpose">
+        <text class="label required">借款用途</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.usageDesc || '请选择借款用途'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 还款方式 -->
+      <view class="form-item" bindtap="selectRepaymentMethod">
+        <text class="label required">还款方式</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.repayMode || '请选择还款方式'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 解决争议方式 -->
+      <view class="form-item" bindtap="selectDisputeResolution">
+        <text class="label required">解决争议方式</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.disputeWay || '请选择解决争议方式'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 仲裁机构 -->
+      <view class="form-item" bindtap="selectArbitrationOrg">
+        <text class="label required">仲裁机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.arbitrationOrg || '请选择仲裁机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 是否办理赋强公证 -->
+      <view class="form-item">
+        <text class="label required">是否办理赋强公证</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.isNotarization === '是' ? 'active' : ''}}" bindtap="selectNotarization" data-value="是">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>是</text>
+          </view>
+          <view class="radio-item {{formData.isNotarization === '否' ? 'active' : ''}}" bindtap="selectNotarization" data-value="否">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>否</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 公证类型（当选择"是"时显示） -->
+      <view class="form-item" wx:if="{{formData.isNotarization === '是'}}" bindtap="selectNotarizationType">
+        <text class="label required">公证类型</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.notarizationType || '请选择公证类型'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 公证事项（当选择"是"时显示） -->
+      <view class="form-item" wx:if="{{formData.isNotarization === '是'}}" bindtap="selectNotarizationItem">
+        <text class="label required">公证事项</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.notarizationItem || '请选择公证事项'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 预约时间（当选择"是"时显示） -->
+      <picker 
+        wx:if="{{formData.isNotarization === '是'}}" 
+        mode="multiSelector" 
+        value="{{appointmentTimeIndex}}" 
+        range="{{appointmentTimeRange}}" 
+        bindchange="onAppointmentTimeChange"
+        disabled="{{readonly}}"
+      >
+        <view class="form-item">
+          <text class="label required">预约时间</text>
+          <view class="value-wrapper">
+            <text class="value {{formData.appointmentTime ? '' : 'placeholder'}}">{{formData.appointmentTime || '请选择预约时间'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <!-- 证书接收方式（当选择"是"时显示） -->
+      <view class="form-item" wx:if="{{formData.isNotarization === '是'}}">
+        <text class="label required">证书接收方式</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.certificateReceiveMethod === '电子版' ? 'active' : ''}}" bindtap="selectCertificateReceiveMethod" data-value="电子版">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>电子版</text>
+          </view>
+          <view class="radio-item {{formData.certificateReceiveMethod === '邮寄' ? 'active' : ''}}" bindtap="selectCertificateReceiveMethod" data-value="邮寄">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>邮寄</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 提前还款违约金比例 -->
+      <view class="form-item">
+        <text class="label required">提前还款违约金比例</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            placeholder="请填写提前还款违约金比例" 
+            value="{{formData.penaltyRatio}}"
+            bindinput="onPenaltyRatioInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">%</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+
+  <!-- 选择器弹窗 -->
+  <view class="picker-mask {{showPicker ? 'show' : ''}}" bindtap="hidePicker" catchtouchmove="stopScroll">
+    <view class="picker-container" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">{{pickerTitle}}</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
+      <scroll-view class="picker-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+        <view 
+          class="picker-item {{pickerCurrentValue === item ? 'selected' : ''}}"
+          wx:for="{{pickerOptions}}" 
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="onPickerItemTap"
+        >
+          {{item}}
+          <text class="picker-check" wx:if="{{pickerCurrentValue === item}}">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 地区选择器组件 -->
+  <region-picker 
+    show="{{showRegionPicker}}" 
+    title="选择签约地"
+    current-value="{{formData.signPlace}}"
+    bind:close="onRegionPickerClose"
+    bind:confirm="onRegionPickerConfirm"
+  />
+</view>
+
