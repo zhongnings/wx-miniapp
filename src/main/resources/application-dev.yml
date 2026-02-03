@@ -1,0 +1,63 @@
+server:
+  port: 8081
+  base-url: http://localhost:8081
+
+spring:
+  application:
+    name: yixinjr
+  servlet:
+    multipart:
+      max-file-size: 10MB        # 单个文件最大大小（与 file.max-file-size 保持一致）
+      max-request-size: 20MB    # 整个请求最大大小（通常设置为 max-file-size 的 2 倍）
+      enabled: true             # 启用 multipart 上传
+
+  datasource:
+    url: jdbc:mysql://rm-cn-h6k4lik6r00081qo.rwlb.rds.aliyuncs.com:3306/loan ?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: dms_user_3b7d4ab 
+    password: 0_zhongning
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 3000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mapper/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+rsa:
+  public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo5Jnsxn5ht1ncx52Ipu33qyvk7grG7dTui6vlJwdb6HQvTqRPKeZYqLT+AtCtIhPINdjz5itOXa8qUKATxjG8BAIDSWtsao2+biC4rbRMcYD25me8GEM8m7MX+BPxXWrPSO9Ijb+9CyB2V6rFHhaBirmHiIboAL00WBTsGHQ50Rs9m36eCfJhgFUsN+1/GseYydSoC5qYD//8hAezEtjHKOFcfMC9Qmx6/XPhWWSpmabU8MTCISqcVZMnsmcOD8L8ZtQuHLTN7LXRUJM+28RmTHbqTYzyOT2L24/WCRZ6cvcVEpzJCXHB+VbcScCcoLaJV8O24H5EaWyuPIYF9LgcwIDAQAB
+  private-key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjkmezGfmG3WdzHnYim7ferK+TuCsbt1O6Lq+UnB1vodC9OpE8p5liotP4C0K0iE8g12PPmK05drypQoBPGMbwEAgNJa2xqjb5uILittExxgPbmZ7wYQzybsxf4E/Fdas9I70iNv70LIHZXqsUeFoGKuYeIhugAvTRYFOwYdDnRGz2bfp4J8mGAVSw37X8ax5jJ1KgLmpgP//yEB7MS2Mco4Vx8wL1CbHr9c+FZZKmZptTwxMIhKpxVkyeyZw4Pwvxm1C4ctM3stdFQkz7bxGZMdupNjPI5PYvbj9YJFnpy9xUSnMkJccH5VtxJwJygtolXw7bgfkRpbK48hgX0uBzAgMBAAECggEANDGTRWMUbCRZzjH6IDDwCu2vWMN7feyRmucqv5DRE73ejYMStPgFyaOLX6q4LkMQfLo97xAYti1dJeVCa/rL/+4do5RSSE64HBb0LMOJHQjCUmBChxFwwCr6q903lxpk+a1dvH0v/Vn2VRYQIQgGMdGefB8GEZjf5a+HBNExh5ma0RXppw4ojswgAk7uST3SxT0JiV0v9xp/Gj3lykokNhB2OwJVv+1qekYhEGMaa4RUt/pk9HztDb++UQdZRLUt/LjLhxuhz6o9QekgT4MTxb6ilECA+6B504KE7tyaCKgES/qRFZeb8ygFk1QCWm1gckT5ozG5s/sQHmheiSo4AQKBgQDfhTpQVxZy+vfM8QIgORJryaL3FxoIIytAa23GhXTHgMhmzgkLvpuryj1aP9xBhwgj3zSrz1MxHuK3JRTpxgtmhCjHZV1NMumLxcwJbfKjR1I3F/BsyQYDe9QAa6fc5Tqe8U5p+uYs92abWTO1+bqioxPahUtyQmJ4CKNRq4bCswKBgQC7VyRzhN1wCxPtCFmP+5u7xJxEvIK9Q87xahL4AU5NQklwX3N0vI+WADg4qyQd0mhz+Y/P1LCS2aPQ0Gf8iFqXTT3xVPSCKK23E6f8vQplM64uno3K9tfUfTIi5c7XDY1cFs49EHZtFCsB9lbtGmB4Jl14ZiKWBHsAZlyF9qtLQQKBgE34PmA6EMWpD/m4dIJjBi79VlCVCWqfQf4lu1RNx2+0V7Os2XD0W38we/hYYG+nN8qzmL76Ak4XNQSn9cSaZe2r2kG79TDxupAcPlFnvgUA4wf+3MpF0Ugz0L8YzqR6fdll2XGUqOg0oOE925D1/Qmwk0NdzfScfZbbhIT/rXGLAoGBAK3/KM7WF2kKEO61M6IEGceSu2UoBPHOefVFBOstI1GkgFsLfEtvGplCCPWxFnFQTE1y+7wXGgy6cWjvN7WX2zPtvNtZgWMmbvm8GukllvMZxexsvNtG2nzz7s30zWB1qNZgJBsZIDT9Z1iCOIgtWG4fi+7YRcU50hgz+jk+OihBAoGAdhwhsI85mebRa9p28RoeeB1NsqPuP8BSrpKSBtUq8e5b7EvqumDfbqAZbsfn5SzFKFvHAaGg0WLZv4K5EJx4af4PFllCqoR9f/QyDgzSUzSfRXVjQSq4hNiTihEeWPzqX3l8HPLy62mRRwCEEImzZB4aGcxA9agN3mwqrIW5d1c=
+
+# 微信配置
+wechat:
+  appid: wx17abb46c748b3702
+  secret: ddcec17a2dd36ad257802eb9ac461799
+
+# 文件上传配置
+file:
+  upload-path: D:/workcode/uploads
+  max-file-size: 10485760  # 10MB（业务层校验，单位：字节）
+  allowed-types: jpg,jpeg,png,gif,pdf,docx
+

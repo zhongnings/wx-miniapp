@@ -1,0 +1,44 @@
+@import '../step3/index.wxss';
+
+/* 担保人列表样式复用共借人列表 */
+.guarantor-list {
+  padding-top: 20rpx;
+  padding-left: 1%;
+  width: 98%;
+  /* 说明：使用百分比宽度和左边距，适配不同屏幕宽度，避免小屏幕左边距过大 */
+  box-sizing: border-box;
+}
+
+.guarantor-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: #ffffff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.guarantor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.guarantor-name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.guarantor-id {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.guarantor-actions {
+  display: flex;
+  gap: 30rpx;
+}
+

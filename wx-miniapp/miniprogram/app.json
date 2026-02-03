@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/login/index",
+    "pages/register/index",
+    "pages/home/index",
+    "pages/order/list/index",
+    "pages/order/detail/index",
+    "pages/order/progress/index",
+    "pages/order/contracts/index",
+    "pages/order/create/step1/index",
+    "pages/order/create/step2/index",
+    "pages/order/create/step3/index",
+    "pages/order/create/co-borrower/index",
+    "pages/order/create/step4/index",
+    "pages/order/create/step5/index",
+    "pages/order/create/step5-edit/index",
+    "pages/order/create/step6/index",
+    "components/region-picker/region-picker"
+  ],
+  "window": {
+    "navigationBarTitleText": "益信通",
+    "navigationBarBackgroundColor": "#ff6f6f",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5"
+  },
+  "pageStyle": "default",
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "usingComponents": {}
+}
+
+

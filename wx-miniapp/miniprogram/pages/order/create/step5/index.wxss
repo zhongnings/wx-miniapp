@@ -1,0 +1,291 @@
+@import '../step1/index.wxss';
+
+/* 覆盖容器样式，使页面可以滚动 */
+.create-order-container {
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 160rpx; /* 为底部按钮留出空间 */
+}
+
+/* 内容区域 */
+.content-area {
+  padding-top: 20rpx;
+  padding-bottom: 20rpx;
+  box-sizing: border-box;
+}
+
+.bank-card-section {
+  padding-top: 20rpx;
+  padding-left: 1%;
+  width: 98%;
+  /* 说明：使用百分比宽度和左边距，适配不同屏幕宽度，避免小屏幕左边距过大 */
+  box-sizing: border-box;
+}
+
+.section-header {
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.bank-card-list {
+  margin-bottom: 30rpx;
+}
+
+.bank-card-item {
+  margin-bottom: 30rpx;
+  width: 92%;
+  padding-left: 4%;
+  padding-top: 20rpx;
+}
+
+.bank-card {
+  position: relative;
+  width: 90%;
+  height: 140rpx;
+  background: linear-gradient(135deg, #ff6f6f 0%, #ff8e8e 100%);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 111, 111, 0.3);
+  overflow: hidden;
+}
+
+.bank-card-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: -20rpx;
+}
+
+.bank-logo {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bank-logo-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.bank-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.bank-name {
+  font-size: 40rpx;
+  font-weight: 650;
+  color: #ffffff;
+}
+
+.cardholder-name {
+  font-size: 28rpx;
+  font-weight: 650;
+  color: #ffffff;
+}
+
+.bank-card-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 20rpx 20rpx 20rpx 0;
+}
+
+.action-icon {
+  width: 50rpx;
+  height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%; */
+  backdrop-filter: blur(10rpx);
+}
+
+.action-icon:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.icon-image {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) invert(1);
+}
+
+/* 顶部右侧删除按钮（依赖 flex 的第一个元素自然在顶部） */
+.card-delete-icon {
+}
+
+/* 底部右侧编辑按钮（依赖 flex 的最后一个元素自然在底部） */
+.card-edit-icon {
+}
+
+.bank-card-number {
+  font-size: 28rpx;
+  font-weight: 650;
+  color: #ffffff;
+  letter-spacing: 4rpx;
+  margin-top: 45rpx;
+}
+
+.bank-card-watermark {
+  position: absolute;
+  right: 40rpx;
+  bottom: 40rpx;
+  font-size: 120rpx;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.add-card-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  width: 100%;
+  padding: 24rpx;
+  border: 2rpx dashed #ff6f6f;
+  border-radius: 12rpx;
+  background: #ffffff;
+  color: #ff6f6f;
+  font-size: 28rpx;
+  margin-top: 50px;
+}
+
+.add-icon {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+/* 银行卡图片上传区域 */
+.bank-card-image-section {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+}
+
+.image-upload-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+
+.image-upload-area {
+  width: 100%;
+}
+
+.image-preview-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #fff;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+.image-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.image-preview:active .image-mask {
+  opacity: 1;
+}
+
+.image-delete-icon {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.delete-icon-text {
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.preview-text {
+  color: #fff;
+  font-size: 28rpx;
+}
+
+.image-upload-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 400rpx;
+  border: 2rpx dashed #ccc;
+  border-radius: 12rpx;
+  background: #fff;
+  color: #999;
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.upload-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* .add-icon {
+  border: 2rpx solid #ff6f6f;
+  border-radius: 50%;
+  width: 25rpx;
+  height: 25rpx;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */

@@ -1,0 +1,102 @@
+<view class="detail-container">
+  <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <!-- 订单摘要卡片 -->
+    <view class="summary-card">
+      <view class="summary-row">
+        <text class="summary-label">借款人员：</text>
+        <text class="summary-value">{{detail.borrowerName || '-'}}</text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-label">借款金额：</text>
+        <text class="summary-amount">¥ {{formattedAmount}}</text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-label">订单编号：</text>
+        <text class="summary-value">{{detail.orderNo || '-'}}</text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-label">订单状态：</text>
+        <text class="summary-value">{{detail.orderStatus || '-'}}</text>
+        <text class="detail-link" bindtap="goOrderDetail">订单详情 ></text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-label">债转状态：</text>
+        <text class="summary-value">{{detail.debtTransferStatus || '-'}}</text>
+      </view>
+      <view class="summary-row">
+        <text class="summary-label">还款状态：</text>
+        <text class="summary-value">{{detail.repaymentStatus || '-'}}</text>
+      </view>
+    </view>
+
+    <!-- 分隔线 -->
+    <view class="separator">
+      <text class="separator-text">———<text class="asterisk">*</text>标记为必填选项——</text>
+    </view>
+
+    <!-- 基础信息部分 -->
+    <view class="basic-info-section">
+      <view class="section-header" bindtap="toggleBasicInfo">
+        <view class="section-indicator"></view>
+        <text class="section-title">基础信息</text>
+        <text class="section-arrow {{basicInfoExpanded ? 'expanded' : ''}}">^</text>
+      </view>
+      
+      <view class="info-list" wx:if="{{basicInfoExpanded}}">
+        <!-- 借款信息（必填） -->
+        <view class="info-item" bindtap="goLoanInfo">
+          <view class="info-icon loan-icon">📄</view>
+          <text class="info-label">借款信息</text>
+          <text class="info-status {{infoStatus.loanInfo === '已完成' ? 'completed' : 'not-filled'}}"><text class="required-mark">*</text>{{infoStatus.loanInfo}}</text>
+        </view>
+
+        <!-- 借款人信息（必填） -->
+        <view class="info-item" bindtap="goBorrowerInfo">
+          <view class="info-icon borrower-icon">👤</view>
+          <text class="info-label">借款人信息</text>
+          <text class="info-status {{infoStatus.borrowerInfo === '已完成' ? 'completed' : 'not-filled'}}"><text class="required-mark">*</text>{{infoStatus.borrowerInfo}}</text>
+        </view>
+
+        <!-- 共借人信息 -->
+        <view class="info-item" bindtap="goCoBorrowerInfo">
+          <view class="info-icon co-borrower-icon">👥</view>
+          <text class="info-label">共借人信息</text>
+          <text class="info-status {{infoStatus.coBorrowerInfo === '已完成' ? 'completed' : 'not-filled'}}">{{infoStatus.coBorrowerInfo}}</text>
+        </view>
+
+        <!-- 担保人信息 -->
+        <view class="info-item" bindtap="goGuarantorInfo">
+          <view class="info-icon guarantor-icon">🤝</view>
+          <text class="info-label">担保人信息</text>
+          <text class="info-status {{infoStatus.guarantorInfo === '已完成' ? 'completed' : 'not-filled'}}">{{infoStatus.guarantorInfo}}</text>
+        </view>
+
+        <!-- 银行卡信息（必填） -->
+        <view class="info-item" bindtap="goBankCardInfo">
+          <view class="info-icon bank-icon">💳</view>
+          <text class="info-label">银行卡信息</text>
+          <text class="info-status {{infoStatus.bankCardInfo === '已完成' ? 'completed' : 'not-filled'}}"><text class="required-mark">*</text>{{infoStatus.bankCardInfo}}</text>
+        </view>
+
+        <!-- 资料上传 -->
+        <view class="info-item" bindtap="goAttachment">
+          <view class="info-icon attachment-icon">📎</view>
+          <text class="info-label">资料上传</text>
+          <text class="info-status {{infoStatus.attachment === '已上传' ? 'completed' : 'not-uploaded'}}">{{infoStatus.attachment}}</text>
+        </view>
+
+        <!-- 合同列表（提交后显示） -->
+        <view class="info-item" wx:if="{{showContractList}}" bindtap="goContractList">
+          <view class="info-icon contract-icon">📋</view>
+          <text class="info-label">合同列表</text>
+          <text class="info-status view-status">查看</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部提交按钮 -->
+  <view class="submit-button" bindtap="onSubmit">
+    <text class="submit-text">{{buttonText}}</text>
+  </view>
+</view>

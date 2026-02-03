@@ -1,0 +1,93 @@
+<view class="create-order-container">
+  
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="true" scroll-x="false" enhanced="true" show-scrollbar="{{false}}">
+    <!-- 保证合同签署方式 -->
+    <view class="form-section">
+      <view class="form-item">
+        <text class="label required">*保证合同签署方式</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.guaranteeSignMethod === '否' ? 'active' : ''}}" bindtap="selectGuaranteeSignMethod" data-method="否">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>否</text>
+          </view>
+          <view class="radio-item {{formData.guaranteeSignMethod === '线上' ? 'active' : ''}}" bindtap="selectGuaranteeSignMethod" data-method="线上">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>线上</text>
+          </view>
+          <view class="radio-item {{formData.guaranteeSignMethod === '线下' ? 'active' : ''}}" bindtap="selectGuaranteeSignMethod" data-method="线下">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>线下</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{guarantors.length === 0}}">
+      <view class="empty-illustration">
+        <view class="building building-left"></view>
+        <view class="calendar-icon">
+          <view class="calendar-lines"></view>
+          <view class="calendar-person"></view>
+        </view>
+        <view class="building building-right"></view>
+        <view class="arrow-up arrow-left"></view>
+        <view class="arrow-up arrow-right"></view>
+      </view>
+      <button class="add-button" bindtap="addGuarantor">
+        <text class="add-icon">④</text>
+        <text>新增担保人</text>
+      </button>
+    </view>
+
+    <!-- 担保人列表 -->
+    <view class="guarantor-list" wx:if="{{guarantors.length > 0}}">
+      <block wx:for="{{guarantors}}" wx:key="index">
+        <view class="guarantor-item">
+          <view class="guarantor-info">
+            <text class="guarantor-name">{{item.name || '未填写'}}</text>
+            <text class="guarantor-id">{{item.idNumber || '未填写'}}</text>
+          </view>
+          <view class="guarantor-actions">
+            <text class="action-icon" bindtap="editGuarantor" data-index="{{index}}">✎</text>
+            <text class="action-icon" bindtap="deleteGuarantor" data-index="{{index}}">🗑</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+</view>
+

@@ -1,0 +1,120 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/register/index",
+      "style": {
+        "navigationBarTitleText": "注册",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/list/index",
+      "style": {
+        "navigationBarTitleText": "订单列表",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/detail/index",
+      "style": {
+        "navigationBarTitleText": "订单详情",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/progress/index",
+      "style": {
+        "navigationBarTitleText": "订单进度",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/contracts/index",
+      "style": {
+        "navigationBarTitleText": "合同管理",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step1/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤1",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step2/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤2",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step3/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤3",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step4/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤4",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step5/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤5",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/order/create/step6/index",
+      "style": {
+        "navigationBarTitleText": "创建订单 - 步骤6",
+        "navigationBarBackgroundColor": "#ff6f6f",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "益信通",
+    "navigationBarBackgroundColor": "#ff6f6f",
+    "backgroundColor": "#f5f5f5"
+  },
+  "condition": {
+    "current": 0,
+    "list": []
+  }
+}
+

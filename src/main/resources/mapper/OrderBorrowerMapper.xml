@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.loanminiapp.mapper.OrderBorrowerMapper">
+
+    <resultMap id="OrderBorrowerResultMap" type="com.example.loanminiapp.entity.OrderBorrower">
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="roleType" column="role_type"/>
+        <result property="name" column="name"/>
+        <result property="idType" column="id_type"/>
+        <result property="idNo" column="id_no"/>
+        <result property="idIssueDate" column="id_issue_date"/>
+        <result property="idExpireDate" column="id_expire_date"/>
+        <result property="mobile" column="mobile"/>
+        <result property="provinceCity" column="province_city"/>
+        <result property="addressDetail" column="address_detail"/>
+        <result property="gender" column="gender"/>
+        <result property="birthday" column="birthday"/>
+        <result property="maritalStatus" column="marital_status"/>
+        <result property="faceFrontUrl" column="face_front_url"/>
+        <result property="faceBackUrl" column="face_back_url"/>
+    </resultMap>
+
+    <!-- 通用查询：按订单ID与角色查询 -->
+    <select id="selectById" resultMap="OrderBorrowerResultMap">
+        SELECT * FROM t_order_borrower WHERE id = #{id}
+    </select>
+
+</mapper>
+
+

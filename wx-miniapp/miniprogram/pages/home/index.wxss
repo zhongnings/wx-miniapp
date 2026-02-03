@@ -1,0 +1,115 @@
+/* 首页样式 */
+.home-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* 主内容区域 */
+.content-area {
+  height: 100vh;
+  padding: 40rpx 30rpx;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+/* 隐藏滚动条 - Webkit 浏览器 */
+.content-area::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+.welcome-section {
+  text-align: center;
+  padding: 100rpx 0;
+}
+
+.welcome-text {
+  font-size: 32rpx;
+  color: #666;
+}
+
+/* 菜单抽屉 */
+.menu-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: none;
+}
+
+.menu-drawer.show {
+  display: block;
+}
+
+.menu-content {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 70%;
+  max-width: 500rpx;
+  background: #ffffff;
+  box-shadow: 2rpx 0 8rpx rgba(0, 0, 0, 0.1);
+  animation: slideLeft 0.3s ease-out;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  background: #ff6f6f;
+  color: #ffffff;
+}
+
+.menu-title {
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.menu-close {
+  font-size: 48rpx;
+  line-height: 1;
+}
+
+.menu-list {
+  padding: 20rpx 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 30rpx;
+  font-size: 28rpx;
+  color: #333;
+  border-left: 4rpx solid transparent;
+}
+
+.menu-item.active {
+  color: #ff6f6f;
+  background: #fff5f5;
+  border-left-color: #ff6f6f;
+}
+
+.menu-check {
+  color: #ff6f6f;
+  font-size: 32rpx;
+}
+

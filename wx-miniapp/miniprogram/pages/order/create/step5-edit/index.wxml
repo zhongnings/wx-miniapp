@@ -1,0 +1,143 @@
+<view class="bank-card-edit-container">
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+    
+    <!-- 银行卡正面图片上传 -->
+    <view class="upload-section">
+      <view class="section-label">银行卡正面</view>
+      <view class="image-upload-area">
+        <view wx:if="{{formData.cardFrontImage}}" class="image-preview" bindtap="previewBankCardImage">
+          <image src="{{formData.cardFrontImage}}" mode="aspectFit" class="preview-image"></image>
+          <view class="image-mask">
+            <text class="preview-text">点击预览</text>
+          </view>
+        </view>
+        <view wx:else class="image-upload-btn" bindtap="chooseBankCardImage">
+          <text class="upload-icon">📷</text>
+          <text class="upload-text">点击上传</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 账户信息 -->
+    <view class="form-section">
+      <view class="section-header">
+        <text class="section-title">账户信息</text>
+        <text class="section-tip">银行卡信息涉及放款信息请仔细填写</text>
+      </view>
+
+      <!-- 持卡人类型 -->
+      <view class="form-item">
+        <text class="label required">持卡人类型</text>
+        <radio-group class="radio-group" bindchange="onHolderTypeChange">
+          <label class="radio-label">
+            <radio value="借款人" checked="{{formData.holderType === '借款人'}}" color="#ff6f6f" />
+            <text>借款人</text>
+          </label>
+          <label class="radio-label">
+            <radio value="共借人" checked="{{formData.holderType === '共借人'}}" color="#ff6f6f" />
+            <text>共借人</text>
+          </label>
+          <label class="radio-label">
+            <radio value="担保人" checked="{{formData.holderType === '担保人'}}" color="#ff6f6f" />
+            <text>担保人</text>
+          </label>
+        </radio-group>
+      </view>
+
+      <!-- 账户名 -->
+      <view class="form-item">
+        <text class="label required">账户名</text>
+        <view class="input-wrapper" bindtap="selectAccountName">
+          <input 
+            class="input" 
+            placeholder="请选择{{formData.holderType || '借款人'}}" 
+            value="{{formData.accountName}}"
+            bindinput="onAccountNameInput"
+            disabled="{{false}}"
+          />
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 开户证件类型 -->
+      <view class="form-item">
+        <text class="label required">开户证件类型</text>
+        <radio-group class="radio-group" bindchange="onIdTypeChange">
+          <label class="radio-label">
+            <radio value="身份证" checked="{{formData.idType === '身份证'}}" color="#ff6f6f" />
+            <text>身份证</text>
+          </label>
+          <label class="radio-label">
+            <radio value="其他证件" checked="{{formData.idType === '其他证件'}}" color="#ff6f6f" />
+            <text>其他证件</text>
+          </label>
+        </radio-group>
+      </view>
+
+      <!-- 开户证件号 -->
+      <view class="form-item">
+        <text class="label required">开户证件号</text>
+        <input 
+          class="input" 
+          placeholder="请填写开户证件号" 
+          value="{{formData.idNumber}}"
+          bindinput="onIdNumberInput"
+        />
+      </view>
+
+      <!-- 开卡银行 -->
+      <picker 
+        mode="selector" 
+        range="{{bankList}}" 
+        value="{{bankList.indexOf(formData.bankName)}}"
+        bindchange="onBankPickerChange"
+      >
+        <view class="form-item">
+          <text class="label required">开卡银行</text>
+          <view class="input-wrapper">
+            <input 
+              class="input" 
+              placeholder="请选择借款人名下银行卡号所属银行" 
+              value="{{formData.bankName}}"
+              disabled="{{true}}"
+            />
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <!-- 银行卡号 -->
+      <view class="form-item">
+        <text class="label required">银行卡号</text>
+        <input 
+          class="input" 
+          placeholder="请填写借款人名下银行卡号" 
+          value="{{formData.cardNumber}}"
+          bindinput="onCardNumberInput"
+          type="number"
+        />
+      </view>
+
+      <!-- 预留手机号 -->
+      <view class="form-item">
+        <text class="label required">预留手机号</text>
+        <input 
+          class="input" 
+          placeholder="请填写银行预留手机号" 
+          value="{{formData.reservedMobile}}"
+          bindinput="onReservedMobileInput"
+          type="number"
+          maxlength="11"
+        />
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部保存按钮 -->
+  <view class="footer">
+    <button class="save-btn" bindtap="save">保存</button>
+  </view>
+
+</view>
+

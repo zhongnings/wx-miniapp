@@ -1,0 +1,425 @@
+<view class="create-order-container {{pageScrollDisabled ? 'scroll-disabled' : ''}}">
+
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-with-animation="false">
+    <view class="form-section">
+      <!-- 受让机构 -->
+      <view class="form-item" bindtap="selectAssigneeOrg">
+        <text class="label required">受让机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.assigneeOrg || '请选择受让机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 小贷机构 -->
+      <view class="form-item" bindtap="selectMicroloanOrg">
+        <text class="label required">小贷机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.microloanOrg || '请选择小贷机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 支付渠道 -->
+      <view class="form-item" bindtap="selectPaymentChannel">
+        <text class="label required">支付渠道</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.paymentChannel || '请选择支付渠道'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 产品类型 -->
+      <view class="form-item" bindtap="selectProductType">
+        <text class="label required">产品类型</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.productType || '请选择产品类型'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 借款人类型 -->
+      <view class="form-item">
+        <text class="label required">借款人类型</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.borrowerType === '个人' ? 'active' : ''}}" bindtap="selectBorrowerType" data-type="个人">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>个人</text>
+          </view>
+          <view class="radio-item {{formData.borrowerType === '对公' ? 'active' : ''}}" bindtap="selectBorrowerType" data-type="对公">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>对公</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 合同签署方式 -->
+      <view class="form-item">
+        <text class="label required">合同签署方式</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.signMethod === '在线签署' ? 'active' : ''}}" bindtap="selectSignMethod" data-method="在线签署">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>在线签署</text>
+          </view>
+          <view class="radio-item {{formData.signMethod === '线下签署' ? 'active' : ''}}" bindtap="selectSignMethod" data-method="线下签署">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>线下签署</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 借款金额 -->
+      <view class="form-item">
+        <text class="label required">借款金额</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            placeholder="请填写借款金额" 
+            value="{{formData.loanAmount}}"
+            bindinput="onLoanAmountInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">元</text>
+        </view>
+      </view>
+
+      <!-- 大写金额 -->
+      <view class="form-item">
+        <text class="label">大写金额</text>
+        <text class="value {{formData.loanAmountUppercase ? '' : 'placeholder'}}">{{formData.loanAmountUppercase || '自动识别'}}</text>
+      </view>
+
+      <!-- 借款天数 -->
+      <view class="form-item">
+        <text class="label required">借款天数</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="number" 
+            value="{{formData.loanDays}}"
+            bindinput="onLoanDaysInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">天</text>
+        </view>
+      </view>
+
+      <!-- 借款起始日期 -->
+      <picker mode="date" value="{{formData.startDate}}" bindchange="onStartDateChange" disabled="{{readonly}}">
+        <view class="form-item">
+          <text class="label required">借款起始日期</text>
+          <view class="value-wrapper">
+            <text class="value {{formData.startDate ? '' : 'placeholder'}}">{{formData.startDate || '请选择借款起始日期'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <!-- 借款结束日期 -->
+      <view class="form-item">
+        <text class="label required">借款结束日期</text>
+        <text class="value {{formData.endDate ? '' : 'placeholder'}}">{{formData.endDate || '自动计算'}}</text>
+      </view>
+
+      <!-- 借款年利率 -->
+      <view class="form-item">
+        <text class="label required">借款年利率</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            value="{{formData.annualRate}}"
+            bindinput="onAnnualRateInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">%</text>
+        </view>
+      </view>
+
+      <!-- 签约地（省市区联动选择 - 带首字母索引） -->
+      <view class="form-item" bindtap="showRegionPicker">
+        <text class="label required">签约地</text>
+        <view class="value-wrapper">
+          <text class="value {{formData.signPlace ? '' : 'placeholder'}}">{{formData.signPlace || '请选择签约地'}}
+          </text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 借款用途 -->
+      <view class="form-item" bindtap="selectLoanPurpose">
+        <text class="label required">借款用途</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.loanPurpose || '请选择借款用途'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 还款方式 -->
+      <view class="form-item" bindtap="selectRepaymentMethod">
+        <text class="label required">还款方式</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.repaymentMethod || '请选择还款方式'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 解决争议方式 -->
+      <view class="form-item" bindtap="selectDisputeResolution">
+        <text class="label required">解决争议方式</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.disputeResolution || '请选择解决争议方式'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 仲裁机构 -->
+      <view class="form-item" bindtap="selectArbitrationOrg">
+        <text class="label required">仲裁机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.arbitrationOrg || '请选择仲裁机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 是否办理赋强公证 -->
+      <view class="form-item">
+        <text class="label required">是否办理赋强公证</text>
+        <view class="radio-group">
+          <view class="radio-item {{formData.notarization === '是' ? 'active' : ''}}" bindtap="selectNotarization" data-value="是">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>是</text>
+          </view>
+          <view class="radio-item {{formData.notarization === '否' ? 'active' : ''}}" bindtap="selectNotarization" data-value="否">
+            <view class="radio-circle">
+              <view class="radio-dot"></view>
+            </view>
+            <text>否</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 提前还款违约金比例 -->
+      <view class="form-item">
+        <text class="label required">提前还款违约金比例</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            type="digit" 
+            placeholder="请填写提前还款违约金比例" 
+            value="{{formData.penaltyRatio}}"
+            bindinput="onPenaltyRatioInput"
+            disabled="{{readonly}}"
+          />
+          <text class="unit">%</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+
+  <!-- 选择器弹窗 -->
+  <view class="picker-mask {{showPicker ? 'show' : ''}}" bindtap="hidePicker" catchtouchmove="stopScroll">
+    <view class="picker-container" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">{{pickerTitle}}</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
+      <scroll-view class="picker-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+        <view 
+          class="picker-item {{pickerCurrentValue === item ? 'selected' : ''}}"
+          wx:for="{{pickerOptions}}" 
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="onPickerItemTap"
+        >
+          {{item}}
+          <text class="picker-check" wx:if="{{pickerCurrentValue === item}}">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 地区选择器弹窗（省市区联动 + 首字母索引） -->
+  <view class="region-picker-mask {{showRegionPicker ? 'show' : ''}}" bindtap="hideRegionPicker" catchtouchmove="stopScroll">
+    <view class="region-picker-container" catchtap="stopPropagation">
+      <view class="region-picker-header">
+        <text class="region-picker-title">选择签约地</text>
+        <text class="region-picker-close" bindtap="hideRegionPicker">×</text>
+      </view>
+      
+      <!-- 搜索框 -->
+      <view class="region-search-box">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="region-search-input" 
+          placeholder="搜索省/市/区" 
+          value="{{regionSearchKeyword}}"
+          bindinput="onRegionSearchInput"
+          confirm-type="search"
+        />
+        <text class="search-clear" wx:if="{{regionSearchKeyword}}" bindtap="clearRegionSearch">×</text>
+      </view>
+
+      <!-- 已选路径显示 -->
+      <view class="region-breadcrumb" wx:if="{{selectedProvince || selectedCity || selectedDistrict}}">
+        <text class="breadcrumb-item" wx:if="{{selectedProvince}}" bindtap="resetRegionToProvince">{{selectedProvince}}</text>
+        <text class="breadcrumb-separator" wx:if="{{selectedProvince && (selectedCity || selectedDistrict)}}">›</text>
+        <text class="breadcrumb-item" wx:if="{{selectedCity}}" bindtap="resetRegionToCity">{{selectedCity}}</text>
+        <!-- 在区级选择模式下，不显示区级面包屑，只显示到市级 -->
+        <!-- 只有在非区级选择模式下（如搜索模式）才显示区级面包屑 -->
+      </view>
+
+      <!-- 地区列表容器 -->
+      <view class="region-content-wrapper">
+        <!-- 左侧：地区列表 -->
+        <scroll-view 
+          class="region-list" 
+          scroll-y="true" 
+          enhanced="true" 
+          show-scrollbar="{{false}}"
+          scroll-into-view="{{regionScrollIntoView}}"
+          scroll-with-animation="true"
+          catchtouchmove="stopScroll"
+        >
+          <!-- 搜索模式：显示搜索结果 -->
+          <block wx:if="{{regionSearchKeyword}}">
+            <view 
+              class="region-item {{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict ? 'selected' : ''}}"
+              wx:for="{{regionSearchResults}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="{{item.level}}"
+              bindtap="onRegionItemTap"
+            >
+              <text class="region-item-name">{{item.fullName}}</text>
+              <text class="region-item-check" wx:if="{{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict}}">✓</text>
+            </view>
+            <view class="region-empty" wx:if="{{regionSearchResults.length === 0}}">
+              <text>未找到相关地区</text>
+            </view>
+          </block>
+
+          <!-- 省份列表（按首字母分组） -->
+          <block wx:elif="{{regionCurrentLevel === 'province'}}">
+            <view 
+              class="region-group" 
+              wx:for="{{regionProvinceGroups}}" 
+              wx:key="letter"
+              id="region-group-{{item.letter === '*' ? 'star' : item.letter}}"
+            >
+              <view class="region-group-header">
+                <text wx:if="{{item.isGaoTai}}">*</text>
+                <text wx:else>{{item.letter}}</text>
+              </view>
+              <view 
+                class="region-item {{province.name === selectedProvince ? 'selected' : ''}}"
+                wx:for="{{item.provinces}}" 
+                wx:for-item="province"
+                wx:key="code"
+                data-code="{{province.code}}"
+                data-name="{{province.name}}"
+                data-full-name="{{province.name}}"
+                data-level="province"
+                bindtap="onRegionItemTap"
+              >
+                <text class="region-item-name">{{province.name}}</text>
+                <text class="region-item-check" wx:if="{{province.name === selectedProvince}}">✓</text>
+              </view>
+            </view>
+          </block>
+
+          <!-- 城市列表 -->
+          <block wx:elif="{{regionCurrentLevel === 'city'}}">
+            <view 
+              class="region-item {{item.fullName === selectedCity ? 'selected' : ''}}"
+              wx:for="{{regionCityList}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="city"
+              bindtap="onRegionItemTap"
+            >
+              <text class="region-item-name">{{item.fullName}}</text>
+              <text class="region-item-check" wx:if="{{item.fullName === selectedCity}}">✓</text>
+            </view>
+          </block>
+
+          <!-- 区县列表 -->
+          <block wx:elif="{{regionCurrentLevel === 'district'}}">
+            <view 
+              class="region-item {{item.name === selectedDistrict ? 'selected' : ''}}"
+              wx:for="{{regionDistrictList}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="district"
+              bindtap="onRegionItemTap"
+            >
+              <text class="region-item-name">{{item.name}}</text>
+              <text class="region-item-check" wx:if="{{item.name === selectedDistrict}}">✓</text>
+            </view>
+          </block>
+        </scroll-view>
+
+        <!-- 右侧：首字母索引（仅在省份列表时显示） -->
+        <view class="region-index-bar" wx:if="{{regionCurrentLevel === 'province' && !regionSearchKeyword}}">
+          <view 
+            class="region-index-item {{regionIndexActive === item ? 'active' : ''}}"
+            wx:for="{{regionIndexLetters}}" 
+            wx:key="*this"
+            data-letter="{{item}}"
+            bindtap="scrollToRegionGroup"
+            bindtouchstart="onRegionIndexTouchStart"
+            bindtouchmove="onRegionIndexTouchMove"
+            bindtouchend="onRegionIndexTouchEnd"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+

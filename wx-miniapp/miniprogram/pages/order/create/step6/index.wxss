@@ -1,0 +1,213 @@
+@import '../step1/index.wxss';
+
+/* 覆盖容器样式，使页面可以滚动 */
+.create-order-container {
+  height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 160rpx; /* 为底部按钮留出空间 */
+}
+
+/* 内容区域 */
+.content-area {
+  padding-bottom: 20rpx;
+  box-sizing: border-box;
+}
+
+/* 覆盖 form-section 样式 */
+.form-section {
+  margin-left: 0;
+  width: 100%;
+  border-radius: 0;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* 警告提示框 */
+.warning-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 24rpx;
+  background: #fff5e6;
+  margin: 120rpx 30rpx 10px;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+}
+
+.warning-icon {
+  font-size: 24rpx;
+  color: #ff6f6f;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+}
+
+.warning-text {
+  flex: 1;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.warning-highlight {
+  color: #ff9500; /* 橘黄色提醒色 */
+}
+
+/* 标题行 */
+.notary-title-row {
+  padding: 30rpx 30rpx 10rpx 30rpx;
+}
+
+.notary-main-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+/* 为标题添加占位符，保持与form-label对齐 */
+.notary-main-title::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+/* 内容行 - 类似form-item */
+.notary-content-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx;
+  background: #fff;
+}
+
+/* 左侧标签 */
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  flex-shrink: 0;
+  min-width: 200rpx;
+}
+
+/* 为标签添加占位符，保持与标题对齐 */
+.form-label::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+/* 右侧组 - 与form-value保持一致 */
+.form-value {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* 上传按钮 */
+.notary-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 16rpx;
+  background: #f5f5f5;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  color: #666;
+  font-size: 26rpx;
+  line-height: 1;
+  flex-shrink: 0;
+  max-width: 200rpx;
+  margin: 0;
+}
+
+/* 图标容器（重叠效果） */
+.notary-btn-icons {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.notary-btn-cloud {
+  font-size: 28rpx;
+  color: #999;
+  position: absolute;
+}
+
+.notary-btn-arrow {
+  font-size: 20rpx;
+  color: #999;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.notary-btn-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 附件列表 */
+.notary-file-list {
+  padding: 20rpx 30rpx 30rpx 30rpx;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+/* 状态文本 */
+.notary-status-text {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  padding-left: 30rpx;
+}
+
+/* 为状态文本添加占位符，保持与form-label对齐 */
+.notary-status-text::before {
+  content: '*';
+  color: transparent;
+  margin-right: 8rpx;
+}
+
+.notary-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.notary-file-item:last-child {
+  margin-bottom: 0;
+}
+
+.notary-file-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #ff6f6f;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notary-file-delete {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notary-delete-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%);
+  /* 上面的 filter 会将白色图标变成灰色 #999 */
+}
+

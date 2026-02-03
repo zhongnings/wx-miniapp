@@ -1,0 +1,255 @@
+/* 订单详情页面样式 */
+.detail-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 120rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 内容区域 */
+.content-area {
+  flex: 1;
+  height: calc(100vh - 100rpx);
+  padding-top: 20rpx;
+  padding-left: 1%;
+  width: 98%;
+  /* 说明：使用百分比宽度和左边距，适配不同屏幕宽度，避免小屏幕左边距过大 */
+  box-sizing: border-box;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+/* 隐藏滚动条 - Webkit 浏览器 */
+.content-area::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* 订单摘要卡片 */
+.summary-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.summary-label {
+  color: #666;
+  margin-right: 16rpx;
+  min-width: 140rpx;
+}
+
+.summary-value {
+  color: #333;
+  flex: 1;
+}
+
+.summary-amount {
+  color: #ff6f6f;
+  font-weight: 500;
+  font-size: 32rpx;
+}
+
+.detail-link {
+  margin-left: auto;
+  color: #ff6f6f;
+  font-size: 28rpx;
+}
+
+/* 分隔线 */
+.separator {
+  text-align: center;
+  margin: 30rpx 0;
+  position: relative;
+}
+
+.separator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1rpx;
+  background: #e0e0e0;
+}
+
+.separator-text {
+  position: relative;
+  background: #f5f5f5;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.asterisk {
+  color: #ff6f6f;
+}
+
+/* 基础信息部分 */
+.basic-info-section {
+  background: #ffffff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.section-indicator {
+  width: 6rpx;
+  height: 32rpx;
+  background: #ff6f6f;
+  margin-right: 16rpx;
+  border-radius: 3rpx;
+}
+
+.section-title {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.section-arrow {
+  font-size: 24rpx;
+  color: #999;
+  transform: rotate(180deg);
+  transition: transform 0.3s;
+}
+
+.section-arrow.expanded {
+  transform: rotate(0deg);
+}
+
+/* 信息列表 */
+.info-list {
+  padding: 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-icon {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.loan-icon {
+  background: #fff5f5;
+  color: #ff6f6f;
+}
+
+.borrower-icon {
+  background: #f0f9f0;
+  color: #52c41a;
+}
+
+.co-borrower-icon {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.guarantor-icon {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.bank-icon {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.attachment-icon {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.contract-icon {
+  background: #f0f9f0;
+  color: #52c41a;
+}
+
+.info-status.view-status {
+  color: #999;
+}
+
+.info-label {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.required-mark {
+  color: #ff6f6f;
+  margin-right: 4rpx;
+}
+
+.info-status {
+  font-size: 28rpx;
+}
+
+.info-status.completed {
+  color: #52c41a;
+}
+
+.info-status.not-filled,
+.info-status.not-uploaded {
+  color: #ff6f6f;
+}
+
+/* 底部提交按钮 */
+.submit-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background: linear-gradient(180deg, #ff6f6f 0%, #ff8e8e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.submit-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #ffffff;
+}
+

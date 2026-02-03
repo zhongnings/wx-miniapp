@@ -1,0 +1,323 @@
+<view class="create-order-container">
+
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-with-animation="false">
+    <!-- 身份证上传 -->
+    <view class="upload-section">
+      <view class="section-header">
+        <text class="section-title">上传身份证照片</text>
+        <text class="section-subtitle">证件照片仅用于实名认证</text>
+      </view>
+      <view class="id-upload-wrapper">
+        <view class="id-upload-item">
+          <view class="id-image-wrapper">
+            <image 
+              class="id-image" 
+              src="{{formData.idFrontImage || '/static/id-front-placeholder.png'}}" 
+              mode="aspectFill"
+              bindtap="handleIdFrontClick"
+            />
+            <view 
+              class="delete-icon" 
+              wx:if="{{formData.idFrontImage}}"
+              catchtap="deleteIdFront"
+            >
+              <text class="delete-icon-text">×</text>
+            </view>
+          </view>
+          <view class="upload-tip" bindtap="uploadIdFront">点击上传 证件正面（人像面）</view>
+        </view>
+        <view class="id-upload-item">
+          <view class="id-image-wrapper">
+            <image 
+              class="id-image" 
+              src="{{formData.idBackImage || '/static/id-back-placeholder.png'}}" 
+              mode="aspectFill"
+              bindtap="handleIdBackClick"
+            />
+            <view 
+              class="delete-icon" 
+              wx:if="{{formData.idBackImage}}"
+              catchtap="deleteIdBack"
+            >
+              <text class="delete-icon-text">×</text>
+            </view>
+          </view>
+          <view class="upload-tip" bindtap="uploadIdBack">点击上传 证件反面（国徽面）</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 个人信息表单 -->
+    <view class="form-section">
+      <view class="form-item">
+        <text class="label required">证件类型</text>
+        <text class="value">{{formData.idType || '身份证'}}</text>
+      </view>
+
+      <view class="form-item">
+        <text class="label required">姓名</text>
+        <input 
+          class="input" 
+          placeholder="请输入姓名" 
+          value="{{formData.name}}"
+          bindinput="onNameInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label required">证件号</text>
+        <input 
+          class="input" 
+          placeholder="请输入证件号" 
+          value="{{formData.idNumber}}"
+          bindinput="onIdNumberInput"
+        />
+      </view>
+
+      <picker mode="date" value="{{formData.idEffectiveDate}}" bindchange="onIdEffectiveDateChange">
+        <view class="form-item">
+          <text class="label required">证件生效日期</text>
+          <view class="value-wrapper">
+            <text class="value {{formData.idEffectiveDate ? '' : 'placeholder'}}">{{formData.idEffectiveDate || '请选择证件生效日期'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <picker mode="date" value="{{formData.idExpiryDate}}" bindchange="onIdExpiryDateChange">
+        <view class="form-item">
+          <text class="label required">证件有效期</text>
+          <view class="value-wrapper">
+            <text class="value {{formData.idExpiryDate ? '' : 'placeholder'}}">{{formData.idExpiryDate || '请选择证件有效期'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </picker>
+
+      <view class="form-item">
+        <text class="label required">证件地址</text>
+        <input 
+          class="input" 
+          placeholder="请输入证件地址" 
+          value="{{formData.idAddress}}"
+          bindinput="onIdAddressInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label required">手机号码</text>
+        <input 
+          class="input" 
+          type="number"
+          placeholder="请输入手机号码" 
+          value="{{formData.phone}}"
+          bindinput="onPhoneInput"
+        />
+      </view>
+
+      <view class="form-item" bindtap="selectResidenceArea">
+        <text class="label required">居住地省市区</text>
+        <view class="value-wrapper">
+          <text class="value {{formData.residenceArea ? '' : 'placeholder'}}">{{formData.residenceArea || '请选择居住地省市区'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <text class="label required">居住详细地址</text>
+        <input 
+          class="input" 
+          placeholder="请输入居住详细地址" 
+          value="{{formData.residenceDetail}}"
+          bindinput="onResidenceDetailInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label required">性别</text>
+        <text class="value">{{formData.gender || '自动识别'}}</text>
+      </view>
+
+      <view class="form-item">
+        <text class="label required">出生年月</text>
+        <text class="value">{{formData.birthDate || '自动识别'}}</text>
+      </view>
+
+      <view class="form-item" bindtap="selectMaritalStatus">
+        <text class="label required">婚姻状况</text>
+        <view class="value-wrapper">
+          <text class="value {{formData.maritalStatus ? '' : 'placeholder'}}">{{formData.maritalStatus || '请选择婚姻状况'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+
+  <!-- 居住地省市区选择器弹窗（复用step1的地区选择器） -->
+  <view class="region-picker-mask {{showRegionPicker ? 'show' : ''}}" bindtap="hideResidenceRegionPicker" catchtouchmove="stopScroll">
+    <view class="region-picker-container" catchtap="stopPropagation">
+      <view class="region-picker-header">
+        <text class="region-picker-title">选择居住地</text>
+        <text class="region-picker-close" bindtap="hideResidenceRegionPicker">×</text>
+      </view>
+      
+      <!-- 搜索框 -->
+      <view class="region-search-box">
+        <text class="search-icon">🔍</text>
+        <input 
+          class="region-search-input" 
+          placeholder="搜索省/市/区" 
+          value="{{regionSearchKeyword}}"
+          bindinput="onResidenceRegionSearchInput"
+          confirm-type="search"
+        />
+        <text class="search-clear" wx:if="{{regionSearchKeyword}}" bindtap="clearResidenceRegionSearch">×</text>
+      </view>
+
+      <!-- 已选路径显示 -->
+      <view class="region-breadcrumb" wx:if="{{selectedProvince || selectedCity || selectedDistrict}}">
+        <text class="breadcrumb-item" wx:if="{{selectedProvince}}" bindtap="resetResidenceRegionToProvince">{{selectedProvince}}</text>
+        <text class="breadcrumb-separator" wx:if="{{selectedProvince && (selectedCity || selectedDistrict)}}">›</text>
+        <text class="breadcrumb-item" wx:if="{{selectedCity}}" bindtap="resetResidenceRegionToCity">{{selectedCity}}</text>
+      </view>
+
+      <!-- 地区列表容器 -->
+      <view class="region-content-wrapper">
+        <!-- 左侧：地区列表 -->
+        <scroll-view 
+          class="region-list" 
+          scroll-y="true" 
+          enhanced="true" 
+          show-scrollbar="{{false}}"
+          scroll-into-view="{{regionScrollIntoView}}"
+          scroll-with-animation="true"
+          catchtouchmove="stopScroll"
+        >
+          <!-- 搜索模式：显示搜索结果 -->
+          <block wx:if="{{regionSearchKeyword}}">
+            <view 
+              class="region-item {{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict ? 'selected' : ''}}"
+              wx:for="{{regionSearchResults}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="{{item.level}}"
+              bindtap="onResidenceRegionItemTap"
+            >
+              <text class="region-item-name">{{item.fullName}}</text>
+              <text class="region-item-check" wx:if="{{item.fullName === selectedProvince || item.fullName === selectedCity || item.fullName === selectedDistrict}}">✓</text>
+            </view>
+            <view class="region-empty" wx:if="{{regionSearchResults.length === 0}}">
+              <text>未找到相关地区</text>
+            </view>
+          </block>
+
+          <!-- 省份列表（按首字母分组） -->
+          <block wx:elif="{{regionCurrentLevel === 'province'}}">
+            <view 
+              class="region-group" 
+              wx:for="{{regionProvinceGroups}}" 
+              wx:key="letter"
+              id="region-group-{{item.letter === '*' ? 'star' : item.letter}}"
+            >
+              <view class="region-group-header">
+                <text wx:if="{{item.isGaoTai}}">*</text>
+                <text wx:else>{{item.letter}}</text>
+              </view>
+              <view 
+                class="region-item {{province.name === selectedProvince ? 'selected' : ''}}"
+                wx:for="{{item.provinces}}" 
+                wx:for-item="province"
+                wx:key="code"
+                data-code="{{province.code}}"
+                data-name="{{province.name}}"
+                data-full-name="{{province.name}}"
+                data-level="province"
+                bindtap="onResidenceRegionItemTap"
+              >
+                <text class="region-item-name">{{province.name}}</text>
+                <text class="region-item-check" wx:if="{{province.name === selectedProvince}}">✓</text>
+              </view>
+            </view>
+          </block>
+
+          <!-- 城市列表 -->
+          <block wx:elif="{{regionCurrentLevel === 'city'}}">
+            <view 
+              class="region-item {{item.fullName === selectedCity ? 'selected' : ''}}"
+              wx:for="{{regionCityList}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="city"
+              bindtap="onResidenceRegionItemTap"
+            >
+              <text class="region-item-name">{{item.fullName}}</text>
+              <text class="region-item-check" wx:if="{{item.fullName === selectedCity}}">✓</text>
+            </view>
+          </block>
+
+          <!-- 区县列表 -->
+          <block wx:elif="{{regionCurrentLevel === 'district'}}">
+            <view 
+              class="region-item {{item.name === selectedDistrict ? 'selected' : ''}}"
+              wx:for="{{regionDistrictList}}" 
+              wx:key="code"
+              data-code="{{item.code}}"
+              data-name="{{item.name}}"
+              data-full-name="{{item.fullName}}"
+              data-level="district"
+              bindtap="onResidenceRegionItemTap"
+            >
+              <text class="region-item-name">{{item.name}}</text>
+              <text class="region-item-check" wx:if="{{item.name === selectedDistrict}}">✓</text>
+            </view>
+          </block>
+        </scroll-view>
+
+        <!-- 右侧：首字母索引（仅在省份列表时显示） -->
+        <view class="region-index-bar" wx:if="{{regionCurrentLevel === 'province' && !regionSearchKeyword}}">
+          <view 
+            class="region-index-item {{regionIndexActive === item ? 'active' : ''}}"
+            wx:for="{{regionIndexLetters}}" 
+            wx:key="*this"
+            data-letter="{{item}}"
+            bindtap="scrollToResidenceRegionGroup"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+

@@ -1,0 +1,92 @@
+<view class="create-order-container">
+
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 内容区域 -->
+  <scroll-view class="form-content" scroll-y="true" scroll-x="false" enhanced="true" show-scrollbar="{{false}}">
+    <!-- 无共借人状态 -->
+    <view class="empty-state" wx:if="{{!hasCoBorrower}}">
+      <view class="empty-illustration">
+        <view class="building building-left"></view>
+        <view class="calendar-icon">
+          <view class="calendar-lines"></view>
+          <view class="calendar-person"></view>
+        </view>
+        <view class="building building-right"></view>
+        <view class="arrow-up arrow-left"></view>
+        <view class="arrow-up arrow-right"></view>
+      </view>
+      <view class="empty-tip">共借人信息为可选项</view>
+      <button class="add-button" bindtap="editCoBorrower">
+        <text class="add-icon">+</text>
+        <text>添加共借人</text>
+      </button>
+    </view>
+
+    <!-- 已有共借人 -->
+    <view class="co-borrower-card" wx:if="{{hasCoBorrower}}">
+      <view class="card-header">
+        <text class="card-title">共借人信息</text>
+        <view class="card-actions">
+          <text class="action-btn edit-btn" bindtap="editCoBorrower">编辑</text>
+          <text class="action-btn delete-btn" bindtap="deleteCoBorrower">删除</text>
+        </view>
+      </view>
+      <view class="card-content">
+        <view class="info-row">
+          <text class="label">类型：</text>
+          <text class="value">{{coBorrower.borrowerType === 'personal' ? '个人' : '对公'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'personal'}}">
+          <text class="label">姓名：</text>
+          <text class="value">{{coBorrower.name || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'personal'}}">
+          <text class="label">证件号：</text>
+          <text class="value">{{coBorrower.idNumber || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'personal'}}">
+          <text class="label">手机号：</text>
+          <text class="value">{{coBorrower.phone || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'company'}}">
+          <text class="label">公司名称：</text>
+          <text class="value">{{coBorrower.companyName || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'company'}}">
+          <text class="label">信用代码：</text>
+          <text class="value">{{coBorrower.companyCreditCode || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{coBorrower.borrowerType === 'company'}}">
+          <text class="label">经办人：</text>
+          <text class="value">{{coBorrower.agentName || '未填写'}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+</view>
+

@@ -1,0 +1,253 @@
+/* ==========================================
+   H5 样式修复文件
+   用于修复小程序转H5后的样式问题
+   ========================================== */
+
+/* 1. 修复安全区域问题 - H5不需要状态栏高度 */
+.custom-navbar {
+  padding-top: 0 !important;
+}
+
+/* 2. 修复导航栏高度 - H5使用固定高度 */
+.navbar {
+  height: 44px !important;
+  padding-top: 0 !important;
+}
+
+.navbar-content {
+  height: 44px !important;
+}
+
+/* 3. 修复内容区域高度 */
+.content-area {
+  height: calc(100vh - 44px) !important;
+}
+
+/* 4. 修复输入框样式 */
+.form-input {
+  line-height: normal;
+  height: auto;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.input-wrapper {
+  min-height: 48px;
+}
+
+/* 5. 修复按钮样式 */
+button::after {
+  border: none !important;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+.login-button::after,
+.btn-primary::after {
+  border: none !important;
+}
+
+/* 6. 修复滚动区域 */
+scroll-view {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* 7. 修复checkbox样式 */
+checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.agreement-checkbox {
+  transform: scale(1);
+  -webkit-appearance: checkbox;
+  appearance: checkbox;
+}
+
+/* 修复checkbox在label中的显示 */
+uni-checkbox .uni-checkbox-input {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #d1d1d1;
+  border-radius: 3px;
+}
+
+uni-checkbox .uni-checkbox-input.uni-checkbox-input-checked {
+  background-color: #ff6f6f;
+  border-color: #ff6f6f;
+}
+
+/* 修复协议文本换行 */
+.agreement-text {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal !important;
+  line-height: 1.8 !important;
+}
+
+.agreement-label {
+  align-items: flex-start !important;
+  line-height: 1.8 !important;
+}
+
+/* 8. 修复图片显示 */
+image {
+  display: block;
+}
+
+/* 9. 修复flex布局兼容性 */
+.flex {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.flex-center {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+}
+
+/* 10. 修复渐变背景 */
+.login-container {
+  background: -webkit-linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.login-button.active {
+  background: -webkit-linear-gradient(135deg, #ff6f6f 0%, #ee5a6f 100%);
+  background: linear-gradient(135deg, #ff6f6f 0%, #ee5a6f 100%);
+}
+
+/* 11. 修复菜单抽屉层级 */
+.menu-drawer {
+  position: fixed;
+  z-index: 9999;
+}
+
+/* 12. 修复文本选择 */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 13. 修复点击高亮 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 14. 修复滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* 15. 修复表单元素在移动端的样式 */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* 16. 修复iOS下的圆角问题 */
+button,
+input,
+textarea {
+  border-radius: inherit;
+}
+
+/* 17. 修复定位元素 */
+.fixed {
+  position: fixed;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* 18. 修复1px边框问题 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .hairline {
+    border-width: 0.5px;
+  }
+}
+
+/* 19. 修复页面最小高度 */
+page,
+body {
+  min-height: 100vh;
+}
+
+/* 20. 修复响应式布局 - 在大屏幕上居中显示 */
+@media (min-width: 750px) {
+  .home-container,
+  .login-container,
+  .order-container {
+    max-width: 750px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 21. 修复文本不换行问题 */
+text {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* 22. 修复label内的文本布局 */
+label {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 23. 修复form表单样式 */
+form {
+  width: 100%;
+}
+
+/* 24. 修复checkbox-group */
+checkbox-group {
+  width: 100%;
+}
+
+uni-checkbox-group {
+  width: 100%;
+}
+

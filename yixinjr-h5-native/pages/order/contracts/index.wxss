@@ -1,0 +1,221 @@
+/* 合同协议页面样式 */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部导航栏 */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  background: #ffffff;
+  padding: 0 30rpx;
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.navbar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.navbar-icon {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 内容区域 */
+.content-area {
+  flex: 1;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+/* 签署列表标题 */
+.section-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+/* 合同卡片 */
+.contract-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 合同头部 */
+.contract-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.contract-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+/* 状态标签 */
+.status-badge {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #ffffff;
+}
+
+.status-badge.unsigned {
+  background: #ffb3b342;
+  color: #ff6f6f;
+}
+
+.status-badge.signed {
+  background: #b3e5b3;
+  color: #52c41a;
+}
+
+/* 签署人信息 */
+.signer-info {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+/* 操作按钮区域 */
+.action-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  border: none;
+  padding: 0;
+}
+
+.preview-btn {
+  background: #ff6f6f;
+  color: #ffffff;
+}
+
+.urge-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.qrcode-btn {
+  background: #ff6f6f;
+  color: #ffffff;
+}
+
+/* 空状态 */
+.empty {
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+  padding: 60rpx 0;
+}
+
+/* 二维码弹窗 */
+.qrcode-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrcode-modal.hide {
+  display: none;
+}
+
+.qrcode-content {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  width: 600rpx;
+  max-width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrcode-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 30rpx;
+}
+
+.qrcode-image {
+  width: 400rpx;
+  height: 400rpx;
+  margin-bottom: 30rpx;
+  border: 1rpx solid #f0f0f0;
+}
+
+.qrcode-tip {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.qrcode-actions {
+  display: flex;
+  gap: 20rpx;
+  width: 100%;
+}
+
+.qrcode-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  text-align: center;
+  border: none;
+}
+
+.qrcode-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.qrcode-btn.save {
+  background: #ff6f6f;
+  color: #ffffff;
+}
+

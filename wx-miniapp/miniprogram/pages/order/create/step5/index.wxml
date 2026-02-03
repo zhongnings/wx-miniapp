@@ -1,0 +1,99 @@
+<view class="create-order-container">
+  
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 表单内容 -->
+  <view class="content-area">
+    <view class="bank-card-section">
+      <view class="section-header">
+        <text class="section-title">银行卡账户 (共{{bankCards.length}}张)</text>
+      </view>
+
+      <!-- 银行卡列表 -->
+      <view class="bank-card-list" wx:if="{{bankCards.length > 0}}">
+        <block wx:for="{{bankCards}}" wx:key="index">
+          <view class="bank-card-item">
+            <view class="bank-card">
+              <view class="bank-card-header">
+                <view class="bank-logo">
+                  <text class="bank-logo-text">{{item.bankIcon || item.bankName.substring(0, 1)}}</text>
+                </view>
+                <view class="bank-info">
+                  <text class="bank-name">{{item.bankName}}</text>
+                  <text class="cardholder-name">{{item.cardholderName}}</text>
+                </view>
+                <view class="bank-card-actions">
+                  <view class="action-icon card-delete-icon" catchtap="deleteBankCard" data-index="{{index}}">
+                    <image class="icon-image" src="/static/delete_icon.png" mode="aspectFit"></image>
+                  </view>
+                  <view class="action-icon card-edit-icon" catchtap="editBankCard" data-index="{{index}}">
+                    <image class="icon-image" src="/static/modify_icon.png" mode="aspectFit"></image>
+                  </view>
+                </view>
+              </view>
+              <view class="bank-card-number">{{item.cardNumber}}</view>
+              <view class="bank-card-watermark">{{item.bankIcon || item.bankName.substring(0, 1)}}</view>
+            </view>
+            
+            <!-- 银行卡图片上传区域 -->
+            <!-- <view class="bank-card-image-section">
+              <view class="image-upload-label">银行卡正面照片</view>
+              <view class="image-upload-area">
+           <view wx:if="{{item.cardFrontImage}}" class="image-preview-wrapper">
+                  <view class="image-preview" bindtap="previewBankCardImage" data-index="{{index}}">
+                    <image src="{{item.cardFrontImage}}" mode="aspectFit" class="preview-image"></image>
+                    <view class="image-mask">
+                      <text class="preview-text">点击预览</text>
+                    </view>
+                  </view>
+                  <view 
+               class="image-delete-icon"
+                    catchtap="deleteBankCardImage"
+                    data-index="{{index}}"
+                  >
+                    <text class="delete-icon-text">×</text>
+                  </view>
+                </view>
+                <view wx:else class="image-upload-btn" bindtap="chooseBankCardImage" data-index="{{index}}">
+                  <text class="upload-icon">📷</text>
+                  <text class="upload-text">上传银行卡照片</text>
+                </view>
+              </view>
+            </view> -->
+          </view>
+        </block>
+      </view>
+
+      <!-- 新增银行卡按钮 -->
+      <button class="add-card-button" bindtap="addBankCard">
+        <text class="add-icon">+</text>
+        <text>新增收款卡</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+</view>
+

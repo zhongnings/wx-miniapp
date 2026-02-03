@@ -1,0 +1,81 @@
+<view class="create-order-container">
+  
+  <!-- 标签页导航 -->
+  <scroll-view 
+    class="tabs-nav" 
+    scroll-x="true" 
+    scroll-left="{{tabsScrollLeft}}"
+    scroll-with-animation="{{true}}"
+    enhanced="true"
+    show-scrollbar="{{false}}"
+    bindscroll="onTabsScroll"
+  >
+    <view class="tabs-nav-inner">
+      <view class="tab {{currentStep === 0 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="0" bindtap="onTabClick">借款信息</view>
+      <view class="tab {{currentStep === 1 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="1" bindtap="onTabClick">借款人信息</view>
+      <view class="tab {{currentStep === 2 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="2" bindtap="onTabClick">共借人信息</view>
+      <view class="tab {{currentStep === 3 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="3" bindtap="onTabClick">担保人信息</view>
+      <view class="tab {{currentStep === 4 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="4" bindtap="onTabClick">银行卡信息</view>
+      <view class="tab {{currentStep === 5 ? 'active' : ''}} {{fromOrderDetail ? 'clickable' : ''}}" data-step="5" bindtap="onTabClick">资料上传</view>
+    </view>
+  </scroll-view>
+
+  <!-- 警告提示 -->
+  <view class="warning-box">
+    <text class="warning-icon">●</text>
+    <view class="warning-text">
+      <text>为有效了解借款人，请上传其他更多关于借款人的资料，请确保</text>
+      <text class="warning-highlight">文字字迹清晰，亮度均衡</text>
+    </view>
+  </view>
+
+  <!-- 表单内容 -->
+  <view class="content-area">
+    <!-- 补充文件 -->
+    <view class="form-section">
+      <!-- 标题行 -->
+      <view class="notary-title-row">
+        <text class="notary-main-title">补充文件</text>
+      </view>
+      
+      <!-- 内容行 - 类似form-item结构 -->
+      <view class="notary-content-row">
+        <view class="form-label">附件上传</view>
+        <view class="form-value">
+          <view class="notary-upload-btn" bindtap="uploadAttachment">
+            <view class="notary-btn-icons">
+              <text class="notary-btn-cloud">☁</text>
+              <text class="notary-btn-arrow">↑</text>
+            </view>
+            <text class="notary-btn-text">附件上传</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 附件列表 -->
+      <view class="notary-file-list">
+        <!-- 未上传状态 -->
+        <view class="notary-status-text" wx:if="{{attachments.length === 0}}">未上传</view>
+        
+        <!-- 已上传文件列表 -->
+        <block wx:if="{{attachments.length > 0}}">
+          <block wx:for="{{attachments}}" wx:key="index">
+            <view class="notary-file-item">
+              <text class="notary-file-name" bindtap="previewAttachment" data-index="{{index}}">{{item.name}}</text>
+              <view class="notary-file-delete" catchtap="deleteAttachment" data-index="{{index}}">
+                <image class="notary-delete-icon" src="/static/delete_icon.png" mode="aspectFit" />
+              </view>
+            </view>
+          </block>
+        </block>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
+    <button class="btn btn-primary" bindtap="goNext">下一步</button>
+  </view>
+</view>
+

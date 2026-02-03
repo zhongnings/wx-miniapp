@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "共借人",
+  "navigationBarBackgroundColor": "#ff6f6f",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "region-picker": "../../../../components/region-picker/region-picker"
+  }
+}
+
