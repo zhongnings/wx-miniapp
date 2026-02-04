@@ -39,6 +39,11 @@ public class ContractService {
     private String serverBaseUrl;
 
     private static final DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    /**
+     * 合同里常见的“下划线填空”字符：
+     * - 使用全角下划线（U+FF3F）在中文合同里更美观，且宽度更接近中文字符
+     */
+    private static final char UNDERLINE_CHAR = '＿';
 
     /**
      * 生成合同PDF文件
@@ -146,9 +151,47 @@ public class ContractService {
 
         // 其他字段
         data.put("type", "肆"); // 担保方式，默认"肆. 无担保"，可根据需要调整
-        data.put("desc", ""); // 其他约定事项，可根据需要从loanInfo扩展
+        // 模板里使用的是 {{otherAgreedMatters}}（见合同模板截图）
+        // 当前实体 OrderLoanInfo 暂未建此字段，先留空；如后续补字段/从别处获取，直接赋值即可
+        String otherAgreedMatters = "";
+        data.put("otherAgreedMatters", otherAgreedMatters);
+        // 兼容历史字段（如前端/旧模板仍在用 {{desc}}）
+        data.put("desc", otherAgreedMatters);
+
+        // 让“填空”更美观：对少数字段按固定长度补齐下划线，避免右侧留白过大
+        applyUnderlineFillForContract(data);
 
         return data;
+    }
+
+    /**
+     * 合同里部分字段通常配有“下划线填空”，但纯文本替换后会显得右侧留白太多。
+     * 这里用“值 + 若干下划线”的方式补齐到一个大致的视觉长度（不依赖PDF字体度量）。
+     */
+    private void applyUnderlineFillForContract(Map<String, String> data) {
+        // 签订地一般 6-12 个字足够
+        data.computeIfPresent("signPlace", (k, v) -> padRightWithUnderline(v, 12));
+        // 其他约定事项通常一整行，给一个较长的“填空”长度
+        data.computeIfPresent("otherAgreedMatters", (k, v) -> padRightWithUnderline(v, 30));
+        data.computeIfPresent("desc", (k, v) -> padRightWithUnderline(v, 30));
+
+        // 日期类字段：如果模板里是“下划线填空”，替换后可能会显得空白太多（或原下划线样式丢失）
+        data.computeIfPresent("nowYear", (k, v) -> padRightWithUnderline(v, 6));
+        data.computeIfPresent("nowMonth", (k, v) -> padRightWithUnderline(v, 2));
+        data.computeIfPresent("nowDay", (k, v) -> padRightWithUnderline(v, 2));
+    }
+
+    private String padRightWithUnderline(String value, int totalChars) {
+        String safe = value == null ? "" : value.trim();
+        int len = safe.codePointCount(0, safe.length());
+        if (len >= totalChars) {
+            return safe;
+        }
+        StringBuilder sb = new StringBuilder(safe);
+        for (int i = len; i < totalChars; i++) {
+            sb.append(UNDERLINE_CHAR);
+        }
+        return sb.toString();
     }
 
     /**

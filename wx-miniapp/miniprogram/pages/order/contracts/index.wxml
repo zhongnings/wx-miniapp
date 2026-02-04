@@ -1,11 +1,11 @@
 <view class="container">
-  <!-- 顶部导航栏 -->
+  <!-- 顶部导航栏
   <view class="navbar">
     <view class="navbar-left" bindtap="goBack">
       <text class="navbar-icon">〈</text>
     </view>
     <view class="navbar-title">合同协议</view>
-  </view>
+  </view> -->
 
   <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
     <!-- 签署列表标题 -->

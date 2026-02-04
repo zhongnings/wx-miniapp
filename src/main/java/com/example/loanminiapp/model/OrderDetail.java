@@ -12,9 +12,12 @@ public class OrderDetail {
     private BigDecimal loanAmount;
     private String orderNo;
     private Integer orderStatus;
+    private String orderStatusName;
     private Integer riskStatus;
     private Integer repaymentStatus;
+    private String repaymentStatusName; // 还款状态名称（中文显示）
     private Integer signStatus;
+    private String signStatusName; // 签署状态名称（中文显示）
 
     private LoanInfo loanInfo;
     private PersonInfo borrowerInfo;

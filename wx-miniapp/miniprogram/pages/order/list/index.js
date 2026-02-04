@@ -251,27 +251,24 @@ Page({
     // 数字状态映射（0-8）- 订单状态
     const numberStatusMap = {
       0: '待提交',
-      1: '风控审核中',
+      1: '签署中',
       2: '风控驳回',
       3: '待放款',
       4: '放款中',
-      5: '待债转',
-      6: '签署中',
-      7: '待人脸识别',
-      8: '完成'
+      5: '完成'
     };
     
     // 字符串状态映射（兼容旧逻辑）
     const stringStatusMap = {
       'pending': '待提交',
-      'reviewing': '风控审核中',
+      'signing': '签署中',
       'rejected': '风控驳回',
       'pending_loan': '待放款',
       'loaning': '放款中',
+      'completed': '完成'/*,
+      'reviewing': '风控审核中',
       'pending_transfer': '待债转',
-      'signing': '签署中',
-      'pending_face': '待人脸识别',
-      'completed': '完成'
+      'pending_face': '待人脸识别'*/
     };
     
     // 如果是数字，使用数字映射

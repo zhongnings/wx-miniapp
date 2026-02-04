@@ -59,6 +59,7 @@ public class InMemoryOrderService implements OrderService {
     private final OrderAccessService orderAccessService;
     private final OrderContractMapper orderContractMapper;
     private final ContractService contractService;
+    private final OrderStatusFlowService orderStatusFlowService;
 
     @Override
     public List<OrderSummary> list(String tab, String keyword, String status) {
@@ -73,6 +74,7 @@ public class InMemoryOrderService implements OrderService {
         // tab 过滤
         orders = orders.stream().filter(o -> {
             Integer st = o.getOrderStatus();
+            // 现在的状态机：0待提交、1签署中、2风控驳回、3待放款、4放款中、5完成
             if ("manage".equalsIgnoreCase(tab)) {
                 return st == null || st != OrderStatusEnum.COMPLETED.getCode();
             } else if ("history".equalsIgnoreCase(tab)) {
@@ -142,7 +144,7 @@ public class InMemoryOrderService implements OrderService {
         switch (status.toLowerCase()) {
             case "pending":
                 return OrderStatusEnum.PENDING_SUBMIT.getCode();
-            case "reviewing":
+            case "signing":
                 return OrderStatusEnum.RISK_REVIEWING.getCode();
             case "rejected":
                 return OrderStatusEnum.RISK_REJECTED.getCode();
@@ -150,12 +152,6 @@ public class InMemoryOrderService implements OrderService {
                 return OrderStatusEnum.WAIT_LOAN.getCode();
             case "loaning":
                 return OrderStatusEnum.LOANING.getCode();
-            case "pending_transfer":
-                return OrderStatusEnum.WAIT_TRANSFER.getCode();
-            case "signing":
-                return OrderStatusEnum.SIGNING.getCode();
-            case "pending_face":
-                return OrderStatusEnum.WAIT_FACE.getCode();
             case "completed":
                 return OrderStatusEnum.COMPLETED.getCode();
             default:
@@ -258,7 +254,9 @@ public class InMemoryOrderService implements OrderService {
         order.setOrderStatus(OrderStatusEnum.PENDING_SUBMIT.getCode());
         order.setRiskStatus(RiskStatusEnum.PENDING.getCode());
         orderMapper.updateById(order);
-        
+        // 记录状态流转
+        orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.PENDING_SUBMIT, "风控驳回后驳回订单，状态回退为待提交");
+
         log.info("订单驳回成功，合同已删除: orderId={}", id);
     }
 
@@ -321,6 +319,7 @@ public class InMemoryOrderService implements OrderService {
         d.setLoanAmount(order.getLoanAmount());
         d.setOrderNo(order.getOrderNo());
         d.setOrderStatus(order.getOrderStatus());
+        d.setOrderStatusName(OrderStatusEnum.fromCode(order.getOrderStatus()).getDesc());
         d.setRiskStatus(order.getRiskStatus());
         d.setRepaymentStatus(order.getRepaymentStatus());
         d.setSignStatus(order.getSignStatus());
@@ -458,6 +457,8 @@ public class InMemoryOrderService implements OrderService {
         order.setOrderStatus(OrderStatusEnum.RISK_REVIEWING.getCode());
         order.setRiskStatus(RiskStatusEnum.REVIEWING.getCode());
         orderMapper.updateById(order);
+        // 记录状态流转
+        orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.RISK_REVIEWING, "提交订单，进入签署中/风控审核中");
         log.info("订单提交成功: orderId={}", id);
     }
 

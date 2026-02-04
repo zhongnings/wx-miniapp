@@ -16,7 +16,7 @@
       </view>
       <view class="summary-row">
         <text class="summary-label">订单状态：</text>
-        <text class="summary-value">{{detail.orderStatus || '-'}}</text>
+        <text class="summary-value">{{detail.orderStatusName || '-'}}</text>
         <text class="detail-link" bindtap="goOrderDetail">订单详情 ></text>
       </view>
       <view class="summary-row">
