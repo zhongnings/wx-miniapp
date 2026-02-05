@@ -968,7 +968,7 @@ Page({
         wx.showToast({ title: '请填写证件号码', icon: 'none' });
         return;
       }
-    } else {
+    } else if (this.data.borrowerType === 'company') {
       if (!this.data.businessLicense) {
         wx.showToast({ title: '请上传营业执照', icon: 'none' });
         return;
@@ -979,6 +979,15 @@ Page({
       }
       if (!this.data.companyCreditCode) {
         wx.showToast({ title: '请填写公司信用代码', icon: 'none' });
+        return;
+      }
+    } else if (this.data.borrowerType === 'property') {
+      if (!this.data.businessLicense) {
+        wx.showToast({ title: '请上传房产证', icon: 'none' });
+        return;
+      }
+      if (!this.data.companyCreditCode) {
+        wx.showToast({ title: '请填写房产证号码', icon: 'none' });
         return;
       }
     }

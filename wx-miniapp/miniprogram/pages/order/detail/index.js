@@ -137,9 +137,8 @@ Page({
    * 订单详情链接
    */
   goOrderDetail() {
-    wx.showToast({
-      title: '订单详情功能待实现',
-      icon: 'none'
+    wx.navigateTo({
+      url: `/pages/order/fulldetail/index?id=${this.data.id}`
     });
   },
 

@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.50.66:8081';
+const BASE_URL = 'http://127.0.0.1:8081';
 const logger = require('./logger');
 
 /**

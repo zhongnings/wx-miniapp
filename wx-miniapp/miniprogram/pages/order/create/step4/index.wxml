@@ -53,7 +53,7 @@
       <view class="card-content">
         <view class="info-row">
           <text class="label">类型：</text>
-          <text class="value">{{guarantor.borrowerType === 'personal' ? '个人' : '对公'}}</text>
+          <text class="value">{{guarantor.borrowerType === 'personal' ? '个人' : (guarantor.borrowerType === 'property' ? '房产' : '对公')}}</text>
         </view>
         <view class="info-row" wx:if="{{guarantor.borrowerType === 'personal'}}">
           <text class="label">姓名：</text>
@@ -76,6 +76,18 @@
           <text class="value">{{guarantor.companyCreditCode || '未填写'}}</text>
         </view>
         <view class="info-row" wx:if="{{guarantor.borrowerType === 'company'}}">
+          <text class="label">经办人：</text>
+          <text class="value">{{guarantor.agentName || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{guarantor.borrowerType === 'property'}}">
+          <text class="label">房产证号码：</text>
+          <text class="value">{{guarantor.companyCreditCode || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{guarantor.borrowerType === 'property'}}">
+          <text class="label">房产地：</text>
+          <text class="value">{{guarantor.companyArea || '未填写'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{guarantor.borrowerType === 'property'}}">
           <text class="label">经办人：</text>
           <text class="value">{{guarantor.agentName || '未填写'}}</text>
         </view>

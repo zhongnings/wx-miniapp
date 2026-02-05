@@ -5,6 +5,7 @@
     "pages/home/index",
     "pages/order/list/index",
     "pages/order/detail/index",
+    "pages/order/fulldetail/index",
     "pages/order/progress/index",
     "pages/order/contracts/index",
     "pages/order/create/step1/index",
