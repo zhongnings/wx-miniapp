@@ -408,10 +408,16 @@ public class OrderGuarantorController {
         entity.setIdAddress(dto.getIdAddress());
         entity.setProvinceCity(dto.getResidenceArea());
         entity.setAddressDetail(dto.getDetailAddress());
-        entity.setRelationship(dto.getRelationship());
         entity.setMaritalStatus(dto.getMaritalStatus());
         entity.setFaceFrontUrl(dto.getIdCardFront());
         entity.setFaceBackUrl(dto.getIdCardBack());
+        
+        // 关系字段：个人类型使用 relationship，对公/房产类型使用 companyRelationship
+        if ("personal".equals(dto.getBorrowerType())) {
+            entity.setRelationship(dto.getRelationship());
+        } else if ("company".equals(dto.getBorrowerType()) || "property".equals(dto.getBorrowerType())) {
+            entity.setRelationship(dto.getCompanyRelationship());
+        }
         
         // 对公信息
         entity.setBusinessLicenseUrl(dto.getBusinessLicense());
@@ -428,11 +434,6 @@ public class OrderGuarantorController {
         entity.setAgentIdAddress(dto.getAgentIdAddress());
         entity.setAgentFaceFrontUrl(dto.getAgentIdCardFront());
         entity.setAgentFaceBackUrl(dto.getAgentIdCardBack());
-        
-        // 对公的关系字段
-        if (dto.getCompanyRelationship() != null) {
-            entity.setRelationship(dto.getCompanyRelationship());
-        }
         
         // 公证材料
         if (dto.getNotaryDocuments() != null && !dto.getNotaryDocuments().isEmpty()) {

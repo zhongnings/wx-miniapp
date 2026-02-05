@@ -60,6 +60,8 @@ public class InMemoryOrderService implements OrderService {
     private final OrderContractMapper orderContractMapper;
     private final ContractService contractService;
     private final OrderStatusFlowService orderStatusFlowService;
+    private final com.example.loanminiapp.mapper.OrderCoBorrowerMapper orderCoBorrowerMapper;
+    private final com.example.loanminiapp.mapper.OrderGuarantorMapper orderGuarantorMapper;
 
     @Override
     public List<OrderSummary> list(String tab, String keyword, String status) {
@@ -370,6 +372,50 @@ public class InMemoryOrderService implements OrderService {
             p.setFaceFrontUrl(borrower.getFaceFrontUrl());
             p.setFaceBackUrl(borrower.getFaceBackUrl());
             d.setBorrowerInfo(p);
+        }
+
+        // 共借人信息（取第一条）
+        com.example.loanminiapp.entity.OrderCoBorrower coBorrower = orderCoBorrowerMapper.selectOne(
+                new LambdaQueryWrapper<com.example.loanminiapp.entity.OrderCoBorrower>()
+                        .eq(com.example.loanminiapp.entity.OrderCoBorrower::getOrderId, order.getId())
+                        .last("limit 1"));
+        if (coBorrower != null) {
+            OrderDetail.PersonInfo p = new OrderDetail.PersonInfo();
+            p.setIdType(coBorrower.getIdType());
+            p.setName(coBorrower.getName());
+            p.setIdNo(coBorrower.getIdNo());
+            p.setIdIssueDate(coBorrower.getIdIssueDate() == null ? null : coBorrower.getIdIssueDate().toString());
+            p.setIdExpireDate(coBorrower.getIdExpireDate() == null ? null : coBorrower.getIdExpireDate().toString());
+            p.setMobile(coBorrower.getMobile());
+            p.setProvinceCity(coBorrower.getProvinceCity());
+            p.setAddressDetail(coBorrower.getAddressDetail());
+            p.setMaritalStatus(coBorrower.getMaritalStatus());
+            p.setFaceFrontUrl(coBorrower.getFaceFrontUrl());
+            p.setFaceBackUrl(coBorrower.getFaceBackUrl());
+            p.setRelationship(coBorrower.getRelationship());
+            d.setCoBorrowerInfo(p);
+        }
+
+        // 担保人信息（取第一条）
+        com.example.loanminiapp.entity.OrderGuarantor guarantor = orderGuarantorMapper.selectOne(
+                new LambdaQueryWrapper<com.example.loanminiapp.entity.OrderGuarantor>()
+                        .eq(com.example.loanminiapp.entity.OrderGuarantor::getOrderId, order.getId())
+                        .last("limit 1"));
+        if (guarantor != null) {
+            OrderDetail.PersonInfo p = new OrderDetail.PersonInfo();
+            p.setIdType(guarantor.getIdType());
+            p.setName(guarantor.getName());
+            p.setIdNo(guarantor.getIdNo());
+            p.setIdIssueDate(guarantor.getIdIssueDate() == null ? null : guarantor.getIdIssueDate().toString());
+            p.setIdExpireDate(guarantor.getIdExpireDate() == null ? null : guarantor.getIdExpireDate().toString());
+            p.setMobile(guarantor.getMobile());
+            p.setProvinceCity(guarantor.getProvinceCity());
+            p.setAddressDetail(guarantor.getAddressDetail());
+            p.setMaritalStatus(guarantor.getMaritalStatus());
+            p.setFaceFrontUrl(guarantor.getFaceFrontUrl());
+            p.setFaceBackUrl(guarantor.getFaceBackUrl());
+            p.setRelationship(guarantor.getRelationship());
+            d.setGuarantorInfo(p);
         }
 
         // 银行卡信息（取第一条）

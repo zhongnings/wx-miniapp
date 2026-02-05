@@ -63,12 +63,68 @@
           <text class="info-label">共借人信息</text>
           <text class="info-status {{infoStatus.coBorrowerInfo === '已完成' ? 'completed' : 'not-filled'}}">{{infoStatus.coBorrowerInfo}}</text>
         </view>
+        
+        <!-- 共借人详细信息展示 -->
+        <view class="person-detail-card" wx:if="{{detail.coBorrowerInfo && detail.coBorrowerInfo.name}}">
+          <view class="person-header">
+            <text class="person-icon">👤</text>
+            <text class="person-name">{{detail.coBorrowerInfo.name}}</text>
+          </view>
+          <view class="person-info-row">
+            <text class="person-info-label">共借人姓名：</text>
+            <text class="person-info-value">{{detail.coBorrowerInfo.name}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.coBorrowerInfo.relationship}}">
+            <text class="person-info-label">与主借人关系：</text>
+            <text class="person-info-value">{{detail.coBorrowerInfo.relationship}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.coBorrowerInfo.mobile}}">
+            <text class="person-info-label">手机号码：</text>
+            <text class="person-info-value">{{detail.coBorrowerInfo.mobile}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.coBorrowerInfo.idNo}}">
+            <text class="person-info-label">身份证号码：</text>
+            <text class="person-info-value">{{detail.coBorrowerInfo.idNo}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.coBorrowerInfo.addressDetail}}">
+            <text class="person-info-label">身份证地址：</text>
+            <text class="person-info-value">{{detail.coBorrowerInfo.addressDetail}}</text>
+          </view>
+        </view>
 
         <!-- 担保人信息 -->
         <view class="info-item" bindtap="goGuarantorInfo">
           <view class="info-icon guarantor-icon">🤝</view>
           <text class="info-label">担保人信息</text>
           <text class="info-status {{infoStatus.guarantorInfo === '已完成' ? 'completed' : 'not-filled'}}">{{infoStatus.guarantorInfo}}</text>
+        </view>
+        
+        <!-- 担保人详细信息展示 -->
+        <view class="person-detail-card" wx:if="{{detail.guarantorInfo && detail.guarantorInfo.name}}">
+          <view class="person-header">
+            <text class="person-icon">👤</text>
+            <text class="person-name">{{detail.guarantorInfo.name}}</text>
+          </view>
+          <view class="person-info-row">
+            <text class="person-info-label">担保人姓名：</text>
+            <text class="person-info-value">{{detail.guarantorInfo.name}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.guarantorInfo.relationship}}">
+            <text class="person-info-label">与主借人关系：</text>
+            <text class="person-info-value">{{detail.guarantorInfo.relationship}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.guarantorInfo.mobile}}">
+            <text class="person-info-label">手机号码：</text>
+            <text class="person-info-value">{{detail.guarantorInfo.mobile}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.guarantorInfo.idNo}}">
+            <text class="person-info-label">身份证号码：</text>
+            <text class="person-info-value">{{detail.guarantorInfo.idNo}}</text>
+          </view>
+          <view class="person-info-row" wx:if="{{detail.guarantorInfo.addressDetail}}">
+            <text class="person-info-label">身份证地址：</text>
+            <text class="person-info-value">{{detail.guarantorInfo.addressDetail}}</text>
+          </view>
         </view>
 
         <!-- 银行卡信息（必填） -->

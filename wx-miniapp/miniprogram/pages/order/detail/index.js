@@ -72,9 +72,9 @@ Page({
       // 计算基础信息状态（只有必填项显示*，其他不显示）
       const infoStatus = {
         loanInfo: detail.loanInfo ? '已完成' : '未填写',
-        borrowerInfo: detail.borrowerInfo && detail.borrowerInfo.name && detail.borrowerInfo.name !== '未填写' ? '已完成' : '未填写',
-        coBorrowerInfo: detail.coBorrowerInfo && detail.coBorrowerInfo.name && detail.coBorrowerInfo.name !== '未填写' ? '已完成' : '未填写',
-        guarantorInfo: detail.guarantorInfo && detail.guarantorInfo.name && detail.guarantorInfo.name !== '未填写' ? '已完成' : '未填写',
+        borrowerInfo: detail.borrowerInfo && detail.borrowerInfo.name ? '已完成' : '未填写',
+        coBorrowerInfo: detail.coBorrowerInfo && detail.coBorrowerInfo.name ? '已完成' : '未填写',
+        guarantorInfo: detail.guarantorInfo && detail.guarantorInfo.name ? '已完成' : '未填写',
         bankCardInfo: detail.bankCardInfo && detail.bankCardInfo.cardNo ? '已完成' : '未填写',
         attachment: (detail.attachments && detail.attachments.length > 0) ? '已上传' : '未上传'
       };

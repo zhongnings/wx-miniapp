@@ -65,6 +65,7 @@ public class OrderDetail {
         private String maritalStatus;
         private String faceFrontUrl;
         private String faceBackUrl;
+        private String relationship; // 与主借人关系
     }
 
     @Data
