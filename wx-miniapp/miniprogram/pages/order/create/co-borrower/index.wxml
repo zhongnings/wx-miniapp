@@ -169,7 +169,7 @@
                 <image 
                   class="license-image" 
                   src="{{businessLicense || businessLicensePlaceholder}}" 
-                  mode="aspectFill"
+                  mode="aspectFit"
                   bindtap="uploadBusinessLicense"
                 />
                 <view 

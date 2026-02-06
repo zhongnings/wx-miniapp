@@ -498,7 +498,7 @@ Page({
 
   // 删除身份证正面（同时删除服务器上的图片文件）
   deleteIdCardFront(e) {
-    e.stopPropagation();
+    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
     const imageUrl = this.data.idCardFront;
     
     wx.showModal({
@@ -531,7 +531,7 @@ Page({
 
   // 删除身份证反面（同时删除服务器上的图片文件）
   deleteIdCardBack(e) {
-    e.stopPropagation();
+    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
     const imageUrl = this.data.idCardBack;
     
     wx.showModal({
@@ -563,7 +563,7 @@ Page({
 
   // 删除营业执照（同时删除服务器上的图片文件）
   deleteBusinessLicense(e) {
-    e.stopPropagation();
+    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
     const imageUrl = this.data.businessLicense;
     
     wx.showModal({
@@ -590,7 +590,7 @@ Page({
 
   // 删除经办人身份证正面（同时删除服务器上的图片文件）
   deleteAgentIdCardFront(e) {
-    e.stopPropagation();
+    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
     const imageUrl = this.data.agentIdCardFront;
     
     wx.showModal({
@@ -617,7 +617,7 @@ Page({
 
   // 删除经办人身份证反面（同时删除服务器上的图片文件）
   deleteAgentIdCardBack(e) {
-    e.stopPropagation();
+    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
     const imageUrl = this.data.agentIdCardBack;
     
     wx.showModal({
