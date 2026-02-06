@@ -78,21 +78,33 @@ Page({
       const req = wx.$request;
       const result = await req.get(`/public/orders/${orderId}/coBorrower/list`);
       
-      if (result && result.success && result.data) {
-        logger.info('[共借人] 后端加载成功', result.data);
-        // 后端返回的是数组，取第一个作为共借人（当前只支持一个共借人）
-        const coBorrower = Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : null;
-        this.setData({
-          hasCoBorrower: coBorrower !== null,
-          coBorrower: coBorrower
-        });
-      } else {
-        logger.info('[共借人] 后端无数据');
-        this.setData({
-          hasCoBorrower: false,
-          coBorrower: null
-        });
+      logger.info('[共借人] 后端返回完整数据', result);
+      logger.info('[共借人] result.success =', result.success);
+      logger.info('[共借人] result.data =', result.data);
+      logger.info('[共借人] result.data 是否为数组 =', Array.isArray(result.data));
+      
+      // 处理数据：result 本身可能就包含 data、success、total
+      let dataList = null;
+      
+      if (result.data && Array.isArray(result.data)) {
+        // result.data 直接是数组
+        dataList = result.data;
+        logger.info('[共借人] 数据在 result.data 中（数组）');
+      } else if (result.data && result.data.data && Array.isArray(result.data.data)) {
+        // result.data.data 是数组
+        dataList = result.data.data;
+        logger.info('[共借人] 数据在 result.data.data 中（数组）');
       }
+      
+      logger.info('[共借人] 解析后的数据列表', dataList);
+      
+      // 取第一个作为共借人（当前只支持一个共借人）
+      const coBorrower = dataList && dataList.length > 0 ? dataList[0] : null;
+      this.setData({
+        hasCoBorrower: coBorrower !== null,
+        coBorrower: coBorrower
+      });
+      logger.info('[共借人] 设置状态', { hasCoBorrower: coBorrower !== null, coBorrower });
     } catch (err) {
       logger.error('[共借人] 后端加载失败', err);
       // 加载失败时尝试从本地加载

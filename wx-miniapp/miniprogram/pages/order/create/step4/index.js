@@ -78,21 +78,37 @@ Page({
       const req = wx.$request;
       const result = await req.get(`/public/orders/${orderId}/guarantor/list`);
       
-      if (result && result.success && result.data) {
-        logger.info('[担保人] 后端加载成功', result.data);
-        // 后端返回的是数组，取第一个作为担保人（当前只支持一个担保人）
-        const guarantor = Array.isArray(result.data) && result.data.length > 0 ? result.data[0] : null;
-        this.setData({
-          hasGuarantor: guarantor !== null,
-          guarantor: guarantor
-        });
-      } else {
-        logger.info('[担保人] 后端无数据');
-        this.setData({
-          hasGuarantor: false,
-          guarantor: null
-        });
+      logger.info('[担保人] 后端返回完整数据', result);
+      logger.info('[担保人] result.success =', result.success);
+      logger.info('[担保人] result.data =', result.data);
+      logger.info('[担保人] result.data 是否为数组 =', Array.isArray(result.data));
+      
+      // 处理数据：result 本身可能就包含 data、success、total
+      let dataList = null;
+      
+      if (result.data && Array.isArray(result.data)) {
+        // result.data 直接是数组
+        dataList = result.data;
+        logger.info('[担保人] 数据在 result.data 中（数组）');
+      } else if (result.data && result.data.data && Array.isArray(result.data.data)) {
+        // result.data.data 是数组
+        dataList = result.data.data;
+        logger.info('[担保人] 数据在 result.data.data 中（数组）');
       }
+      
+      logger.info('[担保人] 解析后的数据列表', dataList);
+      
+      // 取第一个作为担保人（当前只支持一个担保人）
+      const guarantor = dataList && dataList.length > 0 ? dataList[0] : null;
+      if (guarantor) {
+        // 保存担保人ID，用于更新
+        this._guarantorId = guarantor.id;
+      }
+      this.setData({
+        hasGuarantor: guarantor !== null,
+        guarantor: guarantor
+      });
+      logger.info('[担保人] 设置状态', { hasGuarantor: guarantor !== null, guarantor });
     } catch (err) {
       logger.error('[担保人] 后端加载失败', err);
       // 加载失败时尝试从本地加载

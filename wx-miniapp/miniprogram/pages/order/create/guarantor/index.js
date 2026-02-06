@@ -655,7 +655,8 @@ Page({
         
         // 使用通用上传接口上传营业执照/房产证
         const orderId = wx.getStorageSync('currentOrderId');
-        const fileType = that.data.borrowerType === 'property' ? 'guarantor-propertyLicense' : 'guarantor-businessLicense';
+        // 根据类型使用不同的 fileType
+        const fileType = that.data.borrowerType === 'property' ? 'guarantor-propertyOwnershipCert' : 'guarantor-businessLicense';
         wx.$upload.uploadOrderFile(tempFilePath, fileType, orderId)
           .then((result) => {
             wx.hideLoading();

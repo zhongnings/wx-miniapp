@@ -114,72 +114,75 @@
 
 /* 共借人卡片 */
 .co-borrower-card {
+  position: relative;
   margin: 30rpx;
+  padding: 30rpx;
   background: #ffffff;
   border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
-.card-header {
+/* 删除图标 */
+.card-delete-icon {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 48rpx;
+  height: 48rpx;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 30rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  justify-content: center;
+  z-index: 10;
+  filter: brightness(0) saturate(100%) invert(60%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%);
 }
 
-.card-title {
-  font-size: 32rpx;
-  color: #ffffff;
-  font-weight: 500;
+.card-delete-icon .icon-image {
+  width: 32rpx;
+  height: 32rpx;
 }
 
-.card-actions {
-  display: flex;
-  gap: 20rpx;
-}
-
-.action-btn {
-  padding: 8rpx 20rpx;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-}
-
-.edit-btn:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.delete-btn:active {
-  background: rgba(255, 111, 111, 0.3);
-}
-
-.card-content {
-  padding: 30rpx;
-}
-
-.info-row {
+/* 姓名行 */
+.card-name-row {
   display: flex;
   align-items: center;
-  padding: 20rpx 0;
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
-.info-row:last-child {
-  border-bottom: none;
+.name-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
 }
 
-.info-row .label {
-  width: 160rpx;
-  font-size: 28rpx;
-  color: #666;
-}
-
-.info-row .value {
-  flex: 1;
-  font-size: 28rpx;
+.name-text {
+  font-size: 32rpx;
+  font-weight: 500;
   color: #333;
+}
+
+/* 信息行 */
+.card-info-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.card-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  min-width: 200rpx;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
 }
 
