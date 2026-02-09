@@ -6,9 +6,12 @@ import com.example.loanminiapp.dto.step.Step3CoBorrowerListDTO;
 import com.example.loanminiapp.entity.OrderCoBorrower;
 import com.example.loanminiapp.mapper.OrderCoBorrowerMapper;
 import com.example.loanminiapp.security.OrderAccessCheck;
+import com.example.loanminiapp.service.OrderStepService;
+import com.example.loanminiapp.util.FileDeleteUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -26,8 +29,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderCoBorrowerController {
 
+    private final OrderStepService orderStepService;
     private final OrderCoBorrowerMapper coBorrowerMapper;
     private final ObjectMapper objectMapper;
+    private final FileDeleteUtil fileDeleteUtil;
 
     /**
      * 获取共借人列表
@@ -114,6 +119,9 @@ public class OrderCoBorrowerController {
         
         // 保存
         coBorrowerMapper.insert(borrower);
+
+        // 标记步骤完成
+        orderStepService.markStepCompleted(orderId, 3);
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -179,19 +187,95 @@ public class OrderCoBorrowerController {
     public Map<String, Object> deleteCoBorrower(@PathVariable Long orderId, @PathVariable Long id) {
         log.info("删除共借人: orderId={}, id={}", orderId, id);
         
+        // 先查询共借人信息，获取关联的文件URL
+        OrderCoBorrower dbEntry = coBorrowerMapper.selectById(id);
+        
+        Map<String, Object> result = new HashMap<>();
+        if (dbEntry == null || !dbEntry.getOrderId().equals(orderId)) {
+            result.put("success", false);
+            result.put("message", "共借人不存在");
+            return result;
+        }
+        
+        // 删除关联的文件
+        int deletedFileCount = 0;
+        
+        // 删除个人身份证正面
+        if (StringUtils.isNotEmpty(dbEntry.getFaceFrontUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceFrontUrl())) {
+                deletedFileCount++;
+                log.info("删除个人身份证正面: url={}", dbEntry.getFaceFrontUrl());
+            }
+        }
+        
+        // 删除个人身份证反面
+        if (StringUtils.isNotEmpty(dbEntry.getFaceBackUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceBackUrl())) {
+                deletedFileCount++;
+                log.info("删除个人身份证反面: url={}", dbEntry.getFaceBackUrl());
+            }
+        }
+        
+        // 删除营业执照
+        if (StringUtils.isNotEmpty(dbEntry.getBusinessLicenseUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getBusinessLicenseUrl())) {
+                deletedFileCount++;
+                log.info("删除营业执照: url={}", dbEntry.getBusinessLicenseUrl());
+            }
+        }
+        
+        // 删除经办人身份证正面
+        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceFrontUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceFrontUrl())) {
+                deletedFileCount++;
+                log.info("删除经办人身份证正面: url={}", dbEntry.getAgentFaceFrontUrl());
+            }
+        }
+        
+        // 删除经办人身份证反面
+        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceBackUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceBackUrl())) {
+                deletedFileCount++;
+                log.info("删除经办人身份证反面: url={}", dbEntry.getAgentFaceBackUrl());
+            }
+        }
+        
+        // 删除公证材料
+        if (StringUtils.isNotEmpty(dbEntry.getNotaryDocumentsJson())) {
+            try {
+                List<Step3CoBorrowerDTO.NotaryDocument> docs = objectMapper.readValue(
+                    dbEntry.getNotaryDocumentsJson(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, Step3CoBorrowerDTO.NotaryDocument.class)
+                );
+                for (Step3CoBorrowerDTO.NotaryDocument doc : docs) {
+                    if (StringUtils.isNotEmpty(doc.getPath())) {
+                        if (fileDeleteUtil.deleteFileByUrl(doc.getPath())) {
+                            deletedFileCount++;
+                            log.info("删除公证材料: url={}", doc.getPath());
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("解析公证材料JSON失败，跳过文件删除", e);
+            }
+        }
+        
+        log.info("共删除 {} 个关联文件", deletedFileCount);
+        
+        // 删除数据库记录
         LambdaQueryWrapper<OrderCoBorrower> query = new LambdaQueryWrapper<>();
         query.eq(OrderCoBorrower::getId, id)
              .eq(OrderCoBorrower::getOrderId, orderId);
         
         int deleted = coBorrowerMapper.delete(query);
         
-        Map<String, Object> result = new HashMap<>();
         if (deleted > 0) {
             result.put("success", true);
             result.put("message", "删除成功");
+            result.put("deletedFileCount", deletedFileCount);
         } else {
             result.put("success", false);
-            result.put("message", "共借人不存在");
+            result.put("message", "删除失败");
         }
         
         return result;

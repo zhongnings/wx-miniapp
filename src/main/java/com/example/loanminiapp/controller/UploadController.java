@@ -417,6 +417,134 @@ public class UploadController {
             return ResponseEntity.internalServerError().body(resp);
         }
     }
+
+    /**
+     * 通用文件删除接口（根据完整URL地址删除文件）
+     * DELETE /public/files/delete-by-url
+     * 
+     * 请求体示例：
+     * {
+     *   "url": "http://localhost:8081/uploads/1/coBorrower-idFront.png"
+     * }
+     * 
+     * 支持的URL格式：
+     * - 完整URL: http://localhost:8081/uploads/1/coBorrower-idFront.png
+     * - 相对路径: /uploads/1/coBorrower-idFront.png
+     * - 简化路径: uploads/1/coBorrower-idFront.png
+     * 
+     * @param requestBody 包含url字段的请求体
+     * @return 删除结果
+     */
+    @DeleteMapping("/files/delete-by-url")
+    public ResponseEntity<Map<String, Object>> deleteFileByUrl(@RequestBody Map<String, String> requestBody) {
+        Map<String, Object> resp = new HashMap<>();
+        
+        String fileUrl = requestBody.get("url");
+        if (fileUrl == null || fileUrl.trim().isEmpty()) {
+            resp.put("success", false);
+            resp.put("message", "文件URL不能为空");
+            return ResponseEntity.badRequest().body(resp);
+        }
+        
+        try {
+            // 从URL中提取相对路径
+            // 支持格式：
+            // 1. http://localhost:8081/uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+            // 2. /uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+            // 3. uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+            String relativePath = extractRelativePath(fileUrl);
+            
+            if (relativePath == null || relativePath.isEmpty()) {
+                log.warn("无法从URL提取有效路径: url={}", fileUrl);
+                resp.put("success", false);
+                resp.put("message", "无效的文件URL");
+                return ResponseEntity.badRequest().body(resp);
+            }
+            
+            // 解析上传根目录
+            Path root = resolveUploadRoot();
+            Path targetFile = root.resolve(relativePath);
+            
+            // 安全检查：确保文件在上传根目录下（防止路径遍历攻击）
+            if (!targetFile.normalize().startsWith(root.normalize())) {
+                log.warn("非法文件路径访问: url={}, relativePath={}", fileUrl, relativePath);
+                resp.put("success", false);
+                resp.put("message", "非法文件路径");
+                return ResponseEntity.badRequest().body(resp);
+            }
+            
+            // 检查文件是否存在
+            if (!Files.exists(targetFile)) {
+                log.warn("文件不存在: url={}, relativePath={}, path={}", fileUrl, relativePath, targetFile);
+                resp.put("success", false);
+                resp.put("message", "文件不存在");
+                return ResponseEntity.ok(resp); // 返回200，但success=false
+            }
+            
+            // 删除文件
+            Files.delete(targetFile);
+            log.info("文件删除成功: url={}, relativePath={}, path={}", fileUrl, relativePath, targetFile);
+            
+            resp.put("success", true);
+            resp.put("message", "删除成功");
+            resp.put("deletedUrl", fileUrl);
+            resp.put("deletedPath", relativePath);
+            return ResponseEntity.ok(resp);
+            
+        } catch (IOException e) {
+            log.error("删除文件失败: url={}", fileUrl, e);
+            resp.put("success", false);
+            resp.put("message", "删除失败: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(resp);
+        }
+    }
+
+    /**
+     * 从文件URL中提取相对路径
+     * 
+     * 支持的URL格式：
+     * 1. http://localhost:8081/uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+     * 2. /uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+     * 3. uploads/1/coBorrower-idFront.png -> 1/coBorrower-idFront.png
+     * 
+     * @param fileUrl 文件URL
+     * @return 相对路径（相对于上传根目录）
+     */
+    private String extractRelativePath(String fileUrl) {
+        if (fileUrl == null || fileUrl.trim().isEmpty()) {
+            return null;
+        }
+        
+        String url = fileUrl.trim();
+        
+        // 1. 如果是完整URL（http://或https://），提取路径部分
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            // 找到第三个 / 的位置（协议://域名/路径）
+            int firstSlash = url.indexOf("://");
+            if (firstSlash != -1) {
+                int pathStart = url.indexOf("/", firstSlash + 3);
+                if (pathStart != -1) {
+                    url = url.substring(pathStart); // 得到 /uploads/1/coBorrower-idFront.png
+                } else {
+                    return null; // 没有路径部分
+                }
+            }
+        }
+        
+        // 2. 移除 /uploads/ 前缀（如果存在）
+        if (url.startsWith("/uploads/")) {
+            url = url.substring("/uploads/".length()); // 得到 1/coBorrower-idFront.png
+        } else if (url.startsWith("uploads/")) {
+            url = url.substring("uploads/".length()); // 得到 1/coBorrower-idFront.png
+        }
+        
+        // 3. 移除前导 /（如果存在）
+        if (url.startsWith("/")) {
+            url = url.substring(1);
+        }
+        
+        return url;
+    }
 }
 
 

@@ -6,9 +6,12 @@ import com.example.loanminiapp.dto.step.Step4GuarantorListDTO;
 import com.example.loanminiapp.entity.OrderGuarantor;
 import com.example.loanminiapp.mapper.OrderGuarantorMapper;
 import com.example.loanminiapp.security.OrderAccessCheck;
+import com.example.loanminiapp.service.OrderStepService;
+import com.example.loanminiapp.util.FileDeleteUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -26,8 +29,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderGuarantorController {
 
+    private final OrderStepService orderStepService;
     private final OrderGuarantorMapper guarantorMapper;
     private final ObjectMapper objectMapper;
+    private final FileDeleteUtil fileDeleteUtil;
 
     /**
      * 获取担保人列表
@@ -114,6 +119,9 @@ public class OrderGuarantorController {
         
         // 保存
         guarantorMapper.insert(guarantor);
+
+        // 标记步骤完成
+        orderStepService.markStepCompleted(orderId, 4);
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -179,19 +187,75 @@ public class OrderGuarantorController {
     public Map<String, Object> deleteGuarantor(@PathVariable Long orderId, @PathVariable Long id) {
         log.info("删除担保人: orderId={}, id={}", orderId, id);
         
+        // 先查询担保人信息，获取关联的文件URL
+        OrderGuarantor dbEntry = guarantorMapper.selectById(id);
+        
+        Map<String, Object> result = new HashMap<>();
+        if (dbEntry == null || !dbEntry.getOrderId().equals(orderId)) {
+            result.put("success", false);
+            result.put("message", "担保人不存在");
+            return result;
+        }
+        
+        // 删除关联的文件
+        int deletedFileCount = 0;
+        
+        // 删除个人身份证正面
+        if (StringUtils.isNotEmpty(dbEntry.getFaceFrontUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceFrontUrl())) {
+                deletedFileCount++;
+                log.info("删除个人身份证正面: url={}", dbEntry.getFaceFrontUrl());
+            }
+        }
+        
+        // 删除个人身份证反面
+        if (StringUtils.isNotEmpty(dbEntry.getFaceBackUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceBackUrl())) {
+                deletedFileCount++;
+                log.info("删除个人身份证反面: url={}", dbEntry.getFaceBackUrl());
+            }
+        }
+        
+        // 删除营业执照
+        if (StringUtils.isNotEmpty(dbEntry.getBusinessLicenseUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getBusinessLicenseUrl())) {
+                deletedFileCount++;
+                log.info("删除营业执照: url={}", dbEntry.getBusinessLicenseUrl());
+            }
+        }
+        
+        // 删除经办人身份证正面
+        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceFrontUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceFrontUrl())) {
+                deletedFileCount++;
+                log.info("删除经办人身份证正面: url={}", dbEntry.getAgentFaceFrontUrl());
+            }
+        }
+        
+        // 删除经办人身份证反面
+        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceBackUrl())) {
+            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceBackUrl())) {
+                deletedFileCount++;
+                log.info("删除经办人身份证反面: url={}", dbEntry.getAgentFaceBackUrl());
+            }
+        }
+
+        log.info("共删除 {} 个关联文件", deletedFileCount);
+        
+        // 删除数据库记录
         LambdaQueryWrapper<OrderGuarantor> query = new LambdaQueryWrapper<>();
         query.eq(OrderGuarantor::getId, id)
              .eq(OrderGuarantor::getOrderId, orderId);
         
         int deleted = guarantorMapper.delete(query);
         
-        Map<String, Object> result = new HashMap<>();
         if (deleted > 0) {
             result.put("success", true);
             result.put("message", "删除成功");
+            result.put("deletedFileCount", deletedFileCount);
         } else {
             result.put("success", false);
-            result.put("message", "担保人不存在");
+            result.put("message", "删除失败");
         }
         
         return result;
@@ -375,20 +439,7 @@ public class OrderGuarantorController {
         dto.setAgentIdCardFront(entity.getAgentFaceFrontUrl());
         dto.setAgentIdCardBack(entity.getAgentFaceBackUrl());
         dto.setCompanyRelationship(entity.getRelationship());
-        
-        // 公证材料
-        if (entity.getNotaryDocumentsJson() != null && !entity.getNotaryDocumentsJson().isEmpty()) {
-            try {
-                List<Step4GuarantorDTO.NotaryDocument> docs = objectMapper.readValue(
-                    entity.getNotaryDocumentsJson(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, Step4GuarantorDTO.NotaryDocument.class)
-                );
-                dto.setNotaryDocuments(docs);
-            } catch (Exception e) {
-                log.warn("解析公证材料JSON失败", e);
-            }
-        }
-        
+
         return dto;
     }
 
@@ -434,15 +485,6 @@ public class OrderGuarantorController {
         entity.setAgentIdAddress(dto.getAgentIdAddress());
         entity.setAgentFaceFrontUrl(dto.getAgentIdCardFront());
         entity.setAgentFaceBackUrl(dto.getAgentIdCardBack());
-        
-        // 公证材料
-        if (dto.getNotaryDocuments() != null && !dto.getNotaryDocuments().isEmpty()) {
-            try {
-                entity.setNotaryDocumentsJson(objectMapper.writeValueAsString(dto.getNotaryDocuments()));
-            } catch (Exception e) {
-                log.warn("公证材料JSON序列化失败", e);
-            }
-        }
     }
 
     /**

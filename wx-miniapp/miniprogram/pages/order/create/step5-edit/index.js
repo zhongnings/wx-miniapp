@@ -27,6 +27,10 @@ Page({
     mode: 'add',
     // 编辑时的银行卡索引（仅在编辑模式下使用）
     cardIndex: -1,
+    // 是否只读（订单状态为0/2时为只读）
+    readonly: false,
+    // 订单状态（0-待提交，2-风控驳回时为只读）
+    orderStatus: null,
     // 表单数据
     formData: {
       holderType: '借款人', // 持卡人类型：借款人/共借人/担保人
@@ -66,9 +70,21 @@ Page({
     const mode = options.mode || 'add';
     const cardIndex = options.cardIndex ? parseInt(options.cardIndex) : -1;
     
+    // 获取订单状态（如果有）
+    const orderStatus = options?.orderStatus || null;
+    
+    // 判断是否只读：
+    // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
+    // 2. 其他状态且mode为view时，为只读
+    const viewMode = options?.viewMode || 'create';
+    const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
+    const readonly = viewMode === 'view' && !isEditableByStatus;
+    
     this.setData({
       mode: mode,
-      cardIndex: cardIndex
+      cardIndex: cardIndex,
+      orderStatus: orderStatus,
+      readonly: readonly
     });
 
     // 如果是编辑模式，加载银行卡数据
@@ -364,6 +380,13 @@ Page({
 
   // 选择银行卡图片
   chooseBankCardImage() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     const that = this;
     
     wx.chooseImage({
@@ -596,6 +619,15 @@ Page({
 
   // 保存
   save() {
+    // 只读模式下不允许保存
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式，无法保存',
+        icon: 'none'
+      });
+      return;
+    }
+    
     if (!this.validateForm()) {
       return;
     }

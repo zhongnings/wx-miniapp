@@ -127,10 +127,12 @@ Page({
       { label: '个人', value: '个人' },
       { label: '对公', value: '对公' }
     ],
-    // 预留：是否只读（从订单详情进入查看模式时为 true）
+    // 预留：是否只读（从订单详情进入查看模式时为 true，或订单状态为0/2时为true）
     readonly: false,
     // 预留：当前订单ID（从订单详情进入时传入）
     orderId: null,
+    // 订单状态（0-待提交，2-风控驳回时为只读）
+    orderStatus: null,
     // 是否从订单详情页进入（用于判断导航栏tab是否可点击）
     fromOrderDetail: false
   },
@@ -175,9 +177,19 @@ Page({
       const mode = options?.mode || 'create';
       // 优先从 orderId 参数获取，其次从 id 参数获取（兼容旧逻辑）
       const orderId = options?.orderId || options?.id || null;
+      // 获取订单状态（如果有）
+      const orderStatus = options?.orderStatus || null;
+      
+      // 判断是否只读：
+      // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
+      // 2. 其他状态且mode为view时，为只读
+      const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
+      const readonly = mode === 'view' && !isEditableByStatus;
+      
       this.setData({
-        readonly: mode === 'view',
+        readonly: readonly,
         orderId,
+        orderStatus,
         fromOrderDetail: mode === 'view' && orderId !== null
       });
 
@@ -343,11 +355,17 @@ Page({
 
       logger.info('映射后的 formData:', formData);
       
+      // 同时获取订单状态，判断是否需要设置为只读
+      const orderStatus = loanInfo.orderStatus != null ? loanInfo.orderStatus : this.data.orderStatus;
+      const isReadonlyByStatus = orderStatus === 0 || orderStatus === 2;
+      
       this.setData({
-        formData
+        formData,
+        orderStatus,
+        readonly: this.data.readonly || isReadonlyByStatus
       });
       
-      logger.info('订单详情借款信息加载并回显成功');
+      logger.info('订单详情借款信息加载并回显成功', { orderStatus, readonly: this.data.readonly });
       logger.info('========================================');
     }).catch(err => {
       logger.error('加载订单借款信息失败:', err);
@@ -1162,6 +1180,15 @@ Page({
 
   // 下一步
   goNext() {
+    // 只读模式下不允许保存
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式，无法保存',
+        icon: 'none'
+      });
+      return;
+    }
+    
     if (!this.validateForm()) {
       return;
     }

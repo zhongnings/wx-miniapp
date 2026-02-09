@@ -100,19 +100,5 @@ public class Step4GuarantorDTO {
     
     /** 与主借人关系（对公） */
     private String companyRelationship;
-    
-    /** 公证材料列表 */
-    private List<NotaryDocument> notaryDocuments;
-    
-    /**
-     * 公证材料
-     */
-    @Data
-    public static class NotaryDocument {
-        /** 文件名称 */
-        private String name;
-        
-        /** 文件路径 */
-        private String path;
-    }
+
 }

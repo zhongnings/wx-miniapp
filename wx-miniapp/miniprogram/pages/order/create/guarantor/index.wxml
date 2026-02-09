@@ -426,12 +426,6 @@
         <input class="form-input" placeholder="XX路XX区XX号" value="{{companyAddress}}" bindinput="onCompanyAddressInput" />
       </view>
 
-      <!-- 经办人手机号 -->
-      <view class="form-item">
-        <view class="form-label required">经办人手机号</view>
-        <input class="form-input" type="number" placeholder="请填写经办人手机号" value="{{agentPhone}}" bindinput="onAgentPhoneInput" maxlength="11" />
-      </view>
-
       <!-- 上传身份证照片 -->
       <view class="upload-section">
         <view class="section-header">

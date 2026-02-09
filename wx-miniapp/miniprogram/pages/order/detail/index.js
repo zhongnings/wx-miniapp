@@ -272,38 +272,44 @@ Page({
   },
   goLoanInfo() {
     // 从订单详情跳转到借款信息页面（复用创建页 step1，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step1/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step1/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goBorrowerInfo() {
     // 从订单详情跳转到借款人信息页面（复用创建页 step2，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step2/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step2/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goCoBorrowerInfo() {
     // 从订单详情跳转到共借人信息页面（复用创建页 step3，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step3/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step3/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goGuarantorInfo() {
     // 从订单详情跳转到担保人信息页面（复用创建页 step4，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step4/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step4/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goBankCardInfo() {
     // 从订单详情跳转到银行卡信息页面（复用创建页 step5，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step5/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step5/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goAttachment() {
     // 从订单详情跳转到资料上传页面（复用创建页 step6，只读模式）
+    const orderStatus = this.data.detail.orderStatus;
     wx.navigateTo({
-      url: `/pages/order/create/step6/index?mode=view&id=${this.data.id}`
+      url: `/pages/order/create/step6/index?mode=view&id=${this.data.id}&orderStatus=${orderStatus}`
     });
   },
   goContractList() {

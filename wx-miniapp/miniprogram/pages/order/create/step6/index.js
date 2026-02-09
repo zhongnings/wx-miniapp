@@ -23,12 +23,14 @@ Page({
     currentStep: 5, // 当前步骤（0-5，step6对应索引5）
     tabsScrollLeft: 0, // 导航栏滚动位置
     attachments: [],
-    // 是否只读（从订单详情进入查看模式时为 true）
+    // 是否只读（从订单详情进入查看模式时为 true，或订单状态为0/2时为true）
     readonly: false,
     // 是否从订单详情页进入（用于判断导航栏tab是否可点击）
     fromOrderDetail: false,
     // 当前订单ID（从订单详情进入时传入）
-    orderId: null
+    orderId: null,
+    // 订单状态（0-待提交，2-风控驳回时为只读）
+    orderStatus: null
   },
 
   onLoad(options) {
@@ -38,10 +40,24 @@ Page({
     const mode = options?.mode || 'create';
     // 优先从 orderId 参数获取，其次从 id 参数获取（兼容旧逻辑）
     const orderId = options?.orderId || options?.id || null;
+    // 获取订单状态（如果有）
+    const orderStatus = options?.orderStatus || null;
+    
+    // 判断是否只读：
+    // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
+    // 2. 其他状态且mode为view时，为只读
+    const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
+    const readonly = mode === 'view' && !isEditableByStatus;
+    
+    logger.info("订单状态：", orderStatus);
+    logger.info("可编辑状态：", isEditableByStatus);
+    logger.info("只读模式：", readonly);
+
     this.setData({
-      readonly: mode === 'view',
+      readonly: readonly,
       fromOrderDetail: mode === 'view' && orderId !== null,
-      orderId: orderId
+      orderId: orderId,
+      orderStatus: orderStatus
     });
     
     // 如果传递了 orderId，说明是从其他 step 页面跳转过来的，从服务器加载数据
@@ -328,6 +344,14 @@ Page({
 
   // 上传附件
   uploadAttachment() {
+    // 只读模式下不允许上传
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     const that = this;
     wx.chooseMessageFile({
       count: 9,
@@ -448,6 +472,14 @@ Page({
 
   // 删除附件
   deleteAttachment(e) {
+    // 只读模式下不允许删除
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     const index = e.currentTarget.dataset.index;
     const attachment = this.data.attachments[index];
     const that = this;

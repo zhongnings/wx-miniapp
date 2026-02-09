@@ -55,11 +55,31 @@ Page({
     
     // 编辑模式
     isEdit: false,
-    editIndex: -1
+    editIndex: -1,
+    
+    // 是否只读（订单状态为0/2时为只读）
+    readonly: false,
+    // 订单状态（0-待提交，2-风控驳回时为只读）
+    orderStatus: null
   },
 
   onLoad(options) {
     logger.info('共借人页面加载', options);
+    
+    // 获取模式和订单状态
+    const mode = options?.mode || 'create';
+    const orderStatus = options?.orderStatus || null;
+    
+    // 判断是否只读：
+    // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
+    // 2. 其他状态且mode为view时，为只读
+    const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
+    const readonly = mode === 'view' && !isEditableByStatus;
+    
+    this.setData({
+      orderStatus: orderStatus,
+      readonly: readonly
+    });
     
     // 加载共借人数据（从后端或本地）
     this.loadData();
@@ -169,11 +189,25 @@ Page({
 
   // 上传身份证正面（复用step2逻辑：上传+OCR+预览）
   uploadIdCardFront() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseIdCardImage('idCardFront', 'idFront');
   },
 
   // 上传身份证反面（复用step2逻辑：上传+OCR+预览）
   uploadIdCardBack() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseIdCardImage('idCardBack', 'idBack');
   },
 
@@ -644,6 +678,13 @@ Page({
 
   // 上传营业执照（使用通用上传接口）
   uploadBusinessLicense() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     const that = this;
     wx.chooseImage({
       count: 1,
@@ -672,11 +713,25 @@ Page({
 
   // 上传经办人身份证正面（复用身份证上传逻辑）
   uploadAgentIdCardFront() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseIdCardImage('agentIdCardFront', 'idFront', 'agent');
   },
 
   // 上传经办人身份证反面（复用身份证上传逻辑）
   uploadAgentIdCardBack() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseIdCardImage('agentIdCardBack', 'idBack', 'agent');
   },
 
@@ -982,6 +1037,15 @@ Page({
 
   // 保存
   async save() {
+    // 只读模式下不允许保存
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式，无法保存',
+        icon: 'none'
+      });
+      return;
+    }
+    
     // 验证必填项
     if (this.data.borrowerType === 'personal') {
       if (!this.data.idCardFront || !this.data.idCardBack) {

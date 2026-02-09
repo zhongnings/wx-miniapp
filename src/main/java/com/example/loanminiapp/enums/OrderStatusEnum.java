@@ -1,10 +1,13 @@
 package com.example.loanminiapp.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
 /**
  * 订单整体状态
  */
+@Getter
 public enum OrderStatusEnum {
     PENDING_SUBMIT(0, "待提交"),
     SIGNING(1, "签署中"),
@@ -22,14 +25,6 @@ public enum OrderStatusEnum {
     OrderStatusEnum(int code, String desc) {
         this.code = code;
         this.desc = desc;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getDesc() {
-        return desc;
     }
 
     public static OrderStatusEnum fromCode(Integer code) {

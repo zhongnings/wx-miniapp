@@ -119,8 +119,12 @@
           <text class="info-value">{{guarantor.companyAddress || '未填写'}}</text>
         </view>
         <view class="card-info-row" wx:if="{{guarantor.agentName}}">
-          <text class="info-label">经办人：</text>
+          <text class="info-label">姓名：</text>
           <text class="info-value">{{guarantor.agentName || '未填写'}}</text>
+        </view>
+        <view class="card-info-row" wx:if="{{guarantor.agentPhone2}}">
+          <text class="info-label">手机号：</text>
+          <text class="info-value">{{guarantor.agentPhone2 || '未填写'}}</text>
         </view>
       </block>
     </view>

@@ -22,12 +22,14 @@ Page({
   data: {
     currentStep: 1, // 当前步骤（0-5，step2对应索引1）
     tabsScrollLeft: 0, // 导航栏滚动位置
-    // 是否只读（从订单详情进入查看模式时为 true）
+    // 是否只读（从订单详情进入查看模式时为 true，或订单状态为0/2时为true）
     readonly: false,
     // 是否从订单详情页进入（用于判断导航栏tab是否可点击）
     fromOrderDetail: false,
     // 当前订单ID（从订单详情进入时传入）
     orderId: null,
+    // 订单状态（0-待提交，2-风控驳回时为只读）
+    orderStatus: null,
     formData: {
       idType: '身份证',
       name: '',
@@ -55,10 +57,20 @@ Page({
     const mode = options?.mode || 'create';
     // 优先从 orderId 参数获取，其次从 id 参数获取（兼容旧逻辑）
     const orderId = options?.orderId || options?.id || null;
+    // 获取订单状态（如果有）
+    const orderStatus = options?.orderStatus || null;
+    
+    // 判断是否只读：
+    // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
+    // 2. 其他状态且mode为view时，为只读
+    const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
+    const readonly = mode === 'view' && !isEditableByStatus;
+    
     this.setData({
-      readonly: mode === 'view',
+      readonly: readonly,
       fromOrderDetail: mode === 'view' && orderId !== null,
-      orderId: orderId
+      orderId: orderId,
+      orderStatus: orderStatus
     });
 
     // 直接使用全局挂载的占位图配置
@@ -277,11 +289,25 @@ Page({
 
   // 上传身份证正面（国徽面）- 识别有效期
   uploadIdFront() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseImage('idFrontImage', 'front');
   },
 
   // 上传身份证反面（人像面）- 识别姓名、身份证号、出生年月、性别和证件地址
   uploadIdBack() {
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式',
+        icon: 'none'
+      });
+      return;
+    }
     this.chooseImage('idBackImage', 'back');
   },
 
@@ -1194,6 +1220,7 @@ Page({
 
   // 选择居住地省市区（使用公共组件）
   selectResidenceArea() {
+    if (this.data.readonly) return;
     logger.info('[居住地选择] 打开居住地省市区选择器');
     this.setData({
       showRegionPicker: true
@@ -1282,6 +1309,15 @@ Page({
 
   // 下一步
   goNext() {
+    // 只读模式下不允许保存
+    if (this.data.readonly) {
+      wx.showToast({
+        title: '当前为只读模式，无法保存',
+        icon: 'none'
+      });
+      return;
+    }
+    
     if (!this.validateForm()) {
       return;
     }
@@ -2264,11 +2300,17 @@ Page({
         idBackImage: borrowerInfo.faceBackUrl || ''
       };
       
+      // 同时获取订单状态，判断是否需要设置为只读
+      const orderStatus = borrowerInfo.orderStatus != null ? borrowerInfo.orderStatus : this.data.orderStatus;
+      const isReadonlyByStatus = orderStatus === 0 || orderStatus === 2;
+      
       this.setData({
-        formData: { ...this.data.formData, ...formData }
+        formData: { ...this.data.formData, ...formData },
+        orderStatus,
+        readonly: this.data.readonly || isReadonlyByStatus
       });
       
-      logger.info('借款人信息加载成功:', borrowerInfo);
+      logger.info('借款人信息加载成功:', { borrowerInfo, orderStatus, readonly: this.data.readonly });
     }).catch(err => {
       logger.error('加载借款人信息失败:', err);
       wx.showToast({
