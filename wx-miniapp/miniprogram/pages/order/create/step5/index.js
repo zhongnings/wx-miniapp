@@ -400,8 +400,9 @@ Page({
       return;
     }
     
-    const url = `${stepPages[step]}?mode=view&id=${orderId}`;
-    logger.info('准备跳转:', { from: currentStep, to: step, url, orderId });
+    const orderStatus = this.data.orderStatus;
+    const url = `${stepPages[step]}?mode=view&id=${orderId}${orderStatus ? '&orderStatus=' + orderStatus : ''}`;
+    logger.info('准备跳转:', { from: currentStep, to: step, url, orderId, orderStatus });
     
     // 获取页面栈信息
     const pages = getCurrentPages();

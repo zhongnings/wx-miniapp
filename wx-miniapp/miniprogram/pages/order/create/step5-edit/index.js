@@ -20,6 +20,8 @@ const logger = {
 
 // 引入通用上传工具：统一使用全局挂载的 wx.$upload（在 app.js 中挂载）
 const uploadUtil = wx.$upload;
+// 引入银行卡工具
+const bankCardUtil = require('../../../../utils/bank-card-util.js');
 
 Page({
   data: {
@@ -48,7 +50,9 @@ Page({
       '交通银行', '招商银行', '浦发银行', '中信银行',
       '光大银行', '华夏银行', '民生银行', '广发银行',
       '平安银行', '兴业银行', '邮储银行', '其他银行'
-    ]
+    ],
+    // 银行选择器显示状态
+    showBankPicker: false
   },
 
   getRequest() {
@@ -361,13 +365,78 @@ Page({
     }
   },
 
+  // 显示银行选择器
+  showBankPickerDialog() {
+    this.setData({
+      showBankPicker: true
+    });
+  },
+
+  // 银行选择器确认
+  onBankPickerConfirm(e) {
+    const bankName = e.detail.value;
+    if (bankName) {
+      this.setData({
+        'formData.bankName': bankName,
+        showBankPicker: false
+      });
+      logger.info('选择银行:', bankName);
+    }
+  },
+
+  // 银行选择器取消
+  onBankPickerCancel() {
+    this.setData({
+      showBankPicker: false
+    });
+  },
+
   // 银行卡号输入
   onCardNumberInput(e) {
     let value = e.detail.value.replace(/\s/g, ''); // 移除空格
+    
     // 每4位添加一个空格
-    value = value.replace(/(.{4})/g, '$1 ').trim();
+    const formattedValue = bankCardUtil.formatCardNumber(value);
+    
+    // 当输入达到6位时，尝试识别银行
+    if (value.length >= 6) {
+      const bankName = bankCardUtil.identifyBank(value);
+      if (bankName) {
+        logger.info('自动识别银行:', { cardNumber: value.substring(0, 6) + '****', bankName });
+        
+        // 如果识别成功且当前未选择银行，自动填充
+        if (!this.data.formData.bankName || this.data.formData.bankName === '') {
+          this.setData({
+            'formData.bankName': bankName
+          });
+          
+          // 显示提示
+          wx.showToast({
+            title: `已识别：${bankName}`,
+            icon: 'success',
+            duration: 1500
+          });
+        } else if (this.data.formData.bankName !== bankName) {
+          // 如果已选择银行但与识别结果不同，提示用户
+          wx.showModal({
+            title: '银行识别',
+            content: `检测到该卡号属于${bankName}，是否切换？`,
+            confirmText: '切换',
+            cancelText: '保持',
+            success: (res) => {
+              if (res.confirm) {
+                this.setData({
+                  'formData.bankName': bankName
+                });
+              }
+            }
+          });
+        }
+      }
+    }
+    
     this.setData({
-      'formData.cardNumber': value
+      'formData.cardNumber': formattedValue
     });
   },
 

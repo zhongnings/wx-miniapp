@@ -4,6 +4,14 @@
   padding-bottom: 120rpx;
 }
 
+.bank-card-edit-container.picker-open {
+  overflow: hidden;
+  height: 100vh;
+  position: fixed;
+  width: 100%;
+  touch-action: none;
+}
+
 /* 表单内容 */
 .form-content {
   height: calc(100vh - 120rpx);

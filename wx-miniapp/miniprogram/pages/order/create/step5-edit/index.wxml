@@ -1,6 +1,6 @@
-<view class="bank-card-edit-container">
+<view class="bank-card-edit-container {{showBankPicker ? 'picker-open' : ''}}">
   <!-- 表单内容 -->
-  <scroll-view class="form-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+  <scroll-view class="form-content" scroll-y="{{!showBankPicker}}" enhanced="true" show-scrollbar="false">
     
     <!-- 银行卡正面图片上传 -->
     <view class="upload-section">
@@ -83,32 +83,25 @@
       </view>
 
       <!-- 开卡银行 -->
-      <picker 
-        mode="selector" 
-        range="{{bankList}}" 
-        value="{{bankList.indexOf(formData.bankName)}}"
-        bindchange="onBankPickerChange"
-      >
-        <view class="form-item">
-          <text class="label required">开卡银行</text>
-          <view class="input-wrapper">
-            <input 
-              class="input" 
-              placeholder="请选择借款人名下银行卡号所属银行" 
-              value="{{formData.bankName}}"
-              disabled="{{true}}"
-            />
-            <text class="arrow">›</text>
-          </view>
+      <view class="form-item" bindtap="showBankPickerDialog">
+        <text class="label required">开卡银行</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            placeholder="请选择借款人名下银行卡号所属银行" 
+            value="{{formData.bankName}}"
+            disabled="{{true}}"
+          />
+          <text class="arrow">›</text>
         </view>
-      </picker>
+      </view>
 
       <!-- 银行卡号 -->
       <view class="form-item">
         <text class="label required">银行卡号</text>
         <input 
           class="input" 
-          placeholder="请填写借款人名下银行卡号" 
+          placeholder="输入卡号自动识别银行" 
           value="{{formData.cardNumber}}"
           bindinput="onCardNumberInput"
           type="number"
@@ -134,6 +127,15 @@
   <view class="footer">
     <button class="save-btn" bindtap="save">保存</button>
   </view>
+
+  <!-- 银行选择器 -->
+  <bank-picker 
+    show="{{showBankPicker}}"
+    bankList="{{bankList}}"
+    value="{{formData.bankName}}"
+    bind:confirm="onBankPickerConfirm"
+    bind:cancel="onBankPickerCancel"
+  />
 
 </view>
 
