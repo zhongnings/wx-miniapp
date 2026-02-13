@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.loanminiapp.entity.OrderBankCard;
 import com.example.loanminiapp.entity.OrderBorrower;
 import com.example.loanminiapp.entity.OrderVoucher;
+import com.example.loanminiapp.enums.PayeeTypeEnum;
 import com.example.loanminiapp.mapper.OrderBankCardMapper;
 import com.example.loanminiapp.mapper.OrderBorrowerMapper;
 import com.example.loanminiapp.mapper.OrderVoucherMapper;
@@ -38,6 +39,8 @@ public class OrderVoucherServiceImpl implements OrderVoucherService {
         for (OrderVoucher voucher : vouchers) {
             VoucherInfo info = new VoucherInfo();
             BeanUtils.copyProperties(voucher, info);
+            // 添加 payeeTypeName 的枚举映射
+            info.setPayeeTypeName(PayeeTypeEnum.getNameByCode(voucher.getPayeeType()));
             result.add(info);
         }
         return result;
@@ -59,18 +62,6 @@ public class OrderVoucherServiceImpl implements OrderVoucherService {
                         .eq(OrderBorrower::getOrderId, orderId)
         );
 
-        // 类型映射
-        java.util.Map<String, String> typeNameMap = new java.util.HashMap<>();
-        typeNameMap.put("borrower", "主借人");
-        typeNameMap.put("coBorrower", "共借人");
-        typeNameMap.put("guarantor", "担保人");
-
-        // 类型优先级：borrower > coBorrower > guarantor
-        java.util.Map<String, Integer> typePriority = new java.util.HashMap<>();
-        typePriority.put("borrower", 1);
-        typePriority.put("coBorrower", 2);
-        typePriority.put("guarantor", 3);
-
         // 组装收款方信息
         for (OrderBankCard card : bankCards) {
             String holderType = card.getHolderType();
@@ -78,7 +69,8 @@ public class OrderVoucherServiceImpl implements OrderVoucherService {
             PayeeInfo payee = new PayeeInfo();
             payee.setName(card.getAccountName());
             payee.setType(holderType);
-            payee.setTypeName(typeNameMap.getOrDefault(holderType, ""));
+            // 使用枚举获取类型名称
+            payee.setTypeName(PayeeTypeEnum.getNameByCode(holderType));
 
             // 从借款人信息中获取借款人类型（个人/对公）
             // 这里假设借款人类型存储在 OrderBorrower 中，如果没有则默认为"个人"
@@ -99,8 +91,8 @@ public class OrderVoucherServiceImpl implements OrderVoucherService {
 
         // 按类型优先级排序：借款人优先，然后是共借人
         result.sort((a, b) -> {
-            int priorityA = typePriority.getOrDefault(a.getType(), 999);
-            int priorityB = typePriority.getOrDefault(b.getType(), 999);
+            int priorityA = PayeeTypeEnum.getPriorityByCode(a.getType());
+            int priorityB = PayeeTypeEnum.getPriorityByCode(b.getType());
             return Integer.compare(priorityA, priorityB);
         });
 

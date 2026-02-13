@@ -200,6 +200,55 @@ Page({
   },
 
   /**
+   * 复制订单编号
+   */
+  copyOrderNo() {
+    const orderNo = this.data.detail.orderNo;
+    if (!orderNo) {
+      wx.showToast({
+        title: '订单编号为空',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.setClipboardData({
+      data: orderNo,
+      success: () => {
+        wx.showToast({
+          title: '已复制',
+          icon: 'success'
+        });
+      },
+      fail: () => {
+        wx.showToast({
+          title: '复制失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  /**
+   * 查看进度
+   */
+  viewProgress() {
+    const orderId = this.data.orderId;
+    if (!orderId) {
+      wx.showToast({
+        title: '订单ID为空',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 跳转到进度页面（根据实际路径调整）
+    wx.navigateTo({
+      url: `/pages/order/progress/index?orderId=${orderId}`
+    });
+  },
+
+  /**
    * 预览图片
    */
   previewImage(e) {

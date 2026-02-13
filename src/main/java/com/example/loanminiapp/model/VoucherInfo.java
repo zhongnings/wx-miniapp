@@ -24,6 +24,9 @@ public class VoucherInfo {
     /** 收款方类型 */
     private String payeeType;
 
+    /** 收款方类型名称：主借人/共借人/担保人 */
+    private String payeeTypeName;
+
     /** 开卡银行 */
     private String openBank;
 

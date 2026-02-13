@@ -16,23 +16,30 @@
       <view class="section-content" wx:if="{{expandedSections.summary}}">
         <view class="info-row">
           <text class="info-label">借款人员：</text>
-          <text class="info-value">{{detail.borrowerName || '-'}}</text>
+          <text class="info-value-left">{{detail.borrowerName || '-'}}</text>
         </view>
         <view class="info-row">
           <text class="info-label">借款金额：</text>
-          <text class="info-value amount">¥ {{formatTool.formatMoney(detail.loanAmount)}}</text>
+          <text class="info-value-left amount">¥ {{formatTool.formatMoney(detail.loanAmount)}}</text>
         </view>
         <view class="info-row">
           <text class="info-label">订单编号：</text>
-          <text class="info-value">{{detail.orderNo || '-'}}</text>
+          <text class="info-value-left">{{detail.orderNo || '-'}}</text>
+          <view class="copy-btn" wx:if="{{detail.orderNo}}" bindtap="copyOrderNo" catchtap="copyOrderNo">
+            <text class="copy-icon">📋</text>
+          </view>
         </view>
         <view class="info-row">
           <text class="info-label">订单状态：</text>
-          <text class="info-value status-text">{{detail.orderStatusName || '-'}}</text>
+          <text class="info-value-left status-text">{{detail.orderStatusName || '-'}}</text>
+          <view class="view-progress" bindtap="viewProgress" catchtap="viewProgress">
+            <text class="progress-text">查看进度</text>
+            <text class="progress-arrow">›</text>
+          </view>
         </view>
-        <view class="info-row" wx:if="{{detail.debtTransferStatus}}">
+        <view class="info-row">
           <text class="info-label">债转状态：</text>
-          <text class="info-value">{{detail.debtTransferStatus}}</text>
+          <text class="info-value-left">{{detail.debtTransferStatus || '-'}}</text>
         </view>
       </view>
     </view>
@@ -49,71 +56,71 @@
       <view class="section-content" wx:if="{{expandedSections.loanInfo}}">
         <view class="info-row" wx:if="{{detail.loanInfo.assigneeOrg}}">
           <text class="info-label">受让机构：</text>
-          <text class="info-value">{{detail.loanInfo.assigneeOrg}}</text>
+          <text class="info-value-left">{{detail.loanInfo.assigneeOrg}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.channelOrg}}">
           <text class="info-label">小贷机构：</text>
-          <text class="info-value">{{detail.loanInfo.channelOrg}}</text>
+          <text class="info-value-left">{{detail.loanInfo.channelOrg}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.payMethod}}">
           <text class="info-label">支付渠道：</text>
-          <text class="info-value">{{detail.loanInfo.payMethod}}</text>
+          <text class="info-value-left">{{detail.loanInfo.payMethod}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.productType}}">
           <text class="info-label">产品类型：</text>
-          <text class="info-value">{{detail.loanInfo.productType}}</text>
+          <text class="info-value-left">{{detail.loanInfo.productType}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.borrowerCategory}}">
           <text class="info-label">借款人类型：</text>
-          <text class="info-value">{{detail.loanInfo.borrowerCategory}}</text>
+          <text class="info-value-left">{{detail.loanInfo.borrowerCategory}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.contractSignMode}}">
           <text class="info-label">合同签署方式：</text>
-          <text class="info-value">{{detail.loanInfo.contractSignMode}}</text>
+          <text class="info-value-left">{{detail.loanInfo.contractSignMode}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.loanAmount}}">
           <text class="info-label">借款金额：</text>
-          <text class="info-value">{{formatTool.formatMoney(detail.loanInfo.loanAmount)}} 元</text>
+          <text class="info-value-left">{{formatTool.formatMoney(detail.loanInfo.loanAmount)}} 元</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.loanDays}}">
           <text class="info-label">借款天数：</text>
-          <text class="info-value">{{detail.loanInfo.loanDays}} 天</text>
+          <text class="info-value-left">{{detail.loanInfo.loanDays}} 天</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.startDate}}">
           <text class="info-label">借款起始日期：</text>
-          <text class="info-value">{{detail.loanInfo.startDate}}</text>
+          <text class="info-value-left">{{detail.loanInfo.startDate}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.endDate}}">
           <text class="info-label">借款结束日期：</text>
-          <text class="info-value">{{detail.loanInfo.endDate}}</text>
+          <text class="info-value-left">{{detail.loanInfo.endDate}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.annualRate}}">
           <text class="info-label">借款年利率：</text>
-          <text class="info-value">{{detail.loanInfo.annualRate}} %</text>
+          <text class="info-value-left">{{detail.loanInfo.annualRate}} %</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.signPlace}}">
           <text class="info-label">签约地：</text>
-          <text class="info-value">{{detail.loanInfo.signPlace}}</text>
+          <text class="info-value-left">{{detail.loanInfo.signPlace}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.usageDesc}}">
           <text class="info-label">借款用途：</text>
-          <text class="info-value">{{detail.loanInfo.usageDesc}}</text>
+          <text class="info-value-left">{{detail.loanInfo.usageDesc}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.repayMode}}">
           <text class="info-label">还款方式：</text>
-          <text class="info-value">{{detail.loanInfo.repayMode}}</text>
+          <text class="info-value-left">{{detail.loanInfo.repayMode}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.arbitrationOrg}}">
           <text class="info-label">仲裁机构：</text>
-          <text class="info-value">{{detail.loanInfo.arbitrationOrg}}</text>
+          <text class="info-value-left">{{detail.loanInfo.arbitrationOrg}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.notaryOffice}}">
           <text class="info-label">公证处：</text>
-          <text class="info-value">{{detail.loanInfo.notaryOffice}}</text>
+          <text class="info-value-left">{{detail.loanInfo.notaryOffice}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.loanInfo.appointmentTime}}">
           <text class="info-label">预约时间：</text>
-          <text class="info-value">{{detail.loanInfo.appointmentTime}}</text>
+          <text class="info-value-left">{{detail.loanInfo.appointmentTime}}</text>
         </view>
       </view>
     </view>
@@ -142,47 +149,47 @@
         
         <view class="info-row" wx:if="{{detail.borrowerInfo.idType}}">
           <text class="info-label">证件类型：</text>
-          <text class="info-value">{{detail.borrowerInfo.idType}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.idType}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.name}}">
           <text class="info-label">姓名：</text>
-          <text class="info-value">{{detail.borrowerInfo.name}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.name}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.idNo}}">
           <text class="info-label">证件号码：</text>
-          <text class="info-value">{{detail.borrowerInfo.idNo}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.idNo}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.idIssueDate}}">
           <text class="info-label">证件生效日期：</text>
-          <text class="info-value">{{detail.borrowerInfo.idIssueDate}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.idIssueDate}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.idExpireDate}}">
           <text class="info-label">证件有效期：</text>
-          <text class="info-value">{{detail.borrowerInfo.idExpireDate}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.idExpireDate}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.addressDetail}}">
           <text class="info-label">证件地址：</text>
-          <text class="info-value">{{detail.borrowerInfo.addressDetail}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.addressDetail}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.mobile}}">
           <text class="info-label">手机号码：</text>
-          <text class="info-value">{{detail.borrowerInfo.mobile}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.mobile}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.provinceCity}}">
           <text class="info-label">居住地：</text>
-          <text class="info-value">{{detail.borrowerInfo.provinceCity}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.provinceCity}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.gender}}">
           <text class="info-label">性别：</text>
-          <text class="info-value">{{detail.borrowerInfo.gender}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.gender}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.birthday}}">
           <text class="info-label">出生年月：</text>
-          <text class="info-value">{{detail.borrowerInfo.birthday}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.birthday}}</text>
         </view>
         <view class="info-row" wx:if="{{detail.borrowerInfo.maritalStatus}}">
           <text class="info-label">婚姻状况：</text>
-          <text class="info-value">{{detail.borrowerInfo.maritalStatus}}</text>
+          <text class="info-value-left">{{detail.borrowerInfo.maritalStatus}}</text>
         </view>
       </view>
     </view>
@@ -279,28 +286,34 @@
               <text class="voucher-status">{{item.statusText || '待放款申请'}}</text>
             </view>
             
+            <!-- 收款方类型 -->
+            <view class="info-row" wx:if="{{item.payeeTypeName}}">
+              <text class="info-label">收款方类型：</text>
+              <text class="info-value-left">{{item.payeeTypeName}}</text>
+            </view>
+            
             <!-- 收款卡号 -->
-            <view class="voucher-row">
-              <text class="label">收款卡号：</text>
-              <text class="value">{{formatTool.formatBankCard(item.cardNo)}}</text>
+            <view class="info-row">
+              <text class="info-label">收款卡号：</text>
+              <text class="info-value-left">{{formatTool.formatBankCard(item.cardNo)}}</text>
             </view>
             
             <!-- 制单金额 -->
-            <view class="voucher-row amount-row">
-              <text class="label">制单金额</text>
-              <text class="amount-value">{{formatTool.formatMoney(item.amount)}} 元</text>
+            <view class="info-row">
+              <text class="info-label">制单金额：</text>
+              <text class="info-value-left amount">{{formatTool.formatMoney(item.amount)}} 元</text>
             </view>
             
             <!-- 开户行 -->
-            <view class="voucher-row" wx:if="{{item.openBank}}">
-              <text class="label">开户行</text>
-              <text class="value">{{item.openBank}}</text>
+            <view class="info-row" wx:if="{{item.openBank}}">
+              <text class="info-label">开户行：</text>
+              <text class="info-value-left">{{item.openBank}}</text>
             </view>
             
             <!-- 失败原因 -->
-            <view class="voucher-row" wx:if="{{item.remark}}">
-              <text class="label">失败原因</text>
-              <text class="value">{{item.remark}}</text>
+            <view class="info-row" wx:if="{{item.remark}}">
+              <text class="info-label">失败原因：</text>
+              <text class="info-value-left">{{item.remark}}</text>
             </view>
           </view>
         </block>

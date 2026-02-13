@@ -72,10 +72,11 @@
 /* 信息行 */
 .info-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 20rpx 0;
   border-bottom: 1rpx solid #f0f0f0;
   font-size: 28rpx;
+  position: relative;
 }
 
 .info-row:last-child {
@@ -83,10 +84,8 @@
 }
 
 .info-label {
-  min-width: 160rpx;
-  max-width: 200rpx;
+  width: 200rpx;
   color: #666;
-  margin-right: 16rpx;
   flex-shrink: 0;
 }
 
@@ -98,7 +97,16 @@
   overflow-wrap: break-word;
 }
 
-.info-value.amount {
+.info-value-left {
+  flex: 1;
+  color: #333;
+  word-break: break-all;
+  text-align: left;
+  overflow-wrap: break-word;
+}
+
+.info-value.amount,
+.info-value-left.amount {
   color: #ff6b6b;
   font-weight: 500;
   font-size: 32rpx;
@@ -106,6 +114,47 @@
 
 .status-text {
   color: #ff6b6b;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  background: #e8f5e9;
+  color: #4caf50;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+/* 复制按钮 */
+.copy-btn {
+  margin-left: 16rpx;
+  padding: 8rpx 16rpx;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-icon {
+  font-size: 28rpx;
+}
+
+/* 查看进度 */
+.view-progress {
+  margin-left: 16rpx;
+  display: flex;
+  align-items: center;
+  color: #ff6b6b;
+}
+
+.progress-text {
+  font-size: 28rpx;
+}
+
+.progress-arrow {
+  font-size: 32rpx;
+  margin-left: 4rpx;
 }
 
 /* 身份证图片展示 */
