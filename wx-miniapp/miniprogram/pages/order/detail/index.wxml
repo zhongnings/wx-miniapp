@@ -93,10 +93,31 @@
         </view>
       </view>
     </view>
+
+    <!-- 制单信息部分（待放款状态显示） -->
+    <view class="voucher-info-section" wx:if="{{showVoucherInfo}}">
+      <view class="voucher-header" bindtap="toggleVoucherInfo">
+        <view class="voucher-indicator"></view>
+        <text class="voucher-title">制单信息</text>
+        <text class="section-arrow {{voucherInfoExpanded ? 'expanded' : ''}}">^</text>
+      </view>
+      
+      <view class="info-list" wx:if="{{voucherInfoExpanded}}">
+        <view class="info-item" bindtap="goVoucher">
+          <view class="info-icon voucher-icon">📝</view>
+          <text class="info-label">制单信息</text>
+          <text class="info-status {{voucherStatus === '已填写' ? 'completed' : 'not-filled'}}">{{voucherStatus}}</text>
+        </view>
+      </view>
+    </view>
   </scroll-view>
 
-  <!-- 底部提交按钮 -->
-  <view class="submit-button">
+  <!-- 底部按钮 -->
+  <view class="submit-button" wx:if="{{showApproveButton}}">
+    <button class="reject-button" bindtap="onSubmit">{{buttonText}}</button>
+    <button class="approve-button" bindtap="approveOrder">通过</button>
+  </view>
+  <view class="submit-button" wx:else>
     <button class="submit-text" bindtap="onSubmit">{{buttonText}}</button>
   </view>
 </view>

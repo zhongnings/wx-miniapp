@@ -1,23 +1,18 @@
 package com.example.loanminiapp.controller;
 
-import com.example.loanminiapp.entity.OrderLoanInfo;
 import com.example.loanminiapp.model.ContractItem;
 import com.example.loanminiapp.model.OrderDetail;
 import com.example.loanminiapp.model.OrderProgressItem;
 import com.example.loanminiapp.model.OrderSummary;
 import com.example.loanminiapp.model.PageResult;
 import com.example.loanminiapp.model.OrderTabStats;
-import com.example.loanminiapp.security.OrderAccessCheck;
-import com.example.loanminiapp.service.OrderLoanInfoService;
 import com.example.loanminiapp.service.OrderService;
-import com.example.loanminiapp.service.OrderStepService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +27,6 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final OrderLoanInfoService loanInfoService;
-    private final OrderStepService orderStepService;
 
     /**
      * tab = manage | history
@@ -75,17 +68,6 @@ public class OrderController {
         return ResponseEntity.ok(orderService.contracts(id));
     }
 
-    // 银行卡接口已迁移到 OrderBankCardController，避免路由冲突
-    // @GetMapping("/{id}/bankCards")
-    // public ResponseEntity<List<OrderDetail.BankCardInfo>> bankCards(@PathVariable Long id) {
-    //     return ResponseEntity.ok(orderService.getBankCards(id));
-    // }
-
-    // @GetMapping("/{id}/attachments")
-    // public ResponseEntity<List<com.example.loanminiapp.model.AttachmentItem>> attachments(@PathVariable Long id) {
-    //     return ResponseEntity.ok(orderService.getAttachments(id));
-    // }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);
@@ -107,6 +89,15 @@ public class OrderController {
     @PostMapping("/{id}/reject")
     public ResponseEntity<Void> reject(@PathVariable Long id) {
         orderService.reject(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 通过风控审核（将状态从风控审核中改为待放款）
+     */
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<Void> approve(@PathVariable Long id) {
+        orderService.approve(id);
         return ResponseEntity.ok().build();
     }
 

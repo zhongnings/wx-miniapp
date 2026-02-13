@@ -35,7 +35,8 @@ Page({
     orderStatus: null,
     // 表单数据
     formData: {
-      holderType: '借款人', // 持卡人类型：借款人/共借人/担保人
+      holderType: 'borrower', // 持卡人类型（英文，用于传值）：borrower/coBorrower/guarantor
+      holderTypeDisplay: '借款人', // 持卡人类型（中文，用于显示）
       accountName: '', // 账户名（持卡人姓名）
       idType: '身份证', // 开户证件类型：身份证/其他证件
       idNumber: '', // 开户证件号
@@ -108,9 +109,13 @@ Page({
     if (prevPage && prevPage.data && prevPage.data.bankCards) {
       const bankCard = prevPage.data.bankCards[cardIndex];
       if (bankCard) {
+        const holderType = bankCard.holderType || 'borrower';
+        const holderTypeDisplay = this.getHolderTypeDisplay(holderType);
+        
         this.setData({
           formData: {
-            holderType: bankCard.holderType || '借款人',
+            holderType: holderType,
+            holderTypeDisplay: holderTypeDisplay,
             accountName: bankCard.cardholderName || '',
             idType: bankCard.idType || '身份证',
             idNumber: bankCard.idNumber || '',
@@ -129,9 +134,13 @@ Page({
       const savedData = wx.getStorageSync('orderFormData_step5');
       if (savedData && savedData.bankCards && savedData.bankCards[cardIndex]) {
         const bankCard = savedData.bankCards[cardIndex];
+        const holderType = bankCard.holderType || 'borrower';
+        const holderTypeDisplay = this.getHolderTypeDisplay(holderType);
+        
         this.setData({
           formData: {
-            holderType: bankCard.holderType || '借款人',
+            holderType: holderType,
+            holderTypeDisplay: holderTypeDisplay,
             accountName: bankCard.cardholderName || '',
             idType: bankCard.idType || '身份证',
             idNumber: bankCard.idNumber || '',
@@ -143,6 +152,16 @@ Page({
         });
       }
     }
+  },
+
+  // 获取持卡人类型的中文显示
+  getHolderTypeDisplay(holderType) {
+    const map = {
+      'borrower': '借款人',
+      'coBorrower': '共借人',
+      'guarantor': '担保人'
+    };
+    return map[holderType] || '借款人';
   },
 
   // 加载借款人信息（新增模式）
@@ -228,15 +247,18 @@ Page({
 
   // 持卡人类型选择
   onHolderTypeChange(e) {
-    const holderType = e.detail.value;
+    const holderType = e.detail.value; // 英文值
+    const holderTypeDisplay = this.getHolderTypeDisplay(holderType); // 中文显示
+    
     this.setData({
-      'formData.holderType': holderType
+      'formData.holderType': holderType,
+      'formData.holderTypeDisplay': holderTypeDisplay
     });
     
     // 根据持卡人类型，自动填充账户名和证件号
-    if (holderType === '借款人') {
+    if (holderType === 'borrower') {
       this.loadBorrowerInfo();
-    } else if (holderType === '共借人') {
+    } else if (holderType === 'coBorrower') {
       this.loadCoBorrowerInfo();
     }
   },

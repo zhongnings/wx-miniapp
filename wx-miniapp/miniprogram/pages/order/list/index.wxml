@@ -1,3 +1,6 @@
+<!-- 引入WXS文件，指定模块名formatTool -->
+<wxs src="../../../utils/formatMoney.wxs" module="formatTool" />
+
 <view class="order-list-container">
   <!-- 搜索栏 -->
   <view class="search-section">
@@ -63,7 +66,7 @@
         </view>
         <view class="order-row">
           <text class="label">借款金额：</text>
-          <text class="amount">{{item.loanAmount || '0.00'}}</text>
+          <text class="amount">{{formatTool.formatMoney(item.loanAmount)}}</text>
           <text class="unit">(元)</text>
         </view>
         <view class="order-row">

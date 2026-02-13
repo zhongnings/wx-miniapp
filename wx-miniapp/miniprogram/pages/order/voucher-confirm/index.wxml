@@ -1,0 +1,63 @@
+<!-- 引入WXS文件，指定模块名formatTool -->
+<wxs src="../../../utils/formatMoney.wxs" module="formatTool" />
+
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">放款信息</view>
+    <view class="navbar-right"></view>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="content-area">
+    <!-- 提示文字 -->
+    <view class="tip-text">请仔细核对放款信息</view>
+
+    <!-- 放款信息卡片 -->
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">放款金额：</text>
+        <text class="info-value amount-value">{{formatTool.formatMoney(voucherInfo.amount)}} 元</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">收款人：</text>
+        <text class="info-value">{{voucherInfo.payee}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">收款卡号：</text>
+        <text class="info-value">{{formatTool.formatBankCard(voucherInfo.cardNo)}}</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">开户行：</text>
+        <text class="info-value">{{voucherInfo.openBank}}</text>
+      </view>
+    </view>
+
+    <!-- 支付密码输入 -->
+    <view class="password-section">
+      <view class="password-label">
+        <text class="required-mark">*</text>
+        <text>支付密码</text>
+      </view>
+      <input 
+        class="password-input" 
+        type="password" 
+        placeholder="请输入支付密码"
+        value="{{paymentPassword}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-button">
+    <button class="submit-btn" bindtap="submitLoanApply">放款申请</button>
+  </view>
+</view>
+

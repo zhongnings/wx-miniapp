@@ -31,11 +31,11 @@
         <text class="label required">持卡人类型</text>
         <radio-group class="radio-group" bindchange="onHolderTypeChange">
           <label class="radio-label">
-            <radio value="借款人" checked="{{formData.holderType === '借款人'}}" color="#ff6f6f" />
+            <radio value="borrower" checked="{{formData.holderType === 'borrower'}}" color="#ff6f6f" />
             <text>借款人</text>
           </label>
           <label class="radio-label">
-            <radio value="共借人" checked="{{formData.holderType === '共借人'}}" color="#ff6f6f" />
+            <radio value="coBorrower" checked="{{formData.holderType === 'coBorrower'}}" color="#ff6f6f" />
             <text>共借人</text>
           </label>
         </radio-group>
@@ -47,7 +47,7 @@
         <view class="input-wrapper" bindtap="selectAccountName">
           <input 
             class="input" 
-            placeholder="请选择{{formData.holderType || '借款人'}}" 
+            placeholder="请选择{{formData.holderType === 'borrower' ? '借款人' : formData.holderType === 'coBorrower' ? '共借人' : '担保人'}}" 
             value="{{formData.accountName}}"
             bindinput="onAccountNameInput"
             disabled="{{false}}"

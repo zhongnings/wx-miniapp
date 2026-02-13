@@ -147,10 +147,42 @@ public class OrderBankCardService {
         card.setBankName(dto.getBankName());
         card.setAccountName(dto.getCardholderName());
         card.setCardNo(dto.getCardNumber());
-        card.setHolderType(dto.getHolderType());
+        
+        // 将中文的持卡人类型转换为英文存储
+        String holderType = convertHolderTypeToEnglish(dto.getHolderType());
+        card.setHolderType(holderType);
+        
         card.setIdType(dto.getIdType());
         card.setIdNo(dto.getIdNumber());
         card.setReservedMobile(dto.getReservedMobile());
         card.setCardFrontUrl(dto.getCardFrontImage());
+    }
+    
+    /**
+     * 将中文的持卡人类型转换为英文
+     */
+    private String convertHolderTypeToEnglish(String holderType) {
+        if (holderType == null) {
+            return "borrower"; // 默认为借款人
+        }
+        
+        // 如果已经是英文，直接返回
+        if ("borrower".equals(holderType) || "coBorrower".equals(holderType) || "guarantor".equals(holderType)) {
+            return holderType;
+        }
+        
+        // 中文转英文
+        switch (holderType) {
+            case "借款人":
+            case "主借人":
+                return "borrower";
+            case "共借人":
+                return "coBorrower";
+            case "担保人":
+                return "guarantor";
+            default:
+                log.warn("未知的持卡人类型: {}, 默认使用 borrower", holderType);
+                return "borrower";
+        }
     }
 }

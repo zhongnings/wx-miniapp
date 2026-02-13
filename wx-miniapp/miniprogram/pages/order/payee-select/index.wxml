@@ -1,0 +1,58 @@
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">选择收款方</view>
+    <view class="navbar-right"></view>
+  </view>
+
+  <!-- 收款方列表 -->
+  <view class="payee-list">
+    <view 
+      class="payee-item" 
+      wx:for="{{payeeList}}" 
+      wx:key="index"
+      data-index="{{index}}"
+      bindtap="selectPayee"
+    >
+      <view class="payee-header">
+        <view class="payee-icon">
+          <text class="icon-text">👤</text>
+        </view>
+        <view class="payee-title">
+          <text class="payee-name">收款方{{index + 1}}</text>
+        </view>
+        <view class="payee-select">
+          <text class="select-text">{{selectedIndex === index ? '已选' : '选择'}}</text>
+        </view>
+      </view>
+      <view class="payee-detail">
+        <view class="detail-row">
+          <text class="detail-label">收款方姓名：</text>
+          <text class="detail-value">{{item.name}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">开卡银行：</text>
+          <text class="detail-value">{{item.bankName}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">银行卡号：</text>
+          <text class="detail-value">{{item.cardNo}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{payeeList.length === 0}}">
+    <text class="empty-text">暂无收款方信息</text>
+  </view>
+
+  <!-- 底部确认按钮 -->
+  <view class="footer-button" wx:if="{{selectedIndex !== null}}">
+    <button class="btn btn-primary" bindtap="confirmSelect">确认</button>
+  </view>
+</view>
+

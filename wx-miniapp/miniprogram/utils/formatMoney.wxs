@@ -1,0 +1,82 @@
+/**
+ * 格式化金额
+ * @param {Number|String} amount - 金额
+ * @returns {String} 格式化后的金额，如：12,345.60
+ */
+var formatMoney = function(amount) {
+  if (!amount && amount !== 0) return '0.00';
+  
+  // 转换为数字并保留两位小数
+  var num = parseFloat(amount);
+  if (isNaN(num)) return '0.00';
+  
+  // 保留两位小数并转为字符串
+  var str = num.toFixed(2);
+  
+  // 查找小数点位置
+  var dotIndex = str.indexOf('.');
+  var integerPart = '';
+  var decimalPart = '';
+  
+  if (dotIndex > -1) {
+    integerPart = str.substring(0, dotIndex);
+    decimalPart = str.substring(dotIndex + 1);
+  } else {
+    integerPart = str;
+    decimalPart = '00';
+  }
+  
+  // 给整数部分添加千分位分隔符
+  var result = '';
+  var counter = 0;
+  for (var i = integerPart.length - 1; i >= 0; i--) {
+    counter++;
+    result = integerPart.charAt(i) + result;
+    if (counter % 3 === 0 && i !== 0 && integerPart.charAt(i - 1) !== '-') {
+      result = ',' + result;
+    }
+  }
+  
+  // 返回格式化后的金额
+  return result + '.' + decimalPart;
+};
+
+/**
+ * 格式化银行卡号
+ * @param {String} cardNo - 银行卡号
+ * @returns {String} 格式化后的银行卡号，如：6222 6201 1003 1814 719
+ */
+var formatBankCard = function(cardNo) {
+  if (!cardNo) return '';
+  
+  // 转为字符串
+  var str = cardNo.toString();
+  
+  // 手动去除所有空格
+  var cleanStr = '';
+  for (var j = 0; j < str.length; j++) {
+    if (str.charAt(j) !== ' ') {
+      cleanStr += str.charAt(j);
+    }
+  }
+  
+  // 按 4-4-4-4-3 格式分组
+  var result = '';
+  var len = cleanStr.length;
+  
+  for (var i = 0; i < len; i++) {
+    result += cleanStr.charAt(i);
+    // 在第4、8、12、16位后添加空格
+    if ((i === 3 || i === 7 || i === 11 || i === 15) && i < len - 1) {
+      result += ' ';
+    }
+  }
+  
+  return result;
+};
+
+// 暴露函数供wxml调用
+module.exports = {
+  formatMoney: formatMoney,
+  formatBankCard: formatBankCard
+};

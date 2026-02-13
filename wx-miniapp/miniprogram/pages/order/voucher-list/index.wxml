@@ -1,0 +1,99 @@
+<!-- 引入WXS文件，指定模块名formatTool -->
+<wxs src="../../../utils/formatMoney.wxs" module="formatTool" />
+
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">制单列表</view>
+    <view class="navbar-right"></view>
+  </view>
+
+  <!-- 限额提示 -->
+  <view class="limit-notice">
+    <text class="notice-icon">⚠</text>
+    <text class="notice-text">单笔限额 {{limitInfo.singleLimit / 10000}}万 单日限额 {{limitInfo.dailyLimit / 10000}}万 单月限额 {{limitInfo.monthlyLimit / 10000}}万 最多可新增5笔制单</text>
+  </view>
+
+  <!-- 制单列表 -->
+  <view class="voucher-list" wx:if="{{voucherList.length > 0}}">
+    <view class="voucher-item" wx:for="{{voucherList}}" wx:key="id">
+      <!-- 收款方和状态 -->
+      <view class="voucher-header">
+        <text class="payee-name">收款方：{{item.payee}}</text>
+        <text class="voucher-status">{{item.statusText || '待放款申请'}}</text>
+      </view>
+      
+      <!-- 收款卡号 -->
+      <view class="voucher-row">
+        <text class="label">收款卡号：</text>
+        <text class="value">{{item.cardNo}}</text>
+      </view>
+      
+      <!-- 制单金额 -->
+      <view class="voucher-row amount-row">
+        <text class="label">制单金额</text>
+        <text class="amount-value">{{formatTool.formatMoney(item.amount)}} 元</text>
+      </view>
+      
+      <!-- 开户行 -->
+      <view class="voucher-row">
+        <text class="label">开户行</text>
+        <text class="value">{{item.openBank}}</text>
+      </view>
+      
+      <!-- 失败原因 -->
+      <view class="voucher-row">
+        <text class="label">失败原因</text>
+        <text class="value">{{item.remark || '无'}}</text>
+      </view>
+      
+      <!-- 操作按钮 -->
+      <view class="voucher-actions">
+        <view class="action-btn delete-btn" bindtap="deleteVoucher" data-id="{{item.id}}">删除</view>
+        <view class="action-btn edit-btn" bindtap="editVoucher" data-id="{{item.id}}">修改</view>
+        <view class="action-btn apply-btn" bindtap="applyLoan" data-id="{{item.id}}">放款申请</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <view class="empty-illustration">
+      <view class="building building-left"></view>
+      <view class="calendar-icon">
+        <view class="calendar-lines"></view>
+        <view class="calendar-person"></view>
+      </view>
+      <view class="building building-right"></view>
+      <view class="arrow-up arrow-left"></view>
+      <view class="arrow-up arrow-right"></view>
+    </view>
+    <text class="empty-text">暂无制单信息</text>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-outline" bindtap="viewBankCards">查看收款卡</button>
+    <button class="btn btn-primary" bindtap="addVoucher">新增制单</button>
+  </view>
+
+  <!-- 放款申请确认弹窗 -->
+  <view class="modal-mask" wx:if="{{showApplyModal}}" catchtap="closeApplyModal">
+    <view class="modal-container" catchtap="stopPropagation">
+      <view class="modal-title">温馨提示</view>
+      <view class="modal-content">
+        <text>请避免在晚上9点-次日7点放款，</text>
+        <text>期间到账时效不确定，暂时无法</text>
+        <text>处理，请确认是否继续操作？</text>
+      </view>
+      <view class="modal-buttons">
+        <button class="modal-btn cancel-btn" bindtap="closeApplyModal">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="confirmApplyLoan">继续放款</button>
+      </view>
+    </view>
+  </view>
+</view>
+

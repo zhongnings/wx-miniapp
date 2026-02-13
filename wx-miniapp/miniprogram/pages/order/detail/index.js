@@ -8,7 +8,9 @@ Page({
     detail: {},
     attachments: [],
     contracts: [],
+    vouchers: [],
     basicInfoExpanded: true,
+    voucherInfoExpanded: true,
     formattedAmount: '0.00',
     infoStatus: {
       loanInfo: '未填写',
@@ -18,8 +20,11 @@ Page({
       bankCardInfo: '未填写',
       attachment: '未上传'
     },
+    voucherStatus: '未填写',
     buttonText: '立即提交',
-    showContractList: false
+    showContractList: false,
+    showApproveButton: false,
+    showVoucherInfo: false
   },
 
   onLoad(query) {
@@ -50,6 +55,15 @@ Page({
   toggleBasicInfo() {
     this.setData({
       basicInfoExpanded: !this.data.basicInfoExpanded
+    });
+  },
+
+  /**
+   * 切换制单信息展开/收起
+   */
+  toggleVoucherInfo() {
+    this.setData({
+      voucherInfoExpanded: !this.data.voucherInfoExpanded
     });
   },
 
@@ -88,11 +102,31 @@ Page({
       // 判断订单是否已提交（状态不是待提交）
       const isSubmitted = detail.orderStatus !== null && detail.orderStatus !== 0;
       
+      // 判断是否为风控审核中状态（状态3）
+      const isRiskReviewing = detail.orderStatus === 3;
+      
+      // 判断是否为待放款状态（状态4）
+      const isWaitLoan = detail.orderStatus === 4;
+      
       // 设置按钮文字和合同列表显示
       let buttonText = '立即提交';
       let showContractList = false;
+      let showApproveButton = false;
+      let showVoucherInfo = false;
       
-      if (isSubmitted) {
+      if (isRiskReviewing) {
+        // 风控审核中：显示"驳回"和"通过"按钮
+        buttonText = '驳回';
+        showContractList = true;
+        showApproveButton = true;
+      } else if (isWaitLoan) {
+        // 待放款：显示制单信息
+        buttonText = '驳回';
+        showContractList = true;
+        showVoucherInfo = true;
+        // 加载制单列表
+        this.loadVouchers();
+      } else if (isSubmitted) {
         buttonText = '驳回';
         showContractList = true;
       } else if (!requiredFieldsComplete) {
@@ -105,7 +139,9 @@ Page({
         formattedAmount,
         infoStatus,
         buttonText,
-        showContractList
+        showContractList,
+        showApproveButton,
+        showVoucherInfo
       });
       logger.info('订单详情加载成功:', detail);
     }).catch(err => {
@@ -130,6 +166,27 @@ Page({
       this.setData({ contracts: res.data || [] });
     }).catch(err => {
       logger.error('加载合同列表失败:', err);
+    });
+  },
+
+  /**
+   * 加载制单列表
+   */
+  loadVouchers() {
+    req.request({
+      url: `/public/orders/${this.data.id}/vouchers`,
+      method: 'GET'
+    }).then(res => {
+      const vouchers = res.data || [];
+      const voucherStatus = vouchers.length > 0 ? '已填写' : '未填写';
+      this.setData({ 
+        vouchers,
+        voucherStatus
+      });
+      logger.info('制单列表加载成功:', vouchers);
+    }).catch(err => {
+      logger.error('加载制单列表失败:', err);
+      this.setData({ voucherStatus: '未填写' });
     });
   },
 
@@ -252,6 +309,41 @@ Page({
     });
   },
 
+  /**
+   * 通过审核
+   */
+  approveOrder() {
+    wx.showModal({
+      title: '确认通过',
+      content: '确定要通过这个订单的风控审核吗？',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中...' });
+          
+          req.request({
+            url: `/public/orders/${this.data.id}/approve`,
+            method: 'POST'
+          }).then(() => {
+            wx.hideLoading();
+            wx.showToast({
+              title: '审核通过',
+              icon: 'success'
+            });
+            // 重新加载订单详情，更新状态
+            this.loadDetail();
+          }).catch(err => {
+            wx.hideLoading();
+            logger.error('审核通过失败:', err);
+            wx.showToast({
+              title: err.message || '操作失败',
+              icon: 'none'
+            });
+          });
+        }
+      }
+    });
+  },
+
   goProgress() {
     wx.navigateTo({
       url: `/pages/order/progress/index?id=${this.data.id}`
@@ -318,7 +410,9 @@ Page({
     });
   },
   goVoucher() {
-    wx.showToast({ title: '制单信息页面后续完善', icon: 'none' });
+    wx.navigateTo({
+      url: `/pages/order/voucher-list/index?id=${this.data.id}`
+    });
   }
 });
 

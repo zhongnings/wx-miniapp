@@ -1,0 +1,84 @@
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="navbar">
+    <view class="navbar-left" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">制单</view>
+    <view class="navbar-right"></view>
+  </view>
+
+  <!-- 表单内容 -->
+  <view class="form-container">
+    <!-- 金额 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>金额</text>
+      </view>
+      <view class="form-value">
+        <input 
+          class="form-input" 
+          type="digit" 
+          value="{{formData.amount}}" 
+          placeholder="{{loanAmount}}.00"
+          disabled
+        />
+        <text class="unit">元</text>
+      </view>
+    </view>
+
+    <!-- 收款方 -->
+    <view class="form-item" bindtap="selectPayee">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>收款方</text>
+      </view>
+      <view class="form-value">
+        <text class="form-text {{formData.payee ? '' : 'placeholder'}}">{{formData.payee || '请选择收款方'}}
+        </text>
+        <text class="arrow">›</text>
+        <text class="tag" wx:if="{{formData.category}}">{{formData.category}}</text>
+      </view>
+    </view>
+
+    <!-- 收款方类型 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>收款方类型</text>
+      </view>
+      <view class="form-value">
+        <text class="form-text">{{formData.payeeTypeName || '自动识别'}}</text>
+      </view>
+    </view>
+
+    <!-- 开卡银行 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>开卡银行</text>
+      </view>
+      <view class="form-value">
+        <text class="form-text">{{formData.openBank || '自动识别'}}</text>
+      </view>
+    </view>
+
+    <!-- 银行卡号 -->
+    <view class="form-item">
+      <view class="form-label">
+        <text class="required">*</text>
+        <text>银行卡号</text>
+      </view>
+      <view class="form-value">
+        <text class="form-text">{{formData.cardNo || '自动识别'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提交按钮 -->
+  <view class="footer-buttons">
+    <button class="btn btn-primary" bindtap="submit">保存制单</button>
+  </view>
+</view>
+

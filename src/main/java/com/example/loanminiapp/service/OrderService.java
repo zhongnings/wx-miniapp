@@ -42,5 +42,10 @@ public interface OrderService {
      * 驳回订单（删除合同，将状态改回待提交）
      */
     void reject(Long id);
+
+    /**
+     * 通过风控审核（将状态从风控审核中改为待放款）
+     */
+    void approve(Long id);
 }
 

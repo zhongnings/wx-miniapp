@@ -154,6 +154,10 @@ public class InMemoryOrderService implements OrderService {
                 return OrderStatusEnum.WAIT_LOAN.getCode();
             case "loaning":
                 return OrderStatusEnum.LOANING.getCode();
+            case "pending_transfer":
+                return OrderStatusEnum.WAIT_TRANSFER.getCode();
+            case "pending_face":
+                return OrderStatusEnum.WAIT_FACE.getCode();
             case "completed":
                 return OrderStatusEnum.COMPLETED.getCode();
             default:
@@ -260,6 +264,33 @@ public class InMemoryOrderService implements OrderService {
         orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.PENDING_SUBMIT, "风控驳回后驳回订单，状态回退为待提交");
 
         log.info("订单驳回成功，合同已删除: orderId={}", id);
+    }
+
+    /**
+     * 通过风控审核
+     */
+    @Override
+    public void approve(Long id) {
+        checkAccess(id);
+        Order order = orderMapper.selectById(id);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        
+        // 检查当前状态是否为风控审核中
+        if (order.getOrderStatus() == null || order.getOrderStatus() != OrderStatusEnum.RISK_REVIEWING.getCode()) {
+            throw new RuntimeException("订单状态不正确，无法通过审核");
+        }
+        
+        // 更新订单状态为待放款
+        order.setOrderStatus(OrderStatusEnum.WAIT_LOAN.getCode());
+        order.setRiskStatus(RiskStatusEnum.APPROVED.getCode());
+        orderMapper.updateById(order);
+        
+        // 记录状态流转
+        orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.WAIT_LOAN, "风控审核通过");
+
+        log.info("订单审核通过: orderId={}", id);
     }
 
     @Override
@@ -500,11 +531,11 @@ public class InMemoryOrderService implements OrderService {
         }
         
         // 更新订单状态为风控审核中
-        order.setOrderStatus(OrderStatusEnum.RISK_REVIEWING.getCode());
-        order.setRiskStatus(RiskStatusEnum.REVIEWING.getCode());
+        order.setOrderStatus(OrderStatusEnum.SIGNING.getCode());
+//        order.setRiskStatus(RiskStatusEnum.REVIEWING.getCode());
         orderMapper.updateById(order);
         // 记录状态流转
-        orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.RISK_REVIEWING, "提交订单，进入签署中/风控审核中");
+        orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.SIGNING, "提交订单，进入签署中");
         log.info("订单提交成功: orderId={}", id);
     }
 

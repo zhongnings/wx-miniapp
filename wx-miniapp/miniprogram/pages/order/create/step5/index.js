@@ -21,7 +21,64 @@ const logger = {
 // 引入通用上传工具：统一使用全局挂载的 wx.$upload（在 app.js 中挂载）
 const uploadUtil = wx.$upload;
 
-// 银行图标映射（根据银行名称返回图标文本）
+// 银行配置（包含 logo 路径和品牌色）
+const bankConfig = {
+  '中国工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
+  '工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
+  '中国建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
+  '建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
+  '中国农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
+  '农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
+  '中国银行': { logo: '/static/bank/zhongguo.png', color: '#B20838' },
+  '交通银行': { logo: '/static/bank/jiaotong.png', color: '#0066B3' },
+  '招商银行': { logo: '/static/bank/zhaoshang.png', color: '#E4002B' },
+  '浦发银行': { logo: '/static/bank/pufa.png', color: '#003399' },
+  '浦东发展银行': { logo: '/static/bank/pufa.png', color: '#003399' },
+  '中信银行': { logo: '/static/bank/zhongxin.png', color: '#E4002B' },
+  '光大银行': { logo: '/static/bank/guangda.png', color: '#6F2C91' },
+  '华夏银行': { logo: '/static/bank/huaxia.png', color: '#E4002B' },
+  '民生银行': { logo: '/static/bank/minsheng.png', color: '#006EB6' },
+  '广发银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
+  '广东发展银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
+  '平安银行': { logo: '/static/bank/pingan.png', color: '#FF6600' },
+  '兴业银行': { logo: '/static/bank/xingye.png', color: '#003399' },
+  '邮储银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
+  '邮政储蓄银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
+  '宁波银行': { logo: '/static/bank/ningbo.png', color: '#F39800' },
+  '江苏银行': { logo: '/static/bank/jiangsu.png', color: '#E4002B' },
+  '南京银行': { logo: '/static/bank/nanjing.png', color: '#E4002B' },
+  '上海银行': { logo: '/static/bank/shanghai.png', color: '#0066B3' },
+  '盛京银行': { logo: '/static/bank/shengjing.png', color: '#E4002B' },
+  '汇丰银行': { logo: '/static/bank/huifeng.png', color: '#DB0011' },
+  '网商银行': { logo: '/static/bank/wangshang.png', color: '#FF6600' }
+};
+
+// 获取银行配置（logo 和颜色）
+function getBankConfig(bankName) {
+  if (!bankName) {
+    return { logo: '/static/bank/none.png', color: '#4A90E2' };
+  }
+  
+  // 精确匹配
+  if (bankConfig[bankName]) {
+    return bankConfig[bankName];
+  }
+  
+  // 模糊匹配（支持部分匹配）
+  for (const key in bankConfig) {
+    // 移除"中国"、"银行"等通用词后匹配
+    const simplifiedKey = key.replace(/中国|银行/g, '');
+    const simplifiedName = bankName.replace(/中国|银行/g, '');
+    if (simplifiedName.includes(simplifiedKey) || simplifiedKey.includes(simplifiedName)) {
+      return bankConfig[key];
+    }
+  }
+  
+  // 默认返回通用银行图标
+  return { logo: '/static/bank/none.png', color: '#4A90E2' };
+}
+
+// 银行图标映射（根据银行名称返回图标文本）- 保留用于向后兼容
 function getBankIcon(bankName) {
   if (!bankName) return '🏦';
   
@@ -64,6 +121,30 @@ function getBankIcon(bankName) {
   return displayName.substring(0, 1);
 }
 
+// 持卡人类型转换：英文 -> 中文（用于显示）
+function holderTypeToDisplay(holderType) {
+  const map = {
+    'borrower': '借款人',
+    'coBorrower': '共借人',
+    'guarantor': '担保人'
+  };
+  return map[holderType] || holderType || '借款人';
+}
+
+// 持卡人类型转换：中文 -> 英文（用于保存）
+function holderTypeToValue(holderType) {
+  const map = {
+    '借款人': 'borrower',
+    '共借人': 'coBorrower',
+    '担保人': 'guarantor'
+  };
+  // 如果已经是英文，直接返回
+  if (holderType === 'borrower' || holderType === 'coBorrower' || holderType === 'guarantor') {
+    return holderType;
+  }
+  return map[holderType] || 'borrower';
+}
+
 Page({
   data: {
     currentStep: 4, // 当前步骤（0-5，step5对应索引4）
@@ -76,7 +157,9 @@ Page({
     // 当前订单ID（从订单详情进入时传入）
     orderId: null,
     // 订单状态（0-待提交，2-风控驳回时为只读）
-    orderStatus: null
+    orderStatus: null,
+    // 是否隐藏导航栏（从制单页面查看收款卡时隐藏）
+    hideNav: false
   },
 
   onLoad(options) {
@@ -88,18 +171,24 @@ Page({
     const orderId = options?.orderId || options?.id || null;
     // 获取订单状态（如果有）
     const orderStatus = options?.orderStatus || null;
+    // 是否隐藏导航栏
+    const hideNav = options?.hideNav === 'true';
+    // 是否只读
+    const readonlyParam = options?.readonly === 'true';
     
     // 判断是否只读：
     // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
     // 2. 其他状态且mode为view时，为只读
+    // 3. 如果传入了 readonly 参数，直接使用
     const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
-    const readonly = mode === 'view' && !isEditableByStatus;
+    const readonly = readonlyParam || (mode === 'view' && !isEditableByStatus);
     
     this.setData({
       readonly: readonly,
       fromOrderDetail: mode === 'view' && orderId !== null,
       orderId: orderId,
-      orderStatus: orderStatus
+      orderStatus: orderStatus,
+      hideNav: hideNav
     });
     
     // 如果传递了 orderId，说明是从其他 step 页面跳转过来的，从服务器加载数据
@@ -120,7 +209,9 @@ Page({
     this._skipOnShowOnce = true;
     
     // 计算并设置导航栏滚动位置
-    this.calculateTabsScroll();
+    if (!hideNav) {
+      this.calculateTabsScroll();
+    }
   },
 
   onShow() {
@@ -150,7 +241,7 @@ Page({
       delete c.bankIcon;
       // 兼容字段：后端 DTO 使用 cardholderName/idNumber/cardFrontImage
       return {
-        holderType: c.holderType,
+        holderType: holderTypeToValue(c.holderType), // 转换为英文保存
         cardholderName: c.cardholderName,
         idType: c.idType,
         idNumber: c.idNumber,
@@ -197,18 +288,23 @@ Page({
         logger.info('[银行卡] 后端返回银行卡数据', { count: bankCards.length, bankCards });
         
         // 转换数据格式，匹配前端需要的字段名
-        const formattedCards = bankCards.map(card => ({
-          id: card.id,
-          holderType: card.holderType || '借款人',
-          cardholderName: card.accountName || '',
-          idType: card.idType || '身份证',
-          idNumber: card.idNo || '',
-          bankName: card.bankName || '',
-          cardNumber: card.cardNo || '',
-          reservedMobile: card.reservedMobile || '',
-          cardFrontImage: card.cardFrontUrl || '',
-          bankIcon: getBankIcon(card.bankName)
-        }));
+        const formattedCards = bankCards.map(card => {
+          const config = getBankConfig(card.bankName);
+          return {
+            id: card.id,
+            holderType: holderTypeToDisplay(card.holderType), // 转换为中文显示
+            cardholderName: card.accountName || '',
+            idType: card.idType || '身份证',
+            idNumber: card.idNo || '',
+            bankName: card.bankName || '',
+            cardNumber: card.cardNo || '',
+            reservedMobile: card.reservedMobile || '',
+            cardFrontImage: card.cardFrontUrl || '',
+            bankIcon: getBankIcon(card.bankName),
+            bankLogo: config.logo,
+            bankColor: config.color
+          };
+        });
         
         this.setData({
           bankCards: formattedCards
@@ -226,11 +322,16 @@ Page({
           bankCards = savedData.bankCards || [];
         }
         
-        // 为每个银行卡添加图标
-        bankCards = bankCards.map(card => ({
-          ...card,
-          bankIcon: getBankIcon(card.bankName)
-        }));
+        // 为每个银行卡添加图标、logo 和颜色
+        bankCards = bankCards.map(card => {
+          const config = getBankConfig(card.bankName);
+          return {
+            ...card,
+            bankIcon: getBankIcon(card.bankName),
+            bankLogo: config.logo,
+            bankColor: config.color
+          };
+        });
         
         this.setData({
           bankCards: bankCards
@@ -245,11 +346,16 @@ Page({
         bankCards = savedData.bankCards || [];
       }
       
-      // 为每个银行卡添加图标
-      bankCards = bankCards.map(card => ({
-        ...card,
-        bankIcon: getBankIcon(card.bankName)
-      }));
+      // 为每个银行卡添加图标、logo 和颜色
+      bankCards = bankCards.map(card => {
+        const config = getBankConfig(card.bankName);
+        return {
+          ...card,
+          bankIcon: getBankIcon(card.bankName),
+          bankLogo: config.logo,
+          bankColor: config.color
+        };
+      });
       
       this.setData({
         bankCards: bankCards

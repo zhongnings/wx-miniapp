@@ -17,6 +17,10 @@
     "pages/order/create/step5/index",
     "pages/order/create/step5-edit/index",
     "pages/order/create/step6/index",
+    "pages/order/voucher-list/index",
+    "pages/order/voucher-add/index",
+    "pages/order/voucher-confirm/index",
+    "pages/order/payee-select/index",
     "components/region-picker/region-picker"
   ],
   "window": {

@@ -868,7 +868,8 @@ Page({
       { key: 'repayMode', name: '还款方式' },
       { key: 'disputeWay', name: '解决争议方式' },
       { key: 'arbitrationOrg', name: '仲裁机构' },
-      { key: 'isNotarization', name: '是否办理赋强公证' }
+      { key: 'isNotarization', name: '是否办理赋强公证' },
+      { key: 'penaltyRatio', name: '提前还款违约金比例' }
     ];
 
     for (let field of requiredFields) {
@@ -886,7 +887,6 @@ Page({
       const notarizationFields = [
         { key: 'notarizationType', name: '公证类型' },
         { key: 'notarizationItem', name: '公证事项' },
-        { key: 'appointmentTime', name: '预约时间' },
         { key: 'certificateReceiveMethod', name: '证书接收方式' }
       ];
 
@@ -898,6 +898,15 @@ Page({
           });
           return false;
         }
+      }
+
+      // 单独校验预约时间（必填）
+      if (!formData.appointmentTime) {
+        wx.showToast({
+          title: '请选择预约时间',
+          icon: 'none'
+        });
+        return false;
       }
     }
 

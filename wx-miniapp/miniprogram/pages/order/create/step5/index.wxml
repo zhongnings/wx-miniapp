@@ -1,7 +1,8 @@
 <view class="create-order-container">
   
-  <!-- 标签页导航 -->
+  <!-- 标签页导航（hideNav为true时隐藏） -->
   <scroll-view 
+    wx:if="{{!hideNav}}"
     class="tabs-nav" 
     scroll-x="true" 
     scroll-left="{{tabsScrollLeft}}"
@@ -24,17 +25,37 @@
   <view class="content-area">
     <view class="bank-card-section">
       <view class="section-header">
-        <text class="section-title">银行卡账户 (共{{bankCards.length}}张)</text>
+        <text class="section-title">银行卡账户</text>
+        <text class="section-count">(共{{bankCards.length}}张)</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{bankCards.length === 0}}">
+        <view class="empty-illustration">
+          <view class="building building-left"></view>
+          <view class="calendar-icon">
+            <view class="calendar-lines"></view>
+            <view class="calendar-person"></view>
+          </view>
+          <view class="building building-right"></view>
+          <view class="arrow-up arrow-left"></view>
+          <view class="arrow-up arrow-right"></view>
+        </view>
+        <view class="empty-tip">请添加至少一张银行卡</view>
+        <button class="add-button" bindtap="addBankCard" wx:if="{{!readonly}}">
+          <text class="add-icon">+</text>
+          <text>添加银行卡</text>
+        </button>
       </view>
 
       <!-- 银行卡列表 -->
       <view class="bank-card-list" wx:if="{{bankCards.length > 0}}">
         <block wx:for="{{bankCards}}" wx:key="index">
           <view class="bank-card-item">
-            <view class="bank-card">
+            <view class="bank-card" style="background: {{item.bankColor || '#4A90E2'}};">
               <view class="bank-card-header">
                 <view class="bank-logo">
-                  <text class="bank-logo-text">{{item.bankIcon || item.bankName.substring(0, 1)}}</text>
+                  <image class="bank-logo-image" src="{{item.bankLogo}}" mode="aspectFit"></image>
                 </view>
                 <view class="bank-info">
                   <text class="bank-name">{{item.bankName}}</text>
@@ -50,7 +71,9 @@
                 </view>
               </view>
               <view class="bank-card-number">{{item.cardNumber}}</view>
-              <view class="bank-card-watermark">{{item.bankIcon || item.bankName.substring(0, 1)}}</view>
+              <view class="bank-card-watermark">
+                <image class="watermark-logo" src="{{item.bankLogo}}" mode="aspectFit"></image>
+              </view>
             </view>
             
             <!-- 银行卡图片上传区域 -->
@@ -82,16 +105,16 @@
         </block>
       </view>
 
-      <!-- 新增银行卡按钮 -->
-      <button class="add-card-button" bindtap="addBankCard">
+      <!-- 新增银行卡按钮（有银行卡时显示） -->
+      <button class="add-card-button" bindtap="addBankCard" wx:if="{{!readonly && bankCards.length > 0}}">
         <text class="add-icon">+</text>
-        <text>新增收款卡</text>
+        <text>{{hideNav ? '新增收款卡' : '新增收款卡'}}</text>
       </button>
     </view>
   </view>
 
-  <!-- 底部按钮 -->
-  <view class="footer-buttons">
+  <!-- 底部按钮（hideNav为true时隐藏） -->
+  <view class="footer-buttons" wx:if="{{!hideNav}}">
     <button class="btn btn-secondary" bindtap="goPrev">上一步</button>
     <button class="btn btn-primary" bindtap="goNext">下一步</button>
   </view>
