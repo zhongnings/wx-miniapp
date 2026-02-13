@@ -1,148 +1,191 @@
 const logger = require('../../../utils/logger');
 const req = wx.$request;
 
+// 银行配置（包含 logo 路径和品牌色）- 完全复用 step5 的配置
+const bankConfig = {
+  '中国工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
+  '工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
+  '中国建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
+  '建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
+  '中国农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
+  '农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
+  '中国银行': { logo: '/static/bank/zhongguo.png', color: '#B20838' },
+  '交通银行': { logo: '/static/bank/jiaotong.png', color: '#0066B3' },
+  '招商银行': { logo: '/static/bank/zhaoshang.png', color: '#E4002B' },
+  '浦发银行': { logo: '/static/bank/pufa.png', color: '#003399' },
+  '浦东发展银行': { logo: '/static/bank/pufa.png', color: '#003399' },
+  '中信银行': { logo: '/static/bank/zhongxin.png', color: '#E4002B' },
+  '光大银行': { logo: '/static/bank/guangda.png', color: '#6F2C91' },
+  '华夏银行': { logo: '/static/bank/huaxia.png', color: '#E4002B' },
+  '民生银行': { logo: '/static/bank/minsheng.png', color: '#006EB6' },
+  '广发银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
+  '广东发展银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
+  '平安银行': { logo: '/static/bank/pingan.png', color: '#FF6600' },
+  '兴业银行': { logo: '/static/bank/xingye.png', color: '#003399' },
+  '邮储银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
+  '邮政储蓄银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
+  '宁波银行': { logo: '/static/bank/ningbo.png', color: '#F39800' },
+  '江苏银行': { logo: '/static/bank/jiangsu.png', color: '#E4002B' },
+  '南京银行': { logo: '/static/bank/nanjing.png', color: '#E4002B' },
+  '上海银行': { logo: '/static/bank/shanghai.png', color: '#0066B3' },
+  '盛京银行': { logo: '/static/bank/shengjing.png', color: '#E4002B' },
+  '汇丰银行': { logo: '/static/bank/huifeng.png', color: '#DB0011' },
+  '网商银行': { logo: '/static/bank/wangshang.png', color: '#FF6600' }
+};
+
+// 获取银行配置（logo 和颜色）- 完全复用 step5 的逻辑
+function getBankConfig(bankName) {
+  if (!bankName) {
+    return { logo: '/static/bank/none.png', color: '#4A90E2' };
+  }
+  
+  // 精确匹配
+  if (bankConfig[bankName]) {
+    return bankConfig[bankName];
+  }
+  
+  // 模糊匹配（支持部分匹配）
+  for (const key in bankConfig) {
+    // 移除"中国"、"银行"等通用词后匹配
+    const simplifiedKey = key.replace(/中国|银行/g, '');
+    const simplifiedName = bankName.replace(/中国|银行/g, '');
+    if (simplifiedName.includes(simplifiedKey) || simplifiedKey.includes(simplifiedName)) {
+      return bankConfig[key];
+    }
+  }
+  
+  // 默认返回通用银行图标
+  return { logo: '/static/bank/none.png', color: '#4A90E2' };
+}
+
 Page({
   data: {
     orderId: null,
-    orderData: {},
-    loanInfo: null,
-    borrowerInfo: null,
-    coBorrowerInfo: null,
-    guarantorInfo: null,
-    bankCards: [],
-    attachments: [],
-    contracts: [],
-    vouchers: [],
+    detail: {},
     expandedSections: {
-      summary: true,
-      loanInfo: true,
-      borrowerInfo: true,
-      coBorrowerInfo: true,
-      guarantorInfo: true,
-      bankCards: true,
-      attachments: true,
-      contracts: true,
-      vouchers: true
+      summary: true,        // 订单信息 - 默认展开
+      loanInfo: true,       // 借款信息 - 默认展开
+      borrowerInfo: false,  // 借款人信息 - 默认收起
+      coBorrowerInfo: false,// 共借人信息 - 默认收起
+      guarantorInfo: false, // 担保人信息 - 默认收起
+      bankCards: false,     // 银行卡信息 - 默认收起
+      attachments: false,   // 附件材料 - 默认收起
+      contracts: false,     // 合同 - 默认收起
+      vouchers: false       // 制单列表 - 默认收起
     }
   },
 
   onLoad(options) {
     const orderId = options.id;
     this.setData({ orderId });
-    this.loadOrderFullDetail(orderId);
+    this.loadOrderDetail(orderId);
   },
 
   /**
-   * 加载订单完整详情
+   * 加载订单详情（使用订单详情接口）
    */
-  async loadOrderFullDetail(orderId) {
+  loadOrderDetail(orderId) {
     wx.showLoading({ title: '加载中...', mask: true });
 
-    try {
-      // 1. 加载订单基本信息
-      const orderRes = await req.get(`/public/orders/${orderId}`);
-      const orderData = orderRes.data || {};
-
-      // 2. 加载借款信息（step1）
-      let loanInfo = null;
-      try {
-        const loanRes = await req.get(`/public/orders/${orderId}/loan-info`);
-        loanInfo = loanRes.data;
-      } catch (err) {
-        logger.warn('借款信息加载失败:', err);
+    req.request({
+      url: `/public/orders/${orderId}`,
+      method: 'GET'
+    }).then(res => {
+      const detail = res.data || {};
+      
+      this.setData({ detail });
+      
+      // 加载银行卡列表（完全复用 step5 的逻辑）
+      this.loadBankCards(orderId);
+      
+      // 如果有合同，加载合同列表
+      if (detail.orderStatus && detail.orderStatus !== 0) {
+        this.loadContracts(orderId);
       }
-
-      // 3. 加载借款人信息（step2）
-      let borrowerInfo = null;
-      try {
-        const borrowerRes = await req.get(`/public/orders/${orderId}/borrower`);
-        borrowerInfo = borrowerRes.data;
-      } catch (err) {
-        logger.warn('借款人信息加载失败:', err);
+      
+      // 如果是待放款状态，加载制单列表
+      if (detail.orderStatus === 4) {
+        this.loadVouchers(orderId);
       }
-
-      // 4. 加载共借人信息（step3）
-      let coBorrowerInfo = null;
-      try {
-        const coBorrowerRes = await req.get(`/public/orders/${orderId}/coBorrower/list`);
-        if (coBorrowerRes.data && coBorrowerRes.data.length > 0) {
-          coBorrowerInfo = coBorrowerRes.data[0];
-        }
-      } catch (err) {
-        logger.warn('共借人信息加载失败:', err);
-      }
-
-      // 5. 加载担保人信息（step4）
-      let guarantorInfo = null;
-      try {
-        const guarantorRes = await req.get(`/public/orders/${orderId}/guarantor/list`);
-        if (guarantorRes.data && guarantorRes.data.length > 0) {
-          guarantorInfo = guarantorRes.data[0];
-        }
-      } catch (err) {
-        logger.warn('担保人信息加载失败:', err);
-      }
-
-      // 6. 加载银行卡信息（step5）
-      let bankCards = [];
-      try {
-        const bankRes = await req.get(`/public/orders/${orderId}/bank-cards`);
-        bankCards = bankRes.data || [];
-      } catch (err) {
-        logger.warn('银行卡信息加载失败:', err);
-      }
-
-      // 7. 加载附件信息（step6）
-      let attachments = [];
-      try {
-        const attachRes = await req.get(`/public/orders/${orderId}/attachments`);
-        attachments = attachRes.data || [];
-      } catch (err) {
-        logger.warn('附件信息加载失败:', err);
-      }
-
-      // 8. 加载合同列表
-      let contracts = [];
-      try {
-        const contractRes = await req.get(`/public/orders/${orderId}/contracts`);
-        contracts = contractRes.data || [];
-      } catch (err) {
-        logger.warn('合同列表加载失败:', err);
-      }
-
-      // 9. 加载制单列表（如果订单已完成）
-      let vouchers = [];
-      if (orderData.orderStatus === 'completed' || orderData.orderStatus === 4) {
-        try {
-          const voucherRes = await req.get(`/public/orders/${orderId}/vouchers`);
-          vouchers = voucherRes.data || [];
-        } catch (err) {
-          logger.warn('制单列表加载失败:', err);
-        }
-      }
-
-      this.setData({
-        orderData,
-        loanInfo,
-        borrowerInfo,
-        coBorrowerInfo,
-        guarantorInfo,
-        bankCards,
-        attachments,
-        contracts,
-        vouchers
-      });
-
-      logger.info('订单完整详情加载成功');
-    } catch (err) {
+      
+      logger.info('订单详情加载成功:', detail);
+    }).catch(err => {
       logger.error('加载订单详情失败:', err);
       wx.showToast({
         title: '加载失败',
         icon: 'none'
       });
-    } finally {
+    }).finally(() => {
       wx.hideLoading();
-    }
+    });
+  },
+
+  /**
+   * 加载银行卡列表（完全复用 step5 的逻辑）
+   */
+  loadBankCards(orderId) {
+    logger.info('[银行卡] 从后端加载银行卡数据', { orderId });
+    
+    req.get(`/public/orders/${orderId}/bankCards`).then(res => {
+      const bankCards = res.data || [];
+      logger.info('[银行卡] 后端返回银行卡数据', { count: bankCards.length, bankCards });
+      
+      // 转换数据格式，匹配前端需要的字段名，并添加 logo 和颜色
+      const formattedCards = bankCards.map(card => {
+        const config = getBankConfig(card.bankName);
+        return {
+          id: card.id,
+          holderType: card.holderType,
+          cardholderName: card.accountName || '',
+          idType: card.idType || '身份证',
+          idNumber: card.idNo || '',
+          bankName: card.bankName || '',
+          cardNumber: card.cardNo || '',
+          reservedMobile: card.reservedMobile || '',
+          cardFrontImage: card.cardFrontUrl || '',
+          bankLogo: config.logo,
+          bankColor: config.color
+        };
+      });
+      
+      this.setData({
+        'detail.bankCards': formattedCards
+      });
+    }).catch(err => {
+      logger.error('[银行卡] 加载银行卡数据失败', { err });
+    });
+  },
+
+  /**
+   * 加载合同列表
+   */
+  loadContracts(orderId) {
+    req.request({
+      url: `/public/orders/${orderId}/contracts`,
+      method: 'GET'
+    }).then(res => {
+      this.setData({
+        'detail.contracts': res.data || []
+      });
+    }).catch(err => {
+      logger.warn('加载合同列表失败:', err);
+    });
+  },
+
+  /**
+   * 加载制单列表
+   */
+  loadVouchers(orderId) {
+    req.request({
+      url: `/public/orders/${orderId}/vouchers`,
+      method: 'GET'
+    }).then(res => {
+      this.setData({
+        'detail.vouchers': res.data || []
+      });
+    }).catch(err => {
+      logger.warn('加载制单列表失败:', err);
+    });
   },
 
   /**
@@ -164,17 +207,18 @@ Page({
     const urls = [];
     
     // 收集所有图片URL
-    if (this.data.borrowerInfo) {
-      if (this.data.borrowerInfo.idCardFront) urls.push(this.data.borrowerInfo.idCardFront);
-      if (this.data.borrowerInfo.idCardBack) urls.push(this.data.borrowerInfo.idCardBack);
+    const detail = this.data.detail;
+    if (detail.borrowerInfo) {
+      if (detail.borrowerInfo.faceFrontUrl) urls.push(detail.borrowerInfo.faceFrontUrl);
+      if (detail.borrowerInfo.faceBackUrl) urls.push(detail.borrowerInfo.faceBackUrl);
     }
-    if (this.data.coBorrowerInfo) {
-      if (this.data.coBorrowerInfo.idCardFront) urls.push(this.data.coBorrowerInfo.idCardFront);
-      if (this.data.coBorrowerInfo.idCardBack) urls.push(this.data.coBorrowerInfo.idCardBack);
+    if (detail.coBorrowerInfo) {
+      if (detail.coBorrowerInfo.faceFrontUrl) urls.push(detail.coBorrowerInfo.faceFrontUrl);
+      if (detail.coBorrowerInfo.faceBackUrl) urls.push(detail.coBorrowerInfo.faceBackUrl);
     }
-    if (this.data.guarantorInfo) {
-      if (this.data.guarantorInfo.idCardFront) urls.push(this.data.guarantorInfo.idCardFront);
-      if (this.data.guarantorInfo.idCardBack) urls.push(this.data.guarantorInfo.idCardBack);
+    if (detail.guarantorInfo) {
+      if (detail.guarantorInfo.faceFrontUrl) urls.push(detail.guarantorInfo.faceFrontUrl);
+      if (detail.guarantorInfo.faceBackUrl) urls.push(detail.guarantorInfo.faceBackUrl);
     }
 
     wx.previewImage({
@@ -188,9 +232,12 @@ Page({
    */
   previewAttachment(e) {
     const index = e.currentTarget.dataset.index;
-    const attachment = this.data.attachments[index];
+    const attachment = this.data.detail.attachments[index];
     
-    if (!attachment || !attachment.path) {
+    // 后端返回的字段是 url，不是 path
+    const fileUrl = attachment?.url || attachment?.path;
+    
+    if (!attachment || !fileUrl) {
       wx.showToast({
         title: '文件不存在',
         icon: 'none'
@@ -198,21 +245,25 @@ Page({
       return;
     }
 
+    logger.info('[附件预览]', { attachment, fileUrl });
+
     // 判断文件类型
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    const fileExtension = attachment.path.split('.').pop().toLowerCase();
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
     
     if (imageExtensions.includes(fileExtension)) {
       // 图片类型，使用预览图片
-      const imageUrls = this.data.attachments
+      const imageUrls = this.data.detail.attachments
         .filter(item => {
-          const ext = item.path.split('.').pop().toLowerCase();
+          const url = item.url || item.path;
+          if (!url) return false;
+          const ext = url.split('.').pop().toLowerCase();
           return imageExtensions.includes(ext);
         })
-        .map(item => item.path);
+        .map(item => item.url || item.path);
       
       wx.previewImage({
-        current: attachment.path,
+        current: fileUrl,
         urls: imageUrls
       });
     } else {

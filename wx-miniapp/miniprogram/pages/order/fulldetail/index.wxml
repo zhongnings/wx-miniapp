@@ -1,392 +1,306 @@
+<!-- 引入WXS文件 -->
+<wxs src="../../../utils/formatMoney.wxs" module="formatTool" />
+
 <view class="fulldetail-container">
   <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
     
-    <!-- 订单摘要 -->
-    <view class="section-card summary-section">
-      <view class="section-title-bar">
+    <!-- 订单信息 -->
+    <view class="section-card">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="summary">
         <view class="title-indicator"></view>
-        <text class="section-title">订单摘要</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="summary">
+        <text class="section-title">订单信息</text>
+        <view class="collapse-icon">
           <text class="{{expandedSections.summary ? 'expanded' : ''}}">^</text>
         </view>
       </view>
       <view class="section-content" wx:if="{{expandedSections.summary}}">
         <view class="info-row">
           <text class="info-label">借款人员：</text>
-          <text class="info-value">{{orderData.borrowerName || '-'}}</text>
+          <text class="info-value">{{detail.borrowerName || '-'}}</text>
         </view>
         <view class="info-row">
           <text class="info-label">借款金额：</text>
-          <text class="info-value amount">¥ {{orderData.loanAmount || '0.00'}}</text>
+          <text class="info-value amount">¥ {{formatTool.formatMoney(detail.loanAmount)}}</text>
         </view>
         <view class="info-row">
           <text class="info-label">订单编号：</text>
-          <text class="info-value">{{orderData.orderNo || '-'}}</text>
+          <text class="info-value">{{detail.orderNo || '-'}}</text>
         </view>
         <view class="info-row">
           <text class="info-label">订单状态：</text>
-          <text class="info-value">{{orderData.orderStatusName || '-'}}</text>
+          <text class="info-value status-text">{{detail.orderStatusName || '-'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.debtTransferStatus}}">
+          <text class="info-label">债转状态：</text>
+          <text class="info-value">{{detail.debtTransferStatus}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 1. 借款信息 -->
-    <view class="section-card" wx:if="{{loanInfo}}">
-      <view class="section-title-bar">
+    <!-- 借款信息 -->
+    <view class="section-card" wx:if="{{detail.loanInfo}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="loanInfo">
         <view class="title-indicator"></view>
         <text class="section-title">借款信息</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="loanInfo">
+        <view class="collapse-icon">
           <text class="{{expandedSections.loanInfo ? 'expanded' : ''}}">^</text>
         </view>
       </view>
       <view class="section-content" wx:if="{{expandedSections.loanInfo}}">
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.assigneeOrg}}">
           <text class="info-label">受让机构：</text>
-          <text class="info-value">{{loanInfo.assigneeOrg || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.assigneeOrg}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.channelOrg}}">
           <text class="info-label">小贷机构：</text>
-          <text class="info-value">{{loanInfo.channelOrg || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.channelOrg}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.payMethod}}">
           <text class="info-label">支付渠道：</text>
-          <text class="info-value">{{loanInfo.payMethod || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.payMethod}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.productType}}">
           <text class="info-label">产品类型：</text>
-          <text class="info-value">{{loanInfo.productType || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.productType}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.borrowerCategory}}">
           <text class="info-label">借款人类型：</text>
-          <text class="info-value">{{loanInfo.borrowerCategory || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.borrowerCategory}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.contractSignMode}}">
           <text class="info-label">合同签署方式：</text>
-          <text class="info-value">{{loanInfo.contractSignMode || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.contractSignMode}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.loanAmount}}">
           <text class="info-label">借款金额：</text>
-          <text class="info-value">{{loanInfo.loanAmount || '-'}} 元</text>
+          <text class="info-value">{{formatTool.formatMoney(detail.loanInfo.loanAmount)}} 元</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.loanDays}}">
           <text class="info-label">借款天数：</text>
-          <text class="info-value">{{loanInfo.loanDays || '-'}} 天</text>
+          <text class="info-value">{{detail.loanInfo.loanDays}} 天</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.startDate}}">
           <text class="info-label">借款起始日期：</text>
-          <text class="info-value">{{loanInfo.startDate || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.startDate}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.endDate}}">
           <text class="info-label">借款结束日期：</text>
-          <text class="info-value">{{loanInfo.endDate || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.endDate}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.annualRate}}">
           <text class="info-label">借款年利率：</text>
-          <text class="info-value">{{loanInfo.annualRate || '-'}} %</text>
+          <text class="info-value">{{detail.loanInfo.annualRate}} %</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.signPlace}}">
           <text class="info-label">签约地：</text>
-          <text class="info-value">{{loanInfo.signPlace || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.signPlace}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.usageDesc}}">
           <text class="info-label">借款用途：</text>
-          <text class="info-value">{{loanInfo.usageDesc || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.usageDesc}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.repayMode}}">
           <text class="info-label">还款方式：</text>
-          <text class="info-value">{{loanInfo.repayMode || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.repayMode}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.loanInfo.arbitrationOrg}}">
           <text class="info-label">仲裁机构：</text>
-          <text class="info-value">{{loanInfo.arbitrationOrg || '-'}}</text>
+          <text class="info-value">{{detail.loanInfo.arbitrationOrg}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.loanInfo.notaryOffice}}">
+          <text class="info-label">公证处：</text>
+          <text class="info-value">{{detail.loanInfo.notaryOffice}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.loanInfo.appointmentTime}}">
+          <text class="info-label">预约时间：</text>
+          <text class="info-value">{{detail.loanInfo.appointmentTime}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 2. 借款人信息 -->
-    <view class="section-card" wx:if="{{borrowerInfo}}">
-      <view class="section-title-bar">
+    <!-- 借款人信息 -->
+    <view class="section-card" wx:if="{{detail.borrowerInfo}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="borrowerInfo">
         <view class="title-indicator"></view>
         <text class="section-title">借款人信息</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="borrowerInfo">
+        <view class="collapse-icon">
           <text class="{{expandedSections.borrowerInfo ? 'expanded' : ''}}">^</text>
         </view>
       </view>
       <view class="section-content" wx:if="{{expandedSections.borrowerInfo}}">
         <!-- 身份证照片 -->
-        <view class="id-images-row" wx:if="{{borrowerInfo.idCardFront || borrowerInfo.idCardBack}}">
-          <view class="id-image-item" wx:if="{{borrowerInfo.idCardFront}}">
-            <image class="id-image" src="{{borrowerInfo.idCardFront}}" mode="aspectFill" bindtap="previewImage" data-url="{{borrowerInfo.idCardFront}}"></image>
+        <view class="id-images-row" wx:if="{{detail.borrowerInfo.faceFrontUrl || detail.borrowerInfo.faceBackUrl}}">
+          <view class="id-image-item" wx:if="{{detail.borrowerInfo.faceFrontUrl}}">
+            <image class="id-image" src="{{detail.borrowerInfo.faceFrontUrl}}" mode="aspectFill" bindtap="previewImage" data-url="{{detail.borrowerInfo.faceFrontUrl}}"></image>
             <text class="id-image-label">证件正面</text>
           </view>
-          <view class="id-image-item" wx:if="{{borrowerInfo.idCardBack}}">
-            <image class="id-image" src="{{borrowerInfo.idCardBack}}" mode="aspectFill" bindtap="previewImage" data-url="{{borrowerInfo.idCardBack}}"></image>
+          <view class="id-image-item" wx:if="{{detail.borrowerInfo.faceBackUrl}}">
+            <image class="id-image" src="{{detail.borrowerInfo.faceBackUrl}}" mode="aspectFill" bindtap="previewImage" data-url="{{detail.borrowerInfo.faceBackUrl}}"></image>
             <text class="id-image-label">证件反面</text>
           </view>
         </view>
         
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.idType}}">
           <text class="info-label">证件类型：</text>
-          <text class="info-value">{{borrowerInfo.idType || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.idType}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.name}}">
           <text class="info-label">姓名：</text>
-          <text class="info-value">{{borrowerInfo.name || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.name}}</text>
         </view>
-        <view class="info-row">
-          <text class="info-label">手机号：</text>
-          <text class="info-value">{{borrowerInfo.phone || '-'}}</text>
-        </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.idNo}}">
           <text class="info-label">证件号码：</text>
-          <text class="info-value">{{borrowerInfo.idNumber || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.idNo}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.idIssueDate}}">
+          <text class="info-label">证件生效日期：</text>
+          <text class="info-value">{{detail.borrowerInfo.idIssueDate}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.borrowerInfo.idExpireDate}}">
+          <text class="info-label">证件有效期：</text>
+          <text class="info-value">{{detail.borrowerInfo.idExpireDate}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.borrowerInfo.addressDetail}}">
           <text class="info-label">证件地址：</text>
-          <text class="info-value">{{borrowerInfo.idAddress || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.addressDetail}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.mobile}}">
+          <text class="info-label">手机号码：</text>
+          <text class="info-value">{{detail.borrowerInfo.mobile}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.borrowerInfo.provinceCity}}">
           <text class="info-label">居住地：</text>
-          <text class="info-value">{{borrowerInfo.residenceArea || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.provinceCity}}</text>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{detail.borrowerInfo.gender}}">
+          <text class="info-label">性别：</text>
+          <text class="info-value">{{detail.borrowerInfo.gender}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.borrowerInfo.birthday}}">
+          <text class="info-label">出生年月：</text>
+          <text class="info-value">{{detail.borrowerInfo.birthday}}</text>
+        </view>
+        <view class="info-row" wx:if="{{detail.borrowerInfo.maritalStatus}}">
           <text class="info-label">婚姻状况：</text>
-          <text class="info-value">{{borrowerInfo.maritalStatus || '-'}}</text>
+          <text class="info-value">{{detail.borrowerInfo.maritalStatus}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 3. 共借人信息 -->
-    <view class="section-card" wx:if="{{coBorrowerInfo}}">
-      <view class="section-title-bar">
-        <view class="title-indicator"></view>
-        <text class="section-title">共借人信息</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="coBorrowerInfo">
-          <text class="{{expandedSections.coBorrowerInfo ? 'expanded' : ''}}">^</text>
-        </view>
-      </view>
-      <view class="section-content" wx:if="{{expandedSections.coBorrowerInfo}}">
-        <view class="info-row">
-          <text class="info-label">类型：</text>
-          <text class="info-value">{{coBorrowerInfo.borrowerType === 'personal' ? '个人' : '对公'}}</text>
-        </view>
-        
-        <!-- 个人类型 -->
-        <block wx:if="{{coBorrowerInfo.borrowerType === 'personal'}}">
-          <view class="id-images-row" wx:if="{{coBorrowerInfo.idCardFront || coBorrowerInfo.idCardBack}}">
-            <view class="id-image-item" wx:if="{{coBorrowerInfo.idCardFront}}">
-              <image class="id-image" src="{{coBorrowerInfo.idCardFront}}" mode="aspectFill" bindtap="previewImage" data-url="{{coBorrowerInfo.idCardFront}}"></image>
-              <text class="id-image-label">证件正面</text>
-            </view>
-            <view class="id-image-item" wx:if="{{coBorrowerInfo.idCardBack}}">
-              <image class="id-image" src="{{coBorrowerInfo.idCardBack}}" mode="aspectFill" bindtap="previewImage" data-url="{{coBorrowerInfo.idCardBack}}"></image>
-              <text class="id-image-label">证件反面</text>
-            </view>
-          </view>
-          <view class="info-row">
-            <text class="info-label">姓名：</text>
-            <text class="info-value">{{coBorrowerInfo.name || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">证件号：</text>
-            <text class="info-value">{{coBorrowerInfo.idNumber || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">手机号：</text>
-            <text class="info-value">{{coBorrowerInfo.phone || '-'}}</text>
-          </view>
-        </block>
-        
-        <!-- 对公类型 -->
-        <block wx:if="{{coBorrowerInfo.borrowerType === 'company'}}">
-          <view class="info-row">
-            <text class="info-label">公司名称：</text>
-            <text class="info-value">{{coBorrowerInfo.companyName || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">信用代码：</text>
-            <text class="info-value">{{coBorrowerInfo.companyCreditCode || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">经办人：</text>
-            <text class="info-value">{{coBorrowerInfo.agentName || '-'}}</text>
-          </view>
-        </block>
-      </view>
-    </view>
-
-    <!-- 4. 担保人信息 -->
-    <view class="section-card" wx:if="{{guarantorInfo}}">
-      <view class="section-title-bar">
-        <view class="title-indicator"></view>
-        <text class="section-title">担保人信息</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="guarantorInfo">
-          <text class="{{expandedSections.guarantorInfo ? 'expanded' : ''}}">^</text>
-        </view>
-      </view>
-      <view class="section-content" wx:if="{{expandedSections.guarantorInfo}}">
-        <view class="info-row">
-          <text class="info-label">类型：</text>
-          <text class="info-value">{{guarantorInfo.borrowerType === 'personal' ? '个人' : (guarantorInfo.borrowerType === 'property' ? '房产' : '对公')}}</text>
-        </view>
-        
-        <!-- 个人类型 -->
-        <block wx:if="{{guarantorInfo.borrowerType === 'personal'}}">
-          <view class="id-images-row" wx:if="{{guarantorInfo.idCardFront || guarantorInfo.idCardBack}}">
-            <view class="id-image-item" wx:if="{{guarantorInfo.idCardFront}}">
-              <image class="id-image" src="{{guarantorInfo.idCardFront}}" mode="aspectFill" bindtap="previewImage" data-url="{{guarantorInfo.idCardFront}}"></image>
-              <text class="id-image-label">证件正面</text>
-            </view>
-            <view class="id-image-item" wx:if="{{guarantorInfo.idCardBack}}">
-              <image class="id-image" src="{{guarantorInfo.idCardBack}}" mode="aspectFill" bindtap="previewImage" data-url="{{guarantorInfo.idCardBack}}"></image>
-              <text class="id-image-label">证件反面</text>
-            </view>
-          </view>
-          <view class="info-row">
-            <text class="info-label">姓名：</text>
-            <text class="info-value">{{guarantorInfo.name || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">证件号：</text>
-            <text class="info-value">{{guarantorInfo.idNumber || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">手机号：</text>
-            <text class="info-value">{{guarantorInfo.phone || '-'}}</text>
-          </view>
-        </block>
-        
-        <!-- 对公类型 -->
-        <block wx:if="{{guarantorInfo.borrowerType === 'company'}}">
-          <view class="info-row">
-            <text class="info-label">公司名称：</text>
-            <text class="info-value">{{guarantorInfo.companyName || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">信用代码：</text>
-            <text class="info-value">{{guarantorInfo.companyCreditCode || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">经办人：</text>
-            <text class="info-value">{{guarantorInfo.agentName || '-'}}</text>
-          </view>
-        </block>
-        
-        <!-- 房产类型 -->
-        <block wx:if="{{guarantorInfo.borrowerType === 'property'}}">
-          <view class="info-row">
-            <text class="info-label">房产证号码：</text>
-            <text class="info-value">{{guarantorInfo.companyCreditCode || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">房产地：</text>
-            <text class="info-value">{{guarantorInfo.companyArea || '-'}}</text>
-          </view>
-          <view class="info-row">
-            <text class="info-label">经办人：</text>
-            <text class="info-value">{{guarantorInfo.agentName || '-'}}</text>
-          </view>
-        </block>
-      </view>
-    </view>
-
-    <!-- 5. 银行卡信息 -->
-    <view class="section-card" wx:if="{{bankCards && bankCards.length > 0}}">
-      <view class="section-title-bar">
+    <!-- 银行卡信息 -->
+    <view class="section-card" wx:if="{{detail.bankCards && detail.bankCards.length > 0}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="bankCards">
         <view class="title-indicator"></view>
         <text class="section-title">银行卡信息</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="bankCards">
+        <view class="collapse-icon">
           <text class="{{expandedSections.bankCards ? 'expanded' : ''}}">^</text>
         </view>
       </view>
-      <view class="section-content" wx:if="{{expandedSections.bankCards}}">
-        <block wx:for="{{bankCards}}" wx:key="index">
-          <view class="bank-card-display">
+      <view class="section-content bank-card-content" wx:if="{{expandedSections.bankCards}}">
+        <view class="bank-card-item" wx:for="{{detail.bankCards}}" wx:key="id">
+          <view class="bank-card" style="background: {{item.bankColor || '#4A90E2'}};">
             <view class="bank-card-header">
-              <text class="bank-name">{{item.bankName}}</text>
+              <view class="bank-logo">
+                <image class="bank-logo-image" src="{{item.bankLogo}}" mode="aspectFit"></image>
+              </view>
+              <view class="bank-info">
+                <text class="bank-name">{{item.bankName}}</text>
+                <text class="cardholder-name">{{item.cardholderName}}</text>
+              </view>
             </view>
-            <view class="bank-card-number">{{item.cardNumber}}</view>
-            <view class="bank-card-holder">{{item.cardholderName}}</view>
+            <view class="bank-card-number">{{formatTool.formatBankCard(item.cardNumber)}}</view>
+            <view class="bank-card-watermark">
+              <image class="watermark-logo" src="{{item.bankLogo}}" mode="aspectFit"></image>
+            </view>
           </view>
-        </block>
+        </view>
       </view>
     </view>
 
-    <!-- 6. 附件材料 -->
-    <view class="section-card" wx:if="{{attachments && attachments.length > 0}}">
-      <view class="section-title-bar">
+    <!-- 附件材料 -->
+    <view class="section-card" wx:if="{{detail.attachments && detail.attachments.length > 0}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="attachments">
         <view class="title-indicator"></view>
         <text class="section-title">附件材料</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="attachments">
+        <view class="collapse-icon">
           <text class="{{expandedSections.attachments ? 'expanded' : ''}}">^</text>
         </view>
       </view>
       <view class="section-content" wx:if="{{expandedSections.attachments}}">
         <view class="attachment-list">
-          <view class="attachment-status" wx:if="{{attachments.length === 0}}">未上传</view>
-          <block wx:for="{{attachments}}" wx:key="index">
-            <view class="attachment-item">
-              <text class="attachment-name" bindtap="previewAttachment" data-index="{{index}}">{{item.name}}</text>
+          <view class="attachment-item" wx:for="{{detail.attachments}}" wx:key="id" bindtap="previewAttachment" data-index="{{index}}">
+            <view class="attachment-info">
+              <text class="attachment-icon">📎</text>
+              <text class="attachment-name">{{item.name || '附件' + (index + 1)}}</text>
             </view>
-          </block>
+            <text class="attachment-arrow">›</text>
+          </view>
         </view>
       </view>
     </view>
 
-    <!-- 7. 合同列表 -->
-    <view class="section-card" wx:if="{{contracts && contracts.length > 0}}">
-      <view class="section-title-bar">
+    <!-- 合同 -->
+    <view class="section-card" wx:if="{{detail.contracts && detail.contracts.length > 0}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="contracts">
         <view class="title-indicator"></view>
         <text class="section-title">合同</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="contracts">
+        <view class="collapse-icon">
           <text class="{{expandedSections.contracts ? 'expanded' : ''}}">^</text>
         </view>
       </view>
       <view class="section-content" wx:if="{{expandedSections.contracts}}">
-        <block wx:for="{{contracts}}" wx:key="id">
-          <view class="contract-item">
+        <block wx:for="{{detail.contracts}}" wx:key="id">
+          <view class="contract-item" bindtap="previewContract" data-url="{{item.pdfUrl}}">
             <view class="contract-info">
-              <text class="contract-name">{{item.name}}</text>
-              <text class="contract-time">{{item.createTime}}</text>
+              <text class="contract-name">{{item.name || '合同' + (index + 1)}}</text>
+              <text class="contract-time" wx:if="{{item.createTime}}">{{item.createTime}}</text>
             </view>
-            <button class="preview-btn" bindtap="previewContract" data-url="{{item.pdfUrl}}">预览</button>
+            <text class="contract-arrow">›</text>
           </view>
         </block>
       </view>
     </view>
 
-    <!-- 8. 制单列表（放款成功后显示） -->
-    <view class="section-card" wx:if="{{vouchers && vouchers.length > 0}}">
-      <view class="section-title-bar">
+    <!-- 制单列表 -->
+    <view class="section-card" wx:if="{{detail.vouchers && detail.vouchers.length > 0}}">
+      <view class="section-title-bar" bindtap="toggleSection" data-section="vouchers">
         <view class="title-indicator"></view>
         <text class="section-title">制单列表</text>
-        <view class="collapse-icon" bindtap="toggleSection" data-section="vouchers">
+        <view class="collapse-icon">
           <text class="{{expandedSections.vouchers ? 'expanded' : ''}}">^</text>
         </view>
       </view>
-      <view class="section-content" wx:if="{{expandedSections.vouchers}}">
-        <block wx:for="{{vouchers}}" wx:key="index">
-          <view class="voucher-item">
-            <view class="voucher-title">制单{{index + 1}}</view>
-            <view class="info-row">
-              <text class="info-label">金额(元)：</text>
-              <text class="info-value">{{item.amount}}</text>
+      <view class="section-content voucher-content" wx:if="{{expandedSections.vouchers}}">
+        <block wx:for="{{detail.vouchers}}" wx:key="id">
+          <view class="voucher-card">
+            <!-- 收款方和状态 -->
+            <view class="voucher-header">
+              <text class="payee-name">收款方：{{item.payee || '-'}}</text>
+              <text class="voucher-status">{{item.statusText || '待放款申请'}}</text>
             </view>
-            <view class="info-row">
-              <text class="info-label">收款方：</text>
-              <text class="info-value">{{item.payee}}</text>
+            
+            <!-- 收款卡号 -->
+            <view class="voucher-row">
+              <text class="label">收款卡号：</text>
+              <text class="value">{{formatTool.formatBankCard(item.cardNo)}}</text>
             </view>
-            <view class="info-row">
-              <text class="info-label">收款方类型：</text>
-              <text class="info-value">{{item.payeeType}}</text>
+            
+            <!-- 制单金额 -->
+            <view class="voucher-row amount-row">
+              <text class="label">制单金额</text>
+              <text class="amount-value">{{formatTool.formatMoney(item.amount)}} 元</text>
             </view>
-            <view class="info-row">
-              <text class="info-label">开户银行：</text>
-              <text class="info-value">{{item.bankName}}</text>
+            
+            <!-- 开户行 -->
+            <view class="voucher-row" wx:if="{{item.openBank}}">
+              <text class="label">开户行</text>
+              <text class="value">{{item.openBank}}</text>
             </view>
-            <view class="info-row">
-              <text class="info-label">银行卡号：</text>
-              <text class="info-value">{{item.bankCardNo}}</text>
+            
+            <!-- 失败原因 -->
+            <view class="voucher-row" wx:if="{{item.remark}}">
+              <text class="label">失败原因</text>
+              <text class="value">{{item.remark}}</text>
             </view>
           </view>
         </block>

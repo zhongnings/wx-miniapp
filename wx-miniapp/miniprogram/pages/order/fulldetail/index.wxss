@@ -2,19 +2,20 @@
 .fulldetail-container {
   min-height: 100vh;
   background: #f5f5f5;
-  padding-bottom: 40rpx;
 }
 
 .content-area {
   height: 100vh;
-  padding: 20rpx;
+  padding: 0;
+  padding-bottom: 40rpx;
+  box-sizing: border-box;
 }
 
 /* 区块卡片 */
 .section-card {
   background: #ffffff;
   border-radius: 16rpx;
-  margin-bottom: 20rpx;
+  margin: 20rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
@@ -24,12 +25,8 @@
   display: flex;
   align-items: center;
   padding: 30rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
   position: relative;
-}
-
-.summary-section .section-title-bar {
-  background: linear-gradient(135deg, #ff6f6f 0%, #ee5a6f 100%);
 }
 
 .title-indicator {
@@ -69,7 +66,7 @@
 
 /* 区块内容 */
 .section-content {
-  padding: 30rpx;
+  padding: 24rpx;
 }
 
 /* 信息行 */
@@ -86,21 +83,29 @@
 }
 
 .info-label {
-  min-width: 180rpx;
+  min-width: 160rpx;
+  max-width: 200rpx;
   color: #666;
-  margin-right: 20rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
 }
 
 .info-value {
   flex: 1;
   color: #333;
   word-break: break-all;
+  text-align: right;
+  overflow-wrap: break-word;
 }
 
 .info-value.amount {
-  color: #ff6f6f;
+  color: #ff6b6b;
   font-weight: 500;
   font-size: 32rpx;
+}
+
+.status-text {
+  color: #ff6b6b;
 }
 
 /* 身份证图片展示 */
@@ -132,41 +137,95 @@
   color: #999;
 }
 
-/* 银行卡展示 */
-.bank-card-display {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  color: #ffffff;
+/* 银行卡展示 - 完全复用 step5 的样式 */
+.bank-card-content {
+  padding: 20rpx !important;
 }
 
-.bank-card-display:last-child {
+.bank-card-item {
+  width: 100%;
+  margin-bottom: 30rpx;
+}
+
+.bank-card-item:last-child {
   margin-bottom: 0;
+}
+
+.bank-card {
+  position: relative;
+  width: 100%;
+  height: 180rpx;
+  background: linear-gradient(135deg, #ff6f6f 0%, #ff8e8e 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 111, 111, 0.3);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .bank-card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 40rpx;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.bank-logo {
+  width: 88rpx;
+  height: 88rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.bank-logo-image {
+  width: 100%;
+  height: 100%;
+}
+
+.bank-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
 }
 
 .bank-name {
-  font-size: 32rpx;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.cardholder-name {
+  font-size: 26rpx;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .bank-card-number {
-  font-size: 36rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
   letter-spacing: 4rpx;
-  margin-bottom: 20rpx;
-  font-family: 'Courier New', monospace;
 }
 
-.bank-card-holder {
-  font-size: 28rpx;
-  opacity: 0.9;
+.bank-card-watermark {
+  position: absolute;
+  right: 32rpx;
+  bottom: 32rpx;
+  width: 100rpx;
+  height: 100rpx;
+  opacity: 0.15;
+}
+
+.watermark-logo {
+  width: 100%;
+  height: 100%;
 }
 
 /* 附件列表 */
@@ -174,26 +233,35 @@
   padding: 0;
 }
 
-.attachment-status {
-  text-align: center;
-  color: #999;
-  font-size: 28rpx;
-  padding: 40rpx 0;
-}
-
 .attachment-item {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
 }
 
 .attachment-item:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.attachment-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.attachment-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
 }
 
 .attachment-name {
-  color: #1890ff;
+  flex: 1;
+  color: #333;
   font-size: 28rpx;
-  text-decoration: underline;
 }
 
 /* 合同列表 */
@@ -201,12 +269,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  padding: 24rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
 }
 
 .contract-item:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .contract-info {
@@ -219,6 +289,7 @@
 .contract-name {
   font-size: 28rpx;
   color: #333;
+  font-weight: 500;
 }
 
 .contract-time {
@@ -226,47 +297,84 @@
   color: #999;
 }
 
-.preview-btn {
-  padding: 12rpx 24rpx;
-  background: #1890ff;
-  color: #ffffff;
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  border: none;
-  line-height: 1;
+.contract-arrow {
+  font-size: 40rpx;
+  color: #ccc;
+  margin-left: 16rpx;
 }
 
-.preview-btn::after {
-  border: none;
+/* 制单列表内容 */
+.voucher-content {
+  padding: 20rpx !important;
 }
 
-/* 制单列表 */
-.voucher-item {
-  padding: 20rpx;
-  background: #f9f9f9;
-  border-radius: 12rpx;
+.voucher-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 24rpx;
   margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid #f0f0f0;
 }
 
-.voucher-item:last-child {
+.voucher-card:last-child {
   margin-bottom: 0;
 }
 
-.voucher-title {
-  font-size: 28rpx;
+/* 收款方和状态 */
+.voucher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.payee-name {
+  font-size: 30rpx;
   font-weight: 500;
   color: #333;
+}
+
+.voucher-status {
+  font-size: 26rpx;
+  color: #ff6b6b;
+}
+
+/* 制单信息行 */
+.voucher-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 28rpx;
   margin-bottom: 16rpx;
-  padding-bottom: 16rpx;
-  border-bottom: 1rpx solid #e0e0e0;
 }
 
-.voucher-item .info-row {
-  padding: 12rpx 0;
-  border-bottom: none;
+.voucher-row:last-of-type {
+  margin-bottom: 0;
 }
 
-.voucher-item .info-label {
-  min-width: 160rpx;
+.voucher-row .label {
+  color: #666;
+  min-width: 140rpx;
 }
 
+.voucher-row .value {
+  flex: 1;
+  color: #333;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* 金额行特殊样式 */
+.amount-row {
+  margin-top: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.amount-row .amount-value {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #ff6b6b;
+}
