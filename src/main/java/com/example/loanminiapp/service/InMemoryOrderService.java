@@ -36,13 +36,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +71,9 @@ public class InMemoryOrderService implements OrderService {
     private final SysUserMapper sysUserMapper;
     private final com.example.loanminiapp.mapper.OrderCoBorrowerMapper orderCoBorrowerMapper;
     private final com.example.loanminiapp.mapper.OrderGuarantorMapper orderGuarantorMapper;
+    
+    // 用于存储订单提交状态的内存缓存
+    private static final Map<Long, Map<String, Object>> submitStatusCache = new ConcurrentHashMap<>();
 
     @Override
     public List<OrderSummary> list(String tab, String keyword, String status) {
@@ -567,13 +573,91 @@ public class InMemoryOrderService implements OrderService {
             throw new RuntimeException("生成合同失败: " + e.getMessage());
         }
         
-        // 更新订单状态为风控审核中
+        // 更新订单状态为签署中
         order.setOrderStatus(OrderStatusEnum.SIGNING.getCode());
-//        order.setRiskStatus(RiskStatusEnum.REVIEWING.getCode());
         orderMapper.updateById(order);
         // 记录状态流转
         orderStatusFlowService.recordStatusChange(order, OrderStatusEnum.SIGNING, "提交订单，进入签署中");
         log.info("订单提交成功: orderId={}", id);
+    }
+    
+    @Override
+    @Async
+    public void submitAsync(Long id) {
+        log.info("开始异步提交订单: orderId={}", id);
+        
+        // 设置初始状态为处理中
+        Map<String, Object> status = new HashMap<>();
+        status.put("status", "processing");
+        status.put("message", "订单提交中，正在生成合同...");
+        submitStatusCache.put(id, status);
+        
+        try {
+            // 执行提交逻辑
+            submit(id);
+            
+            // 更新状态为成功
+            status.put("status", "success");
+            status.put("message", "订单提交成功");
+            submitStatusCache.put(id, status);
+            
+            log.info("异步提交订单成功: orderId={}", id);
+        } catch (Exception e) {
+            log.error("异步提交订单失败: orderId={}", id, e);
+            
+            // 更新状态为失败
+            status.put("status", "failed");
+            status.put("message", "订单提交失败: " + e.getMessage());
+            submitStatusCache.put(id, status);
+        }
+    }
+    
+    @Override
+    public Map<String, Object> getSubmitStatus(Long id) {
+        checkAccess(id);
+        
+        // 从缓存中获取状态
+        Map<String, Object> status = submitStatusCache.get(id);
+        
+        if (status == null) {
+            // 如果缓存中没有，检查订单当前状态
+            Order order = orderMapper.selectById(id);
+            if (order == null) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("status", "failed");
+                result.put("message", "订单不存在");
+                return result;
+            }
+            
+            // 根据订单状态判断
+            if (order.getOrderStatus() != null && order.getOrderStatus() != OrderStatusEnum.PENDING_SUBMIT.getCode()) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("status", "success");
+                result.put("message", "订单已提交");
+                return result;
+            } else {
+                Map<String, Object> result = new HashMap<>();
+                result.put("status", "pending");
+                result.put("message", "订单未提交");
+                return result;
+            }
+        }
+        
+        // 如果已完成（成功或失败），清除缓存
+        String statusStr = (String) status.get("status");
+        if ("success".equals(statusStr) || "failed".equals(statusStr)) {
+            // 延迟清除，给前端足够时间获取最终状态
+            new Thread(() -> {
+                try {
+                    Thread.sleep(30000); // 30秒后清除
+                    submitStatusCache.remove(id);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
+        
+        return new HashMap<>(status);
     }
 
     /**

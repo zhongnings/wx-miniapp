@@ -256,22 +256,19 @@ Page({
   },
 
   /**
-   * 提交订单
+   * 提交订单（异步提交 + 轮询状态）
    */
   submitOrder() {
-    wx.showLoading({ title: '提交中...' });
+    const that = this;
+    wx.showLoading({ title: '提交中...', mask: true });
     
     req.request({
       url: `/public/orders/${this.data.id}/submit`,
       method: 'POST'
-    }).then(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '提交成功',
-        icon: 'success'
-      });
-      // 重新加载订单详情，更新状态
-      this.loadDetail();
+    }).then((res) => {
+      // 后端立即返回，开始轮询状态
+      logger.info('订单提交请求已发送，开始轮询状态');
+      that.pollSubmitStatus();
     }).catch(err => {
       wx.hideLoading();
       logger.error('提交订单失败:', err);
@@ -280,6 +277,103 @@ Page({
         icon: 'none'
       });
     });
+  },
+  
+  /**
+   * 轮询订单提交状态
+   */
+  pollSubmitStatus() {
+    const that = this;
+    let pollCount = 0;
+    const maxPollCount = 60; // 最多轮询60次（60秒）
+    const pollInterval = 1000; // 每1秒轮询一次
+    
+    const poll = () => {
+      pollCount++;
+      
+      req.request({
+        url: `/public/orders/${that.data.id}/submit-status`,
+        method: 'GET'
+      }).then((res) => {
+        const statusData = res.data || {};
+        const status = statusData.status;
+        const message = statusData.message || '';
+        
+        logger.info(`轮询状态 (${pollCount}/${maxPollCount}):`, statusData);
+        
+        if (status === 'success') {
+          // 提交成功
+          wx.hideLoading();
+          wx.showToast({
+            title: '提交成功',
+            icon: 'success'
+          });
+          // 重新加载订单详情，更新状态
+          setTimeout(() => {
+            that.loadDetail();
+          }, 1500);
+        } else if (status === 'failed') {
+          // 提交失败
+          wx.hideLoading();
+          wx.showToast({
+            title: message || '提交失败',
+            icon: 'none',
+            duration: 3000
+          });
+        } else if (status === 'processing') {
+          // 仍在处理中
+          wx.showLoading({ 
+            title: message || '提交中...', 
+            mask: true 
+          });
+          
+          // 继续轮询
+          if (pollCount < maxPollCount) {
+            setTimeout(poll, pollInterval);
+          } else {
+            // 超时
+            wx.hideLoading();
+            wx.showModal({
+              title: '提示',
+              content: '订单提交时间较长，请稍后在订单列表中查看提交结果',
+              showCancel: false,
+              success: () => {
+                that.loadDetail();
+              }
+            });
+          }
+        } else {
+          // 未知状态，继续轮询
+          if (pollCount < maxPollCount) {
+            setTimeout(poll, pollInterval);
+          } else {
+            wx.hideLoading();
+            wx.showToast({
+              title: '提交超时，请稍后查看',
+              icon: 'none'
+            });
+            that.loadDetail();
+          }
+        }
+      }).catch(err => {
+        logger.error('轮询状态失败:', err);
+        
+        // 轮询失败，继续重试
+        if (pollCount < maxPollCount) {
+          setTimeout(poll, pollInterval);
+        } else {
+          wx.hideLoading();
+          wx.showToast({
+            title: '提交状态查询失败',
+            icon: 'none'
+          });
+          that.loadDetail();
+        }
+      });
+    };
+    
+    // 开始第一次轮询
+    poll();
   },
 
   /**

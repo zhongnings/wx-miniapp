@@ -45,7 +45,14 @@ App({
   globalData: {
     // 预留全局数据
     uploadUtil,
-    placeholderImages: {} // 占位图缓存映射
+    placeholderImages: {}, // 占位图缓存映射
+    // 订单创建流程上下文（统一管理订单ID、状态等，避免参数传递遗漏）
+    orderContext: {
+      orderId: null,
+      orderStatus: null,
+      mode: null,
+      fromOrderDetail: false
+    }
   }
 });
 

@@ -72,13 +72,19 @@ Component({
     },
 
     /**
-     * 选择银行
+     * 选择银行（点击后直接确认并关闭）
      */
     onBankSelect(e) {
       const bank = e.currentTarget.dataset.bank;
       this.setData({
         selectedBank: bank
       });
+      
+      // 直接触发确认事件并关闭选择器
+      this.triggerEvent('confirm', {
+        value: bank
+      });
+      this.hide();
     },
 
     /**

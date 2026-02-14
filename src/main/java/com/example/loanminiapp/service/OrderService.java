@@ -37,6 +37,17 @@ public interface OrderService {
      * 提交订单（将状态从待提交改为风控审核中）
      */
     void submit(Long id);
+    
+    /**
+     * 异步提交订单（立即返回，后台处理）
+     */
+    void submitAsync(Long id);
+    
+    /**
+     * 获取订单提交状态
+     * @return status: processing(处理中) | success(成功) | failed(失败), message: 提示信息
+     */
+    java.util.Map<String, Object> getSubmitStatus(Long id);
 
     /**
      * 驳回订单（删除合同，将状态改回待提交）

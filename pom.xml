@@ -132,6 +132,12 @@
             <artifactId>spire.pdf.free</artifactId>
             <version>9.13.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.20</version> <!-- 可替换为最新版本 -->
+        </dependency>
     </dependencies>
 
     <profiles>

@@ -33,6 +33,8 @@ Page({
     readonly: false,
     // 订单状态（0-待提交，2-风控驳回时为只读）
     orderStatus: null,
+    // 是否有共借人数据（用于控制是否显示共借人选项）
+    hasCoBorrower: false,
     // 表单数据
     formData: {
       holderType: 'borrower', // 持卡人类型（英文，用于传值）：borrower/coBorrower/guarantor
@@ -50,7 +52,7 @@ Page({
       '中国工商银行', '中国建设银行', '中国农业银行', '中国银行',
       '交通银行', '招商银行', '浦发银行', '中信银行',
       '光大银行', '华夏银行', '民生银行', '广发银行',
-      '平安银行', '兴业银行', '邮储银行', '其他银行'
+      '平安银行', '�兴业银行', '邮储银行', '其他银行'
     ],
     // 银行选择器显示状态
     showBankPicker: false
@@ -92,12 +94,15 @@ Page({
       readonly: readonly
     });
 
+    // 检查是否有共借人数据
+    this.checkCoBorrowerExists();
+
     // 如果是编辑模式，加载银行卡数据
     if (mode === 'edit' && cardIndex >= 0) {
       this.loadBankCardData(cardIndex);
     } else {
-      // 新增模式，尝试从 step2 获取借款人信息
-      this.loadBorrowerInfo();
+      // 新增模式，加载账户名列表（默认加载借款人）
+      this.loadAccountNameList('borrower');
     }
   },
 
@@ -112,30 +117,8 @@ Page({
         const holderType = bankCard.holderType || 'borrower';
         const holderTypeDisplay = this.getHolderTypeDisplay(holderType);
         
-        this.setData({
-          formData: {
-            holderType: holderType,
-            holderTypeDisplay: holderTypeDisplay,
-            accountName: bankCard.cardholderName || '',
-            idType: bankCard.idType || '身份证',
-            idNumber: bankCard.idNumber || '',
-            bankName: bankCard.bankName || '',
-            cardNumber: bankCard.cardNumber || '',
-            reservedMobile: bankCard.reservedMobile || '',
-            cardFrontImage: bankCard.cardFrontImage || ''
-          }
-        });
-        // 保存后端主键，便于单条更新
-        this._bankCardId = bankCard.id || bankCard.bankCardId || null;
-        logger.info('加载银行卡数据成功', this.data.formData);
-      }
-    } else {
-      // 如果无法从页面栈获取，尝试从本地存储获取
-      const savedData = wx.getStorageSync('orderFormData_step5');
-      if (savedData && savedData.bankCards && savedData.bankCards[cardIndex]) {
-        const bankCard = savedData.bankCards[cardIndex];
-        const holderType = bankCard.holderType || 'borrower';
-        const holderTypeDisplay = this.getHolderTypeDisplay(holderType);
+        // 标记为正在加载银行卡数据（避免自动识别覆盖）
+        this._isLoadingCard = true;
         
         this.setData({
           formData: {
@@ -150,6 +133,57 @@ Page({
             cardFrontImage: bankCard.cardFrontImage || ''
           }
         });
+        
+        // 记录当前卡号的BIN码
+        const cleanCardNumber = (bankCard.cardNumber || '').replace(/\s/g, '');
+        if (cleanCardNumber.length >= 6) {
+          this._lastCardBin = cleanCardNumber.substring(0, 6);
+        }
+        
+        // 延迟清除加载标记
+        setTimeout(() => {
+          this._isLoadingCard = false;
+        }, 500);
+        
+        // 保存后端主键，便于单条更新
+        this._bankCardId = bankCard.id || bankCard.bankCardId || null;
+        logger.info('加载银行卡数据成功', this.data.formData);
+      }
+    } else {
+      // 如果无法从页面栈获取，尝试从本地存储获取
+      const savedData = wx.getStorageSync('orderFormData_step5');
+      if (savedData && savedData.bankCards && savedData.bankCards[cardIndex]) {
+        const bankCard = savedData.bankCards[cardIndex];
+        const holderType = bankCard.holderType || 'borrower';
+        const holderTypeDisplay = this.getHolderTypeDisplay(holderType);
+        
+        // 标记为正在加载银行卡数据
+        this._isLoadingCard = true;
+        
+        this.setData({
+          formData: {
+            holderType: holderType,
+            holderTypeDisplay: holderTypeDisplay,
+            accountName: bankCard.cardholderName || '',
+            idType: bankCard.idType || '身份证',
+            idNumber: bankCard.idNumber || '',
+            bankName: bankCard.bankName || '',
+            cardNumber: bankCard.cardNumber || '',
+            reservedMobile: bankCard.reservedMobile || '',
+            cardFrontImage: bankCard.cardFrontImage || ''
+          }
+        });
+        
+        // 记录当前卡号的BIN码
+        const cleanCardNumber = (bankCard.cardNumber || '').replace(/\s/g, '');
+        if (cleanCardNumber.length >= 6) {
+          this._lastCardBin = cleanCardNumber.substring(0, 6);
+        }
+        
+        // 延迟清除加载标记
+        setTimeout(() => {
+          this._isLoadingCard = false;
+        }, 500);
       }
     }
   },
@@ -255,11 +289,52 @@ Page({
       'formData.holderTypeDisplay': holderTypeDisplay
     });
     
-    // 根据持卡人类型，自动填充账户名和证件号
-    if (holderType === 'borrower') {
-      this.loadBorrowerInfo();
-    } else if (holderType === 'coBorrower') {
-      this.loadCoBorrowerInfo();
+    // 根据持卡人类型，加载对应的账户名列表
+    this.loadAccountNameList(holderType);
+  },
+
+  // 检查是否有共借人数据
+  checkCoBorrowerExists() {
+    const orderId = this.getOrderId();
+    
+    if (orderId) {
+      const req = this.getRequest();
+      
+      req.request({
+        url: `/public/orders/${orderId}/coBorrower/list`,
+        method: 'GET'
+      }).then(res => {
+        let dataList = null;
+        
+        if (res.data && Array.isArray(res.data)) {
+          dataList = res.data;
+        } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+          dataList = res.data.data;
+        }
+        
+        const hasCoBorrower = dataList && dataList.length > 0 && dataList[0]?.name;
+        
+        this.setData({
+          hasCoBorrower: hasCoBorrower
+        });
+        
+        logger.info('[银行卡编辑] 检查共借人数据', { hasCoBorrower });
+      }).catch(err => {
+        logger.error('[银行卡编辑] 检查共借人数据失败', err);
+        // 检查失败，尝试从本地存储判断
+        const step3Data = wx.getStorageSync('orderFormData_step3') || {};
+        const hasCoBorrower = !!step3Data.name;
+        this.setData({
+          hasCoBorrower: hasCoBorrower
+        });
+      });
+    } else {
+      // 没有订单ID，从本地存储判断
+      const step3Data = wx.getStorageSync('orderFormData_step3') || {};
+      const hasCoBorrower = !!step3Data.name;
+      this.setData({
+        hasCoBorrower: hasCoBorrower
+      });
     }
   },
 
@@ -271,23 +346,42 @@ Page({
       logger.info('[银行卡编辑] 从后端加载共借人信息', { orderId });
       const req = this.getRequest();
       
+      // 使用 step3 的接口：/public/orders/${orderId}/coBorrower/list
       req.request({
-        url: `/public/orders/${orderId}/coBorrower`,
+        url: `/public/orders/${orderId}/coBorrower/list`,
         method: 'GET'
       }).then(res => {
-        const coBorrowerInfo = res.data?.data || res.data || {};
+        // 处理返回数据，可能是数组或包含data字段的对象
+        let dataList = null;
+        
+        if (res.data && Array.isArray(res.data)) {
+          dataList = res.data;
+        } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+          dataList = res.data.data;
+        }
+        
+        // 取第一个共借人（当前只支持一个共借人）
+        const coBorrowerInfo = dataList && dataList.length > 0 ? dataList[0] : null;
+        
         logger.info('[银行卡编辑] 后端返回共借人信息', { 
-          name: coBorrowerInfo.name,
-          idNo: coBorrowerInfo.idNo
+          hasCoBorrower: !!coBorrowerInfo,
+          name: coBorrowerInfo?.name,
+          idNo: coBorrowerInfo?.idNo
         });
         
-        if (coBorrowerInfo.name) {
+        if (coBorrowerInfo && coBorrowerInfo.name) {
           this.setData({
             'formData.accountName': coBorrowerInfo.name,
             'formData.idNumber': coBorrowerInfo.idNo || coBorrowerInfo.idNumber || ''
           });
         } else {
-          // 后端没有数据，尝试从本地存储读取
+          // 后端没有数据，提示用户
+          wx.showToast({
+            title: '暂无共借人信息',
+            icon: 'none',
+            duration: 2000
+          });
+          // 尝试从本地存储读取
           const step3Data = wx.getStorageSync('orderFormData_step3') || {};
           if (step3Data.name) {
             this.setData({
@@ -298,6 +392,11 @@ Page({
         }
       }).catch(err => {
         logger.error('[银行卡编辑] 从后端加载共借人信息失败', err);
+        wx.showToast({
+          title: '加载共借人信息失败',
+          icon: 'none',
+          duration: 2000
+        });
         // 加载失败，尝试从本地存储读取
         const step3Data = wx.getStorageSync('orderFormData_step3') || {};
         if (step3Data.name) {
@@ -315,50 +414,160 @@ Page({
           'formData.accountName': step3Data.name,
           'formData.idNumber': step3Data.idNumber || ''
         });
+      } else {
+        wx.showToast({
+          title: '暂无共借人信息',
+          icon: 'none',
+          duration: 2000
+        });
       }
     }
   },
 
-  // 账户名输入
-  onAccountNameInput(e) {
-    this.setData({
-      'formData.accountName': e.detail.value
-    });
+  // 加载账户名列表（根据持卡人类型）
+  loadAccountNameList(holderType) {
+    const orderId = this.getOrderId();
+    const accountNameList = [];
+    
+    if (holderType === 'borrower') {
+      // 加载借款人信息
+      if (orderId) {
+        const req = this.getRequest();
+        req.request({
+          url: `/public/orders/${orderId}/step2`,
+          method: 'GET'
+        }).then(res => {
+          const borrowerInfo = res.data?.data || res.data || {};
+          if (borrowerInfo.name) {
+            accountNameList.push({
+              name: borrowerInfo.name,
+              idNumber: borrowerInfo.idNo || borrowerInfo.idNumber || ''
+            });
+          }
+          this.updateAccountNameList(accountNameList);
+        }).catch(() => {
+          // 从本地存储加载
+          const step2Data = wx.getStorageSync('orderFormData_step2') || {};
+          if (step2Data.name) {
+            accountNameList.push({
+              name: step2Data.name,
+              idNumber: step2Data.idNumber || ''
+            });
+          }
+          this.updateAccountNameList(accountNameList);
+        });
+      } else {
+        // 从本地存储加载
+        const step2Data = wx.getStorageSync('orderFormData_step2') || {};
+        if (step2Data.name) {
+          accountNameList.push({
+            name: step2Data.name,
+            idNumber: step2Data.idNumber || ''
+          });
+        }
+        this.updateAccountNameList(accountNameList);
+      }
+    } else if (holderType === 'coBorrower') {
+      // 加载共借人信息
+      if (orderId) {
+        const req = this.getRequest();
+        req.request({
+          url: `/public/orders/${orderId}/coBorrower/list`,
+          method: 'GET'
+        }).then(res => {
+          let dataList = null;
+          if (res.data && Array.isArray(res.data)) {
+            dataList = res.data;
+          } else if (res.data && res.data.data && Array.isArray(res.data.data)) {
+            dataList = res.data.data;
+          }
+          
+          if (dataList && dataList.length > 0) {
+            dataList.forEach(item => {
+              if (item.name) {
+                accountNameList.push({
+                  name: item.name,
+                  idNumber: item.idNo || item.idNumber || ''
+                });
+              }
+            });
+          }
+          this.updateAccountNameList(accountNameList);
+        }).catch(() => {
+          // 从本地存储加载
+          const step3Data = wx.getStorageSync('orderFormData_step3') || {};
+          if (step3Data.name) {
+            accountNameList.push({
+              name: step3Data.name,
+              idNumber: step3Data.idNumber || ''
+            });
+          }
+          this.updateAccountNameList(accountNameList);
+        });
+      } else {
+        // 从本地存储加载
+        const step3Data = wx.getStorageSync('orderFormData_step3') || {};
+        if (step3Data.name) {
+          accountNameList.push({
+            name: step3Data.name,
+            idNumber: step3Data.idNumber || ''
+          });
+        }
+        this.updateAccountNameList(accountNameList);
+      }
+    }
   },
 
-  // 选择账户名（从已有数据中选择）
-  selectAccountName() {
-    const holderType = this.data.formData.holderType;
-    let name = '';
-    let idNumber = '';
-    
-    if (holderType === '借款人') {
-      const step2Data = wx.getStorageSync('orderFormData_step2') || {};
-      name = step2Data.name || '';
-      idNumber = step2Data.idNumber || '';
-    } else if (holderType === '共借人') {
-      const step3Data = wx.getStorageSync('orderFormData_step3') || {};
-      name = step3Data.name || '';
-      idNumber = step3Data.idNumber || '';
-    }
-    
-    if (name) {
+  // 更新账户名列表并默认选择第一个
+  updateAccountNameList(accountNameList) {
+    if (accountNameList.length > 0) {
       this.setData({
-        'formData.accountName': name,
-        'formData.idNumber': idNumber || this.data.formData.idNumber
+        accountNameList: accountNameList,
+        accountNameIndex: 0,
+        'formData.accountName': accountNameList[0].name,
+        'formData.idNumber': accountNameList[0].idNumber
       });
-      wx.showToast({
-        title: '已自动填充',
-        icon: 'success',
-        duration: 1500
+      logger.info('[银行卡编辑] 账户名列表加载成功，默认选择第一个', {
+        count: accountNameList.length,
+        selected: accountNameList[0]
       });
     } else {
+      this.setData({
+        accountNameList: [],
+        accountNameIndex: 0,
+        'formData.accountName': '',
+        'formData.idNumber': ''
+      });
+      logger.warn('[银行卡编辑] 没有可用的账户名');
+    }
+  },
+
+  // 显示账户名选择器
+  showAccountNamePicker() {
+    if (this.data.accountNameList.length === 0) {
       wx.showToast({
-        title: `请先在${holderType}信息步骤填写姓名`,
+        title: '暂无可选账户',
         icon: 'none',
         duration: 2000
       });
+      return;
     }
+    
+    // 使用微信原生选择器
+    const nameList = this.data.accountNameList.map(item => item.name);
+    wx.showActionSheet({
+      itemList: nameList,
+      success: (res) => {
+        const index = res.tapIndex;
+        const selected = this.data.accountNameList[index];
+        this.setData({
+          accountNameIndex: index,
+          'formData.accountName': selected.name,
+          'formData.idNumber': selected.idNumber
+        });
+        logger.info('[银行卡编辑] 选择账户名', { index, selected });
+      }
+    });
   },
 
   // 证件类型选择
@@ -421,40 +630,44 @@ Page({
     const formattedValue = bankCardUtil.formatCardNumber(value);
     
     // 当输入达到6位时，尝试识别银行
+    // 修改逻辑：如果卡号前6位变化了，重新识别银行（即使已有银行名称）
     if (value.length >= 6) {
-      const bankName = bankCardUtil.identifyBank(value);
-      if (bankName) {
-        logger.info('自动识别银行:', { cardNumber: value.substring(0, 6) + '****', bankName });
+      const currentBin = value.substring(0, 6);
+      const previousBin = this._lastCardBin || '';
+      
+      // 如果前6位变化了，重新识别
+      if (currentBin !== previousBin) {
+        this._lastCardBin = currentBin;
         
-        // 如果识别成功且当前未选择银行，自动填充
-        if (!this.data.formData.bankName || this.data.formData.bankName === '') {
-          this.setData({
-            'formData.bankName': bankName
-          });
+        const bankName = bankCardUtil.identifyBank(value);
+        if (bankName) {
+          logger.info('自动识别银行:', { cardNumber: value.substring(0, 6) + '****', bankName });
           
-          // 显示提示
-          wx.showToast({
-            title: `已识别：${bankName}`,
-            icon: 'success',
-            duration: 1500
-          });
-        } else if (this.data.formData.bankName !== bankName) {
-          // 如果已选择银行但与识别结果不同，提示用户
-          wx.showModal({
-            title: '银行识别',
-            content: `检测到该卡号属于${bankName}，是否切换？`,
-            confirmText: '切换',
-            cancelText: '保持',
-            success: (res) => {
-              if (res.confirm) {
-                this.setData({
-                  'formData.bankName': bankName
-                });
-              }
-            }
-          });
+          // 如果识别到的银行与当前不同，更新银行名称
+          if (this.data.formData.bankName !== bankName) {
+            this.setData({
+              'formData.bankName': bankName
+            });
+            
+            // 显示提示
+            wx.showToast({
+              title: `已识别：${bankName}`,
+              icon: 'success',
+              duration: 1500
+            });
+          }
+        } else {
+          // 无法识别时，如果是新输入的卡号（不是编辑模式加载的），清空银行名称
+          if (!this._isLoadingCard) {
+            this.setData({
+              'formData.bankName': ''
+            });
+          }
         }
       }
+    } else if (value.length < 6) {
+      // 卡号少于6位时，清除记录的BIN码
+      this._lastCardBin = '';
     }
     
     this.setData({

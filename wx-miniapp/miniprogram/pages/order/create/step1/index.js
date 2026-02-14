@@ -23,6 +23,9 @@ const logger = {
 // 统一请求工具：直接使用全局挂载的 wx.$request（在 app.js 中挂载）
 const req = wx.$request;
 
+// 引入导航工具
+const navigation = require('../../../../utils/navigation.js');
+
 Page({
   data: {
     currentStep: 0, // 当前步骤（0-5，step1对应索引0）
@@ -140,8 +143,22 @@ Page({
   onLoad(options) {
     try {
       logger.info('订单创建步骤1：借款信息页面加载', options);
+      
+      // 使用导航工具初始化订单上下文
+      // step1 不主动设置全局上下文，只在保存成功后设置
+      const context = navigation.initOrderContextFromOptions(options, false);
+      const readonly = navigation.calculateReadonly(context.mode, context.orderStatus);
+      
+      this.setData({
+        readonly: readonly,
+        fromOrderDetail: context.fromOrderDetail,
+        orderId: context.orderId,
+        orderStatus: context.orderStatus
+      });
+      
       // 计算并设置导航栏滚动位置
       this.calculateTabsScroll();
+      
       // 确保数据初始化
       if (!this.data.formData) {
         this.setData({
@@ -173,29 +190,9 @@ Page({
         });
       }
 
-      // 预留：根据入口模式初始化（新建 / 详情查看）
-      const mode = options?.mode || 'create';
-      // 优先从 orderId 参数获取，其次从 id 参数获取（兼容旧逻辑）
-      const orderId = options?.orderId || options?.id || null;
-      // 获取订单状态（如果有）
-      const orderStatus = options?.orderStatus || null;
-      
-      // 判断是否只读：
-      // 1. 订单状态为0(待提交)或2(风控驳回)时，允许编辑（不是只读）
-      // 2. 其他状态且mode为view时，为只读
-      const isEditableByStatus = orderStatus === "0" || orderStatus === "2";
-      const readonly = mode === 'view' && !isEditableByStatus;
-      
-      this.setData({
-        readonly: readonly,
-        orderId,
-        orderStatus,
-        fromOrderDetail: mode === 'view' && orderId !== null
-      });
-
       // 新建模式下，为下拉框和单选框设置默认选中第一个选项
       // 如果传递了 orderId，说明是从其他 step 页面跳转过来的，不设置默认值
-      if (mode !== 'view' && !orderId) {
+      if (context.mode !== 'view' && !context.orderId) {
         const updates = {};
         const formData = this.data.formData || {};
 
@@ -249,15 +246,12 @@ Page({
         }
       }
 
-      // 加载下拉选项（当前使用本地静态数据，后续可切换到后端接口）
-      this.loadDropdownOptions();
-      
       // 初始化预约时间选择器
       this.initAppointmentTimePicker();
 
       // 如果从订单详情进入查看模式，则根据订单ID加载后端的借款信息并回显
-      if (mode === 'view' && orderId) {
-        this.loadLoanInfoFromOrder(orderId);
+      if (context.mode === 'view' && context.orderId) {
+        this.loadLoanInfoFromOrder(context.orderId);
       }
     } catch (error) {
       logger.error('页面加载错误:', error);
@@ -1102,90 +1096,8 @@ Page({
    * 如果从订单详情页进入，可以点击tab跳转到对应页面
    */
   onTabClick(e) {
-    logger.info('========== 导航栏tab点击事件 ==========');
-    logger.info('当前页面数据:', {
-      fromOrderDetail: this.data.fromOrderDetail,
-      orderId: this.data.orderId,
-      currentStep: this.data.currentStep
-    });
-    
-    if (!this.data.fromOrderDetail) {
-      logger.warn('不是从订单详情页进入，不允许跳转');
-      return;
-    }
-
     const step = parseInt(e.currentTarget.dataset.step);
-    const currentStep = this.data.currentStep;
-    
-    logger.info('点击信息:', {
-      clickedStep: step,
-      currentStep: currentStep,
-      stepName: ['借款信息', '借款人信息', '共借人信息', '担保人信息', '银行卡信息', '资料上传'][step]
-    });
-    
-    if (step === currentStep) {
-      logger.info('点击的是当前页面，不跳转');
-      return;
-    }
-
-    const stepPages = [
-      '/pages/order/create/step1/index',
-      '/pages/order/create/step2/index',
-      '/pages/order/create/step3/index',
-      '/pages/order/create/step4/index',
-      '/pages/order/create/step5/index',
-      '/pages/order/create/step6/index'
-    ];
-
-    const orderId = this.data.orderId;
-    if (!orderId) {
-      logger.error('订单ID为空，无法跳转');
-      wx.showToast({
-        title: '订单ID缺失',
-        icon: 'none'
-      });
-      return;
-    }
-    
-    const orderStatus = this.data.orderStatus;
-    const url = `${stepPages[step]}?mode=view&id=${orderId}${orderStatus ? '&orderStatus=' + orderStatus : ''}`;
-    logger.info('准备跳转:', { from: currentStep, to: step, url, orderId, orderStatus });
-    
-    // 获取页面栈信息
-    const pages = getCurrentPages();
-    logger.info('当前页面栈:', {
-      stackLength: pages.length,
-      currentPage: pages[pages.length - 1]?.route,
-      pages: pages.map(p => p.route)
-    });
-    
-    wx.navigateTo({
-      url: url,
-      success: (res) => {
-        logger.info('页面跳转成功:', res);
-      },
-      fail: (err) => {
-        logger.error('页面跳转失败:', err);
-        // 如果 navigateTo 失败，尝试使用 redirectTo
-        logger.info('尝试使用 redirectTo 跳转');
-        wx.redirectTo({
-          url: url,
-          success: (res) => {
-            logger.info('redirectTo 跳转成功:', res);
-          },
-          fail: (err2) => {
-            logger.error('redirectTo 也失败:', err2);
-            wx.showToast({
-              title: '跳转失败: ' + (err2.errMsg || '未知错误'),
-              icon: 'none',
-              duration: 3000
-            });
-          }
-        });
-      }
-    });
-    
-    logger.info('====================================');
+    navigation.navigateToStep(step, this.data.currentStep);
   },
 
   // 下一步
@@ -1212,11 +1124,22 @@ Page({
     
     // 调用统一的保存接口（内部会根据是否有 orderId 判断新建还是更新）
     this.saveStep1ToServer(orderId, formData)
-      .then(newOrderId => {
-        // 保存返回的 orderId 到页面数据，并传递到下一步
-        this.setData({ orderId: newOrderId });
-        wx.setStorageSync('currentOrderId', newOrderId);
-        logger.info('步骤1保存成功，orderId:', newOrderId);
+      .then(result => {
+        // 保存返回的 orderId 和 orderStatus 到页面数据
+        this.setData({ 
+          orderId: result.orderId,
+          orderStatus: result.orderStatus
+        });
+        wx.setStorageSync('currentOrderId', result.orderId);
+        
+        // 更新全局上下文（重要：保证后续页面能正确读取）
+        navigation.setOrderContext({
+          orderId: result.orderId,
+          orderStatus: result.orderStatus,
+          mode: 'create'
+        });
+        
+        logger.info('步骤1保存成功', result);
         wx.hideLoading();
         this.goNextInternal();
       })
@@ -1255,25 +1178,34 @@ Page({
     }
 
     return req.post(`/public/orders/step1`, formData).then(res => {
-      if (res && res.data && res.data.orderId) {
-        return res.data.orderId;
+      // 返回完整的订单信息（包括 orderId 和 orderStatus）
+      const result = {
+        orderId: null,
+        orderStatus: null
+      };
+      
+      if (res && res.data) {
+        result.orderId = res.data.orderId || orderId;
+        result.orderStatus = res.data.orderStatus != null ? String(res.data.orderStatus) : '0';
       }
-      return orderId;
+      
+      logger.info('step1 保存响应', { res: res.data, result });
+      return result;
     });
   },
 
   // 执行页面跳转到步骤2
   goNextInternal() {
-    let url = '/pages/order/create/step2/index';
-    const orderId = this.data.orderId;
-    if (orderId) {
-      // 如果有 orderId，传递到下一步
-      url += `?orderId=${orderId}`;
-    }
-    if (this.data.fromOrderDetail && orderId) {
-      url += (url.includes('?') ? '&' : '?') + `mode=view&id=${orderId}`;
-    }
-    wx.navigateTo({ url });
+    navigation.goNext(this.data.currentStep);
+  },
+
+  /**
+   * 导航栏tab点击事件
+   * 如果从订单详情页进入，可以点击tab跳转到对应页面
+   */
+  onTabClick(e) {
+    const step = parseInt(e.currentTarget.dataset.step);
+    navigation.navigateToStep(step, this.data.currentStep);
   }
 });
 

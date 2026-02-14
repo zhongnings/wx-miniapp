@@ -34,7 +34,7 @@
             <radio value="borrower" checked="{{formData.holderType === 'borrower'}}" color="#ff6f6f" />
             <text>借款人</text>
           </label>
-          <label class="radio-label">
+          <label class="radio-label" wx:if="{{hasCoBorrower}}">
             <radio value="coBorrower" checked="{{formData.holderType === 'coBorrower'}}" color="#ff6f6f" />
             <text>共借人</text>
           </label>
@@ -44,13 +44,12 @@
       <!-- 账户名 -->
       <view class="form-item">
         <text class="label required">账户名</text>
-        <view class="input-wrapper" bindtap="selectAccountName">
+        <view class="input-wrapper" bindtap="showAccountNamePicker">
           <input 
             class="input" 
             placeholder="请选择{{formData.holderType === 'borrower' ? '借款人' : formData.holderType === 'coBorrower' ? '共借人' : '担保人'}}" 
             value="{{formData.accountName}}"
-            bindinput="onAccountNameInput"
-            disabled="{{false}}"
+            disabled="{{true}}"
           />
           <text class="arrow">›</text>
         </view>

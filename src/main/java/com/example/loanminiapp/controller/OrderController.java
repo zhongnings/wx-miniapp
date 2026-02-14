@@ -75,12 +75,26 @@ public class OrderController {
     }
 
     /**
-     * 提交订单
+     * 提交订单（异步处理）
+     * 立即返回，后台异步生成合同
      */
     @PostMapping("/{id}/submit")
-    public ResponseEntity<Void> submit(@PathVariable Long id) {
-        orderService.submit(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> submit(@PathVariable Long id) {
+        orderService.submitAsync(id);
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "订单提交中，请稍候...");
+        result.put("orderId", id);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 查询订单提交状态
+     * 前端轮询此接口检查提交是否完成
+     */
+    @GetMapping("/{id}/submit-status")
+    public ResponseEntity<Map<String, Object>> getSubmitStatus(@PathVariable Long id) {
+        Map<String, Object> status = orderService.getSubmitStatus(id);
+        return ResponseEntity.ok(status);
     }
 
     /**

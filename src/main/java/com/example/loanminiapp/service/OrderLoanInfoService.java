@@ -1,8 +1,9 @@
 package com.example.loanminiapp.service;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.example.loanminiapp.dto.step.Step1LoanInfoDTO;
 import com.example.loanminiapp.entity.Order;
 import com.example.loanminiapp.entity.OrderLoanInfo;
 import com.example.loanminiapp.mapper.OrderLoanInfoMapper;
@@ -39,7 +40,16 @@ public class OrderLoanInfoService {
             dto.setOrderId(orderId);
             loanInfoMapper.insert(dto);
         } else {
-            loanInfoMapper.updateById(dto);
+            LambdaQueryWrapper<OrderLoanInfo> query = new LambdaQueryWrapper<>();
+            query.eq(OrderLoanInfo::getOrderId, orderId);
+            OrderLoanInfo dbEntry = loanInfoMapper.selectOne(query);
+
+            // 核心：忽略null值 + 排除id字段不复制
+            CopyOptions options = CopyOptions.create()
+                    .ignoreNullValue() // 忽略源null值
+                    .setIgnoreProperties("id"); // 强制忽略id字段
+            BeanUtil.copyProperties(dto, dbEntry, options);
+            loanInfoMapper.updateById(dbEntry);
         }
         
         // 同步更新订单表的借款信息字段
