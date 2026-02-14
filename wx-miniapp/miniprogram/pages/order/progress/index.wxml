@@ -1,12 +1,21 @@
 <scroll-view class="container" scroll-y="true" enhanced="true" show-scrollbar="false">
-  <view class="title">订单进度</view>
-  <block wx:for="{{timeline}}" wx:key="stage">
-    <view class="item">
-      <view class="stage">{{item.stage}}</view>
-      <view class="row">操作人：{{item.operator}}</view>
-      <view class="row">时间：{{item.time}}</view>
-      <view class="row">备注：{{item.remark}}</view>
-    </view>
+  <block wx:if="{{timeline && timeline.length > 0}}">
+    <block wx:for="{{timeline}}" wx:key="id">
+      <view class="item {{index === 0 ? 'latest' : ''}}">
+        <view class="icon-wrapper">
+          <view class="icon {{index === 0 ? 'icon-warning' : 'icon-check'}}">
+            <text class="icon-text">{{index === 0 ? '!' : '✓'}}</text>
+          </view>
+        </view>
+        <view class="content">
+          <view class="stage">{{item.stage}}</view>
+          <view class="row">操作人：{{item.operator}}</view>
+          <view class="row">{{item.time}}</view>
+          <view class="row">备注：{{item.remark}}</view>
+        </view>
+      </view>
+    </block>
   </block>
+  <view wx:else class="empty">暂无进度记录</view>
 </scroll-view>
 

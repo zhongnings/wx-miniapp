@@ -242,9 +242,9 @@ Page({
       return;
     }
     
-    // 跳转到进度页面（根据实际路径调整）
+    // 跳转到进度页面
     wx.navigateTo({
-      url: `/pages/order/progress/index?orderId=${orderId}`
+      url: `/pages/order/progress/index?id=${orderId}`
     });
   },
 

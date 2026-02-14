@@ -6,6 +6,8 @@ import com.example.loanminiapp.entity.OrderAttachment;
 import com.example.loanminiapp.entity.OrderBankCard;
 import com.example.loanminiapp.entity.OrderBorrower;
 import com.example.loanminiapp.entity.OrderLoanInfo;
+import com.example.loanminiapp.entity.OrderStatusFlow;
+import com.example.loanminiapp.entity.SysUser;
 import com.example.loanminiapp.enums.OrderStatusEnum;
 import com.example.loanminiapp.enums.RiskStatusEnum;
 import com.example.loanminiapp.enums.RepaymentStatusEnum;
@@ -18,7 +20,9 @@ import com.example.loanminiapp.mapper.OrderBorrowerMapper;
 import com.example.loanminiapp.mapper.OrderContractMapper;
 import com.example.loanminiapp.mapper.OrderLoanInfoMapper;
 import com.example.loanminiapp.mapper.OrderMapper;
+import com.example.loanminiapp.mapper.OrderStatusFlowMapper;
 import com.example.loanminiapp.mapper.OrderUserRelationMapper;
+import com.example.loanminiapp.mapper.SysUserMapper;
 import com.example.loanminiapp.model.AttachmentItem;
 import com.example.loanminiapp.model.ContractItem;
 import com.example.loanminiapp.model.OrderDetail;
@@ -60,6 +64,8 @@ public class InMemoryOrderService implements OrderService {
     private final OrderContractMapper orderContractMapper;
     private final ContractService contractService;
     private final OrderStatusFlowService orderStatusFlowService;
+    private final OrderStatusFlowMapper orderStatusFlowMapper;
+    private final SysUserMapper sysUserMapper;
     private final com.example.loanminiapp.mapper.OrderCoBorrowerMapper orderCoBorrowerMapper;
     private final com.example.loanminiapp.mapper.OrderGuarantorMapper orderGuarantorMapper;
 
@@ -129,9 +135,40 @@ public class InMemoryOrderService implements OrderService {
 
     @Override
     public List<OrderProgressItem> progress(Long id) {
-        // 进度表暂未接入，返回空列表，避免示例数据
         checkAccess(id);
-        return new ArrayList<>();
+        
+        // 查询订单状态流转记录，按创建时间倒序排列
+        List<OrderStatusFlow> flowList = orderStatusFlowMapper.selectList(
+                new LambdaQueryWrapper<OrderStatusFlow>()
+                        .eq(OrderStatusFlow::getOrderId, id)
+                        .orderByDesc(OrderStatusFlow::getCreatedAt)
+        );
+        
+        return flowList.stream().map(flow -> {
+            OrderProgressItem item = new OrderProgressItem();
+            
+            // 设置状态名称
+            OrderStatusEnum statusEnum = OrderStatusEnum.fromCode(flow.getOrderStatus());
+            item.setStage(statusEnum != null ? statusEnum.getDesc() : "未知状态");
+            
+            // 设置操作人
+            String operator = "系统";
+            if (flow.getOperatorUserId() != null) {
+                SysUser user = sysUserMapper.selectById(flow.getOperatorUserId());
+                if (user != null && user.getUsername() != null) {
+                    operator = user.getUsername();
+                }
+            }
+            item.setOperator(operator);
+            
+            // 设置时间
+            item.setTime(flow.getCreatedAt() != null ? flow.getCreatedAt().toString().replace("T", " ") : "");
+            
+            // 设置备注
+            item.setRemark(flow.getRemark() != null ? flow.getRemark() : "无");
+            
+            return item;
+        }).collect(Collectors.toList());
     }
 
     private Integer parseOrderStatus(String status) {
