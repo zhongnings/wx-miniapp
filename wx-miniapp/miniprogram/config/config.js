@@ -12,6 +12,9 @@ const REQUEST_TIMEOUT = 30000;
 // 缓存过期时间（毫秒）
 const CACHE_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000; // 7天
 
+// 调试模式开关（生产环境请设置为 false）
+const DEBUG = true;
+
 // 导出配置
 module.exports = {
   // API 基础地址
@@ -22,6 +25,9 @@ module.exports = {
   
   // 缓存过期时间
   CACHE_EXPIRE_TIME,
+  
+  // 调试模式
+  DEBUG,
   
   // 其他配置可以在这里添加
 };

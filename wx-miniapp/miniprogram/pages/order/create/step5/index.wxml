@@ -63,10 +63,10 @@
                 </view>
                 <view class="bank-card-actions">
                   <view class="action-icon card-delete-icon" catchtap="deleteBankCard" data-index="{{index}}">
-                    <image class="icon-image" src="/static/delete_icon.png" mode="aspectFit"></image>
+                    <image class="icon-image" src="{{deleteIconUrl}}" mode="aspectFit"></image>
                   </view>
                   <view class="action-icon card-edit-icon" catchtap="editBankCard" data-index="{{index}}">
-                    <image class="icon-image" src="/static/modify_icon.png" mode="aspectFit"></image>
+                    <image class="icon-image" src="{{modifyIconUrl}}" mode="aspectFit"></image>
                   </view>
                 </view>
               </view>

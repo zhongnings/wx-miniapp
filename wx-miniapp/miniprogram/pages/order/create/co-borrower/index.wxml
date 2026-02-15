@@ -361,7 +361,7 @@
               <view class="notary-file-item">
                 <text class="notary-file-name" bindtap="previewNotaryDocument" data-index="{{index}}">{{item.name}}</text>
                 <view class="notary-file-delete" catchtap="deleteNotaryDocument" data-index="{{index}}">
-                  <image class="notary-delete-icon" src="/static/delete_icon.png" mode="aspectFit" />
+                  <image class="notary-delete-icon" src="{{deleteIconUrl}}" mode="aspectFit" />
                 </view>
               </view>
             </block>

@@ -37,6 +37,21 @@ module.exports = {
     return `${getBaseUrl()}/img/business-license-placeholder1.png`;
   },
   
+  // 空状态图片
+  get EMPTY() {
+    return `${getBaseUrl()}/img/empty.png`;
+  },
+  
+  // 修改图标
+  get MODIFY_ICON() {
+    return `${getBaseUrl()}/img/modify_icon.png`;
+  },
+  
+  // 删除图标
+  get DELETE_ICON() {
+    return `${getBaseUrl()}/img/delete_icon.png`;
+  },
+  
   // 获取占位图（带缓存）
   getPlaceholder(type) {
     const app = getApp();

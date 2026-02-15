@@ -3,8 +3,10 @@
  * 统一管理日志输出，方便调试和排查问题
  */
 
-// 开发环境启用详细日志，生产环境关闭
-const DEBUG = true; // 可以通过配置文件控制
+const config = require('../config/config.js');
+
+// 从配置文件读取 DEBUG 开关
+const DEBUG = config.DEBUG;
 
 const logger = {
   /**
@@ -17,7 +19,7 @@ const logger = {
   },
 
   /**
-   * 错误日志
+   * 错误日志（始终输出）
    */
   error: (...args) => {
     console.error('[ERROR]', ...args);

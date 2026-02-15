@@ -57,6 +57,9 @@ Page({
     currentStep: 4, // 当前步骤（0-5，step5对应索引4）
     tabsScrollLeft: 0, // 导航栏滚动位置
     bankCards: [],
+    // 图标URL
+    deleteIconUrl: '',
+    modifyIconUrl: '',
     // 是否只读（从订单详情进入查看模式时为 true，或订单状态为0/2时为true）
     readonly: false,
     // 是否从订单详情页进入（用于判断导航栏tab是否可点击）
@@ -71,6 +74,12 @@ Page({
 
   onLoad(options) {
     logger.info('订单创建步骤5：银行卡信息页面加载', options);
+    
+    // 初始化图标URL
+    this.setData({
+      deleteIconUrl: wx.$placeholders.DELETE_ICON,
+      modifyIconUrl: wx.$placeholders.MODIFY_ICON
+    });
     
     // 使用导航工具初始化订单上下文
     // step5 只读取全局上下文，不主动设置（除非从订单详情进入）

@@ -67,6 +67,9 @@ Page({
     relationshipOptions: [],
     maritalStatusOptions: [],
     
+    // 图标URL
+    deleteIconUrl: '',
+    
     // 编辑模式
     isEdit: false,
     editIndex: -1,
@@ -104,7 +107,8 @@ Page({
     this.setData({
       idFrontPlaceholder: wx.$placeholders.ID_FRONT,
       idBackPlaceholder: wx.$placeholders.ID_BACK,
-      businessLicensePlaceholder: wx.$placeholders.BUSINESS_LICENSE
+      businessLicensePlaceholder: wx.$placeholders.BUSINESS_LICENSE,
+      deleteIconUrl: wx.$placeholders.DELETE_ICON
     });
   },
 
