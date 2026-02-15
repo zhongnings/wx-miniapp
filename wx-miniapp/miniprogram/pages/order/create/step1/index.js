@@ -63,66 +63,17 @@ Page({
     pickerOptions: [], // 当前选择器选项
     pickerTitle: '', // 选择器标题
     pickerCurrentValue: '', // 当前选中的值
-    // 选项数据
-    assigneeOrgOptions: [
-      '广西云桂实业投资有限公司',
-      '广西南宁投资有限公司',
-      '广西桂林实业有限公司',
-      '广西柳州投资集团'
-    ],
-    microloanOrgOptions: [
-      '南宁市益信小额贷款股份有限公司',
-      '南宁市金信小额贷款有限公司',
-      '南宁市银信小额贷款有限公司',
-      '南宁市信合小额贷款有限公司'
-    ],
-    paymentChannelOptions: [
-      '宝付',
-      '支付宝',
-      '微信支付',
-      '银联支付',
-      '网银支付'
-    ],
-    productTypeOptions: [
-      '信用业务',
-      '抵押业务',
-      '担保业务',
-      '质押业务'
-    ],
-    loanPurposeOptions: [
-      '资金周转',
-      '生产经营',
-      '消费贷款',
-      '购房贷款',
-      '购车贷款',
-      '其他'
-    ],
-    repaymentMethodOptions: [
-      '等额本息',
-      '等额本金',
-      '先息后本',
-      '一次性还本付息',
-      '按月付息到期还本'
-    ],
-    disputeResolutionOptions: [
-      '仲裁解决',
-      '诉讼解决',
-      '协商解决'
-    ],
-    arbitrationOrgOptions: [
-      '南平国际仲裁院',
-      '北京仲裁委员会',
-      '上海仲裁委员会',
-      '广州仲裁委员会',
-      '深圳仲裁委员会'
-    ],
-    notarizationTypeOptions: [
-      '赋强公证'
-    ],
-    notarizationItemOptions: [
-      '有抵押赋强',
-      '无抵押赋强'
-    ],
+    // 选项数据（从后端字典加载）
+    assigneeOrgOptions: [],
+    microloanOrgOptions: [],
+    paymentChannelOptions: [],
+    productTypeOptions: [],
+    loanPurposeOptions: [],
+    repaymentMethodOptions: [],
+    disputeResolutionOptions: [],
+    arbitrationOrgOptions: [],
+    notarizationTypeOptions: [],
+    notarizationItemOptions: [],
     // 预约时间选择器数据
     appointmentTimeIndex: [0, 0, 0, 0, 0], // [年, 月, 日, 时, 分]
     appointmentTimeRange: [[], [], [], [], []], // 年月日时分的范围
@@ -158,6 +109,9 @@ Page({
       
       // 计算并设置导航栏滚动位置
       this.calculateTabsScroll();
+      
+      // 加载下拉选项数据（从后端字典接口获取）
+      this.loadDropdownOptions();
       
       // 确保数据初始化
       if (!this.data.formData) {
@@ -279,25 +233,187 @@ Page({
   },
 
   /**
-   * 预留方法：加载下拉选项数据
-   * 说明：当前仍使用本地静态数组，后续可改为调用后端字典/配置接口动态获取
+   * 加载下拉选项数据（从后端字典接口获取）
    */
   loadDropdownOptions() {
-    // 示例：如果后端提供接口 /public/loan/options，可以在这里请求并覆盖 *_Options
-    // req.request({
-    //   url: '/public/loan/options',
-    //   method: 'GET'
-    // }).then(res => {
-    //   const data = res.data || {};
-    //   this.setData({
-    //     assigneeOrgOptions: data.assigneeOrgOptions || this.data.assigneeOrgOptions,
-    //     microloanOrgOptions: data.microloanOrgOptions || this.data.microloanOrgOptions,
-    //     ...
-    //   });
-    // }).catch(err => {
-    //   logger.error('加载下拉选项失败，使用本地默认值:', err);
-    // });
-    logger.info('使用本地静态下拉选项（预留后端动态加载逻辑）');
+    logger.info('[字典] 开始加载下拉选项数据');
+    
+    // 使用字典管理器加载数据
+    const dictManager = require('../../../../utils/dict-manager.js');
+    
+    // 优先使用全局缓存的字典数据
+    const app = getApp();
+    const cachedDict = app.globalData.dictData || {};
+    
+    logger.info('[字典] 全局缓存数据:', cachedDict);
+    logger.info('[字典] 缓存数据键数量:', Object.keys(cachedDict).length);
+    
+    // 检查缓存中是否有我们需要的数据
+    const hasValidCache = cachedDict.assignee_org && cachedDict.assignee_org.length > 0;
+    
+    // 如果缓存中已有有效数据，直接使用
+    if (hasValidCache) {
+      logger.info('[字典] 使用全局缓存的字典数据');
+      this.applyDictData(cachedDict);
+      return;
+    }
+    
+    logger.info('[字典] 缓存无效，从后端或本地加载');
+    
+    // 如果缓存中没有数据，从后端加载
+    dictManager.loadDictFromServer([
+      'assignee_org',
+      'microloan_org',
+      'payment_channel',
+      'product_type',
+      'loan_purpose',
+      'repayment_method',
+      'dispute_resolution',
+      'arbitration_org',
+      'notarization_type',
+      'notarization_item'
+    ]).then(dictData => {
+      logger.info('[字典] 字典数据加载完成', dictData);
+      // 应用到当前页面
+      this.applyDictData(dictData);
+    }).catch(err => {
+      logger.error('[字典] 加载失败，使用本地默认值:', err);
+      // 使用本地默认值
+      const localDict = dictManager.batchGetDictOptions([
+        'assignee_org',
+        'microloan_org',
+        'payment_channel',
+        'product_type',
+        'loan_purpose',
+        'repayment_method',
+        'dispute_resolution',
+        'arbitration_org',
+        'notarization_type',
+        'notarization_item'
+      ]);
+      
+      logger.info('[字典] 本地默认值:', localDict);
+      
+      // 转换为后端格式
+      const formattedDict = {};
+      Object.keys(localDict).forEach(key => {
+        formattedDict[key] = localDict[key].map((value, index) => ({
+          itemValue: value,
+          sortOrder: index,
+          isDefault: index === 0
+        }));
+      });
+      
+      logger.info('[字典] 格式化后的数据:', formattedDict);
+      this.applyDictData(formattedDict);
+    });
+  },
+  
+  /**
+   * 应用字典数据到页面
+   */
+  applyDictData(dictData) {
+    const updates = {};
+    
+    // 受让机构
+    if (dictData.assignee_org && dictData.assignee_org.length > 0) {
+      updates.assigneeOrgOptions = dictData.assignee_org.map(item => item.itemValue);
+      // 如果当前没有选中值，默认选中第一个
+      if (!this.data.formData.assigneeOrg) {
+        updates['formData.assigneeOrg'] = dictData.assignee_org[0].itemValue;
+      }
+    }
+    
+    // 小贷机构
+    if (dictData.microloan_org && dictData.microloan_org.length > 0) {
+      updates.microloanOrgOptions = dictData.microloan_org.map(item => item.itemValue);
+      if (!this.data.formData.channelOrg) {
+        updates['formData.channelOrg'] = dictData.microloan_org[0].itemValue;
+      }
+    }
+    
+    // 支付渠道
+    if (dictData.payment_channel && dictData.payment_channel.length > 0) {
+      updates.paymentChannelOptions = dictData.payment_channel.map(item => item.itemValue);
+      if (!this.data.formData.payMethod) {
+        updates['formData.payMethod'] = dictData.payment_channel[0].itemValue;
+      }
+    }
+    
+    // 产品类型
+    if (dictData.product_type && dictData.product_type.length > 0) {
+      updates.productTypeOptions = dictData.product_type.map(item => item.itemValue);
+      if (!this.data.formData.productType) {
+        updates['formData.productType'] = dictData.product_type[0].itemValue;
+      }
+    }
+    
+    // 借款用途
+    if (dictData.loan_purpose && dictData.loan_purpose.length > 0) {
+      updates.loanPurposeOptions = dictData.loan_purpose.map(item => item.itemValue);
+      if (!this.data.formData.usageDesc) {
+        updates['formData.usageDesc'] = dictData.loan_purpose[0].itemValue;
+      }
+    }
+    
+    // 还款方式
+    if (dictData.repayment_method && dictData.repayment_method.length > 0) {
+      updates.repaymentMethodOptions = dictData.repayment_method.map(item => item.itemValue);
+      if (!this.data.formData.repayMode) {
+        updates['formData.repayMode'] = dictData.repayment_method[0].itemValue;
+      }
+    }
+    
+    // 解决争议方式
+    if (dictData.dispute_resolution && dictData.dispute_resolution.length > 0) {
+      updates.disputeResolutionOptions = dictData.dispute_resolution.map(item => item.itemValue);
+      if (!this.data.formData.disputeWay) {
+        updates['formData.disputeWay'] = dictData.dispute_resolution[0].itemValue;
+      }
+    }
+    
+    // 仲裁机构
+    if (dictData.arbitration_org && dictData.arbitration_org.length > 0) {
+      updates.arbitrationOrgOptions = dictData.arbitration_org.map(item => item.itemValue);
+      if (!this.data.formData.arbitrationOrg) {
+        updates['formData.arbitrationOrg'] = dictData.arbitration_org[0].itemValue;
+      }
+    }
+    
+    // 公证类型
+    if (dictData.notarization_type && dictData.notarization_type.length > 0) {
+      updates.notarizationTypeOptions = dictData.notarization_type.map(item => item.itemValue);
+      if (!this.data.formData.notarizationType) {
+        updates['formData.notarizationType'] = dictData.notarization_type[0].itemValue;
+      }
+    }
+    
+    // 公证事项
+    if (dictData.notarization_item && dictData.notarization_item.length > 0) {
+      updates.notarizationItemOptions = dictData.notarization_item.map(item => item.itemValue);
+      if (!this.data.formData.notarizationItem) {
+        updates['formData.notarizationItem'] = dictData.notarization_item[0].itemValue;
+      }
+    }
+    
+    // 单选框默认值
+    if (!this.data.formData.borrowerCategory && this.data.loanTypeOptions?.length > 0) {
+      updates['formData.borrowerCategory'] = this.data.loanTypeOptions[0].value;
+    }
+    if (!this.data.formData.contractSignMode) {
+      updates['formData.contractSignMode'] = '在线签署';
+    }
+    if (!this.data.formData.isNotarization) {
+      updates['formData.isNotarization'] = '是';
+    }
+    if (!this.data.formData.certificateReceiveMethod) {
+      updates['formData.certificateReceiveMethod'] = '电子版';
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      this.setData(updates);
+      logger.info('[字典] 应用字典数据完成，更新字段数量:', Object.keys(updates).length);
+    }
   },
 
   /**

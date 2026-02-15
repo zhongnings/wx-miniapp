@@ -16,6 +16,8 @@ const RegionCache = require('/utils/region-cache');
 const regionCache = new RegionCache();
 // 全局配置
 const config = require('/config/config');
+// 数据字典 API
+const dictApi = require('/api/dict');
 
 App({
   onLaunch() {
@@ -42,6 +44,42 @@ App({
     // 图片会在首次使用时自动下载并缓存
     console.log('[App] 图片采用按需加载策略，首次使用时自动缓存');
     
+    // 预加载常用字典数据
+    this.loadCommonDicts();
+  },
+  
+  /**
+   * 预加载常用字典数据
+   */
+  loadCommonDicts() {
+    console.log('[字典] 开始预加载常用字典数据');
+    
+    // 批量获取常用字典
+    dictApi.batchGetDictItems([
+      // step1 借款信息相关
+      'assignee_org',
+      'microloan_org',
+      'payment_channel',
+      'product_type',
+      'loan_purpose',
+      'repayment_method',
+      'dispute_resolution',
+      'arbitration_org',
+      'notarization_type',
+      'notarization_item',
+      // step2/step3/step4 个人信息相关
+      'marital_status',
+      'id_type'
+    ]).then(res => {
+      if (res && res.data) {
+        // 保存到全局数据
+        this.globalData.dictData = res.data;
+        console.log('[字典] 常用字典数据加载成功，分类数量:', Object.keys(res.data).length);
+      }
+    }).catch(err => {
+      console.error('[字典] 加载失败，页面将使用本地默认值', err);
+      // 加载失败不影响使用，页面会使用本地默认值
+    });
   },
 
   globalData: {
@@ -51,6 +89,7 @@ App({
     uploadUtil,
     placeholderImages: {}, // 占位图缓存映射
     bankLogoImages: {}, // 银行 logo 缓存映射
+    dictData: {}, // 字典数据缓存
     // 订单创建流程上下文（统一管理订单ID、状态等，避免参数传递遗漏）
     orderContext: {
       orderId: null,

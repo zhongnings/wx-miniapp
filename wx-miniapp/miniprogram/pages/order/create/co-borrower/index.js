@@ -8,6 +8,8 @@ const logger = {
   debug: (...args) => DEBUG && console.log('[DEBUG]', ...args)
 };
 
+const dictManager = require('../../../../utils/dict-manager');
+
 Page({
   data: {
     // 共借人类型：personal-个人，company-对公
@@ -16,7 +18,7 @@ Page({
     // 个人信息
     idCardFront: '',
     idCardBack: '',
-    idType: '身份证',
+    idType: '',
     name: '',
     phone: '',
     idNumber: '',
@@ -37,7 +39,7 @@ Page({
     agentPhone: '',
     agentIdCardFront: '',
     agentIdCardBack: '',
-    agentIdType: '身份证',
+    agentIdType: '',
     agentName: '',
     agentPhone2: '',
     agentIdNumber: '',
@@ -52,6 +54,18 @@ Page({
     regionPickerTitle: '选择地区',
     regionCurrentValue: '',
     currentRegionType: '', // 'residence' 或 'company'
+    
+    // 统一选择器相关
+    showPicker: false,
+    pickerTitle: '',
+    pickerOptions: [],
+    pickerCurrentValue: '',
+    pickerField: '', // 当前选择器对应的字段
+    
+    // 下拉选项数据
+    idTypeOptions: [],
+    relationshipOptions: [],
+    maritalStatusOptions: [],
     
     // 编辑模式
     isEdit: false,
@@ -81,6 +95,9 @@ Page({
       readonly: readonly
     });
     
+    // 加载下拉选项
+    this.loadDictOptions();
+    
     // 加载共借人数据（从后端或本地）
     this.loadData();
 
@@ -89,6 +106,52 @@ Page({
       idBackPlaceholder: wx.$placeholders.ID_BACK,
       businessLicensePlaceholder: wx.$placeholders.BUSINESS_LICENSE
     });
+  },
+
+  // 加载数据字典选项
+  async loadDictOptions() {
+    try {
+      const categories = ['id_type', 'relationship', 'marital_status'];
+      
+      // 先尝试从后端加载
+      await dictManager.loadDictFromServer(categories);
+      
+      // 然后获取数据（会优先使用缓存）
+      const dictData = dictManager.batchGetDictOptions(categories);
+      
+      const updates = {
+        idTypeOptions: dictData.id_type || [],
+        relationshipOptions: dictData.relationship || [],
+        maritalStatusOptions: dictData.marital_status || []
+      };
+      
+      this.setData(updates);
+      
+      // 应用默认值（仅在新建且字段为空时）
+      this.applyDictData(dictData);
+      
+      logger.info('[共借人] 数据字典加载完成', updates);
+    } catch (err) {
+      logger.error('[共借人] 数据字典加载失败', err);
+    }
+  },
+
+  // 应用数据字典的默认值
+  applyDictData(dictData) {
+    const updates = {};
+    
+    // 证件类型默认选择第一个
+    if (!this.data.idType && dictData.id_type && dictData.id_type.length > 0) {
+      updates.idType = dictData.id_type[0];
+    }
+    if (!this.data.agentIdType && dictData.id_type && dictData.id_type.length > 0) {
+      updates.agentIdType = dictData.id_type[0];
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      this.setData(updates);
+      logger.info('[共借人] 应用默认值', updates);
+    }
   },
 
   // 加载共借人数据
@@ -906,22 +969,28 @@ Page({
 
   // 选择证件类型
   selectIdType() {
-    wx.showActionSheet({
-      itemList: ['身份证', '护照', '军官证', '其他'],
-      success: (res) => {
-        const types = ['身份证', '护照', '军官证', '其他'];
-        this.setData({ idType: types[res.tapIndex] });
-      }
+    if (this.data.readonly) {
+      return;
+    }
+    this.setData({
+      showPicker: true,
+      pickerTitle: '选择证件类型',
+      pickerOptions: this.data.idTypeOptions,
+      pickerCurrentValue: this.data.idType,
+      pickerField: 'idType'
     });
   },
 
   selectAgentIdType() {
-    wx.showActionSheet({
-      itemList: ['身份证', '护照', '军官证', '其他'],
-      success: (res) => {
-        const types = ['身份证', '护照', '军官证', '其他'];
-        this.setData({ agentIdType: types[res.tapIndex] });
-      }
+    if (this.data.readonly) {
+      return;
+    }
+    this.setData({
+      showPicker: true,
+      pickerTitle: '选择证件类型',
+      pickerOptions: this.data.idTypeOptions,
+      pickerCurrentValue: this.data.agentIdType,
+      pickerField: 'agentIdType'
     });
   },
 
@@ -997,36 +1066,67 @@ Page({
 
   // 选择关系
   selectRelationship() {
-    const that = this;
-    wx.showActionSheet({
-      itemList: ['配偶', '父母', '子女', '兄弟姐妹', '朋友', '其他'],
-      success: (res) => {
-        const relationships = ['配偶', '父母', '子女', '兄弟姐妹', '朋友', '其他'];
-        that.setData({ relationship: relationships[res.tapIndex] });
-      }
+    if (this.data.readonly) {
+      return;
+    }
+    this.setData({
+      showPicker: true,
+      pickerTitle: '选择与主借人关系',
+      pickerOptions: this.data.relationshipOptions,
+      pickerCurrentValue: this.data.relationship,
+      pickerField: 'relationship'
     });
   },
 
   selectCompanyRelationship() {
-    const that = this;
-    wx.showActionSheet({
-      itemList: ['配偶', '父母', '子女', '兄弟姐妹', '朋友', '其他'],
-      success: (res) => {
-        const relationships = ['配偶', '父母', '子女', '兄弟姐妹', '朋友', '其他'];
-        that.setData({ companyRelationship: relationships[res.tapIndex] });
-      }
+    if (this.data.readonly) {
+      return;
+    }
+    this.setData({
+      showPicker: true,
+      pickerTitle: '选择与主借人关系',
+      pickerOptions: this.data.relationshipOptions,
+      pickerCurrentValue: this.data.companyRelationship,
+      pickerField: 'companyRelationship'
     });
   },
 
   // 选择婚姻状况
   selectMaritalStatus() {
-    const that = this;
-    wx.showActionSheet({
-      itemList: ['未婚', '已婚', '离异', '丧偶'],
-      success: (res) => {
-        const statusList = ['未婚', '已婚', '离异', '丧偶'];
-        that.setData({ maritalStatus: statusList[res.tapIndex] });
-      }
+    if (this.data.readonly) {
+      return;
+    }
+    this.setData({
+      showPicker: true,
+      pickerTitle: '选择婚姻状况',
+      pickerOptions: this.data.maritalStatusOptions,
+      pickerCurrentValue: this.data.maritalStatus,
+      pickerField: 'maritalStatus'
+    });
+  },
+
+  // 统一选择器相关方法
+  hidePicker() {
+    this.setData({ showPicker: false });
+  },
+
+  stopPropagation() {
+    // 阻止事件冒泡
+  },
+
+  stopScroll() {
+    // 阻止滚动穿透
+    return false;
+  },
+
+  onPickerItemTap(e) {
+    const index = e.currentTarget.dataset.index;
+    const value = this.data.pickerOptions[index];
+    const field = this.data.pickerField;
+    
+    this.setData({
+      [field]: value,
+      showPicker: false
     });
   },
 

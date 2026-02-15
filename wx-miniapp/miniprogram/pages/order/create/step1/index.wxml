@@ -203,8 +203,8 @@
         </view>
       </view>
 
-      <!-- 仲裁机构 -->
-      <view class="form-item" bindtap="selectArbitrationOrg">
+      <!-- 仲裁机构（仅当选择"仲裁解决"时显示） -->
+      <view class="form-item" wx:if="{{formData.disputeWay === '仲裁解决'}}" bindtap="selectArbitrationOrg">
         <text class="label required">仲裁机构</text>
         <view class="value-wrapper">
           <text class="value">{{formData.arbitrationOrg || '请选择仲裁机构'}}</text>

@@ -20,6 +20,8 @@ const logger = {
 
 // 引入导航工具
 const navigation = require('../../../../utils/navigation.js');
+// 引入字典管理器
+const dictManager = require('../../../../utils/dict-manager.js');
 
 Page({
   data: {
@@ -50,7 +52,9 @@ Page({
       idBackImage: ''
     },
     // 地区选择器相关数据（使用公共组件）
-    showRegionPicker: false
+    showRegionPicker: false,
+    // 婚姻状况选项（从字典加载）
+    maritalStatusOptions: []
   },
 
   onLoad(options) {
@@ -75,6 +79,9 @@ Page({
       idBackPlaceholder: wx.$placeholders.ID_BACK,
       businessLicensePlaceholder: wx.$placeholders.BUSINESS_LICENSE
     });
+    
+    // 加载字典数据
+    this.loadDictOptions();
     
     // 数据加载逻辑：
     // 1. 如果有 orderId，从服务器加载数据
@@ -155,43 +162,7 @@ Page({
     const tabVisibleCenter = currentTabCenter - scrollLeft; // tab在屏幕中的中心位置
     const tabVisibleEnd = currentTabEnd - scrollLeft; // tab在屏幕中的结束位置
     
-    // 详细日志
-    logger.info('========== 导航栏滚动位置计算 ==========');
-    logger.info('页面信息:', {
-      page: 'step2',
-      currentStep: currentStep,
-      stepName: ['借款信息', '借款人信息', '共借人信息', '担保人信息', '银行卡信息', '资料上传'][currentStep]
-    });
-    logger.info('屏幕信息:', {
-      screenWidth: `${screenWidth}px`,
-      screenHeight: `${screenHeight}px`,
-      screenCenter: `${screenCenter.toFixed(2)}px`
-    });
-    logger.info('Tab尺寸信息:', {
-      tabWidthRpx: `${tabWidthRpx}rpx`,
-      tabWidthPx: `${tabWidthPx.toFixed(2)}px`,
-      totalWidth: `${totalWidth.toFixed(2)}px`,
-      tabCount: 6
-    });
-    logger.info('当前Tab位置（滚动前）:', {
-      tabStart: `${currentTabStart.toFixed(2)}px`,
-      tabCenter: `${currentTabCenter.toFixed(2)}px`,
-      tabEnd: `${currentTabEnd.toFixed(2)}px`
-    });
-    logger.info('计算规则:', calculationRule);
-    logger.info('滚动位置计算:', {
-      originalScrollLeft: `${originalScrollLeft.toFixed(2)}px`,
-      finalScrollLeft: `${scrollLeft.toFixed(2)}px`,
-      adjusted: originalScrollLeft !== scrollLeft ? '是（已调整为非负数）' : '否'
-    });
-    logger.info('当前Tab位置（滚动后）:', {
-      visibleStart: `${tabVisibleStart.toFixed(2)}px`,
-      visibleCenter: `${tabVisibleCenter.toFixed(2)}px`,
-      visibleEnd: `${tabVisibleEnd.toFixed(2)}px`,
-      isCentered: Math.abs(tabVisibleCenter - screenCenter) < 1 ? '是' : '否',
-      centerOffset: `${(tabVisibleCenter - screenCenter).toFixed(2)}px`
-    });
-    logger.info('========================================');
+
     
     this.setData({
       tabsScrollLeft: scrollLeft
@@ -246,27 +217,6 @@ Page({
         });
       }
     }
-    
-    logger.info('========== 导航栏手动滚动 ==========');
-    logger.info('滚动信息:', {
-      scrollLeft: `${scrollLeft.toFixed(2)}px`,
-      scrollWidth: `${scrollWidth}px`,
-      scrollHeight: `${scrollHeight}px`,
-      screenWidth: `${screenWidth}px`
-    });
-    logger.info('滚动条位置:', {
-      scrollBarLeft: `${scrollBarLeft.toFixed(2)}px`,
-      scrollBarCenter: `${scrollBarCenter.toFixed(2)}px`,
-      scrollBarRight: `${scrollBarRight.toFixed(2)}px`,
-      screenCenter: `${(screenWidth / 2).toFixed(2)}px`
-    });
-    logger.info('可见Tab范围:', {
-      startIndex: visibleStartTabIndex,
-      endIndex: visibleEndTabIndex,
-      tabNames: visibleTabs.map(t => `${t.index}:${t.name}`).join(', ')
-    });
-    logger.info('可见Tab详细信息:', visibleTabs);
-    logger.info('====================================');
   },
 
   goBack() {
@@ -1241,15 +1191,50 @@ Page({
     });
   },
 
+  /**
+   * 加载字典选项数据
+   */
+  loadDictOptions() {
+    // 加载婚姻状况选项
+    const maritalStatusOptions = dictManager.getDictOptions('marital_status');
+    
+    const updates = {
+      maritalStatusOptions: maritalStatusOptions
+    };
+    
+    // 如果当前没有选中值，默认选中第一个
+    if (!this.data.formData.maritalStatus && maritalStatusOptions.length > 0) {
+      updates['formData.maritalStatus'] = maritalStatusOptions[0];
+    }
+    
+    this.setData(updates);
+    
+    logger.info('[字典] 加载字典选项完成', { 
+      maritalStatusCount: maritalStatusOptions.length,
+      defaultValue: updates['formData.maritalStatus']
+    });
+  },
+
   // 选择婚姻状况
   selectMaritalStatus() {
+    if (this.data.readonly) return;
+    
     const that = this;
+    const options = this.data.maritalStatusOptions;
+    
+    if (options.length === 0) {
+      wx.showToast({
+        title: '选项加载中，请稍后',
+        icon: 'none'
+      });
+      return;
+    }
+    
     wx.showActionSheet({
-      itemList: ['未婚', '已婚', '离异', '丧偶'],
+      itemList: options,
       success: (res) => {
-        const statusList = ['未婚', '已婚', '离异', '丧偶'];
         that.setData({
-          'formData.maritalStatus': statusList[res.tapIndex]
+          'formData.maritalStatus': options[res.tapIndex]
         });
       }
     });

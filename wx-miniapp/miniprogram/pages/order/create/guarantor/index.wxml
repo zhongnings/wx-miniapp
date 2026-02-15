@@ -551,5 +551,27 @@
     bind:close="onRegionPickerClose"
     bind:confirm="onRegionPickerConfirm"
   />
+
+  <!-- 统一选择器弹窗 -->
+  <view class="picker-mask {{showPicker ? 'show' : ''}}" bindtap="hidePicker" catchtouchmove="stopScroll">
+    <view class="picker-container" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">{{pickerTitle}}</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
+      <scroll-view class="picker-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+        <view 
+          class="picker-item {{pickerCurrentValue === item ? 'selected' : ''}}"
+          wx:for="{{pickerOptions}}" 
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="onPickerItemTap"
+        >
+          {{item}}
+          <text class="picker-check" wx:if="{{pickerCurrentValue === item}}">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
 </view>
 
