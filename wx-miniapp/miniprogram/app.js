@@ -9,6 +9,13 @@ const uploadUtil = require('/utils/upload');
 const imageCache = require('/utils/imageCache');
 // 占位图配置
 const placeholders = require('/config/placeholders');
+// 银行配置
+const banks = require('/config/banks');
+// 地区数据缓存工具
+const RegionCache = require('/utils/region-cache');
+const regionCache = new RegionCache();
+// 全局配置
+const config = require('/config/config');
 
 App({
   onLaunch() {
@@ -22,30 +29,28 @@ App({
     wx.$imageCache = imageCache;
     // 占位图配置（全局挂载，避免路径问题）
     wx.$placeholders = placeholders;
+    // 银行配置（全局挂载，避免路径问题）
+    wx.$banks = banks;
+    // 地区数据缓存工具
+    wx.$regionCache = regionCache;
     
     // 清除过期的图片缓存
     imageCache.clearExpiredCache();
     
-    // 预加载常用占位图（从服务器加载）
-    const placeholderImages = [
-      placeholders.ID_FRONT,
-      placeholders.ID_BACK,
-      placeholders.BUSINESS_LICENSE
-    ];
+    // 不再预加载图片，改为按需加载
+    // 原因：预加载所有图片会超出小程序存储限制
+    // 图片会在首次使用时自动下载并缓存
+    console.log('[App] 图片采用按需加载策略，首次使用时自动缓存');
     
-    imageCache.preloadImages(placeholderImages).then(imageMap => {
-      console.log('[App] 占位图预加载完成', imageMap);
-      // 保存到全局数据
-      this.globalData.placeholderImages = imageMap;
-    }).catch(err => {
-      console.error('[App] 占位图预加载失败', err);
-    });
   },
 
   globalData: {
+    // API 基础地址（从配置文件读取）
+    apiBaseUrl: config.API_BASE_URL,
     // 预留全局数据
     uploadUtil,
     placeholderImages: {}, // 占位图缓存映射
+    bankLogoImages: {}, // 银行 logo 缓存映射
     // 订单创建流程上下文（统一管理订单ID、状态等，避免参数传递遗漏）
     orderContext: {
       orderId: null,

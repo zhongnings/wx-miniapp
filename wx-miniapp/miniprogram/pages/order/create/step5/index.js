@@ -24,105 +24,9 @@ const navigation = require('../../../../utils/navigation.js');
 // 引入通用上传工具：统一使用全局挂载的 wx.$upload（在 app.js 中挂载）
 const uploadUtil = wx.$upload;
 
-// 银行配置（包含 logo 路径和品牌色）
-const bankConfig = {
-  '中国工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
-  '工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
-  '中国建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
-  '建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
-  '中国农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
-  '农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
-  '中国银行': { logo: '/static/bank/zhongguo.png', color: '#B20838' },
-  '交通银行': { logo: '/static/bank/jiaotong.png', color: '#0066B3' },
-  '招商银行': { logo: '/static/bank/zhaoshang.png', color: '#E4002B' },
-  '浦发银行': { logo: '/static/bank/pufa.png', color: '#003399' },
-  '浦东发展银行': { logo: '/static/bank/pufa.png', color: '#003399' },
-  '中信银行': { logo: '/static/bank/zhongxin.png', color: '#E4002B' },
-  '光大银行': { logo: '/static/bank/guangda.png', color: '#6F2C91' },
-  '华夏银行': { logo: '/static/bank/huaxia.png', color: '#E4002B' },
-  '民生银行': { logo: '/static/bank/minsheng.png', color: '#006EB6' },
-  '广发银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
-  '广东发展银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
-  '平安银行': { logo: '/static/bank/pingan.png', color: '#FF6600' },
-  '兴业银行': { logo: '/static/bank/xingye.png', color: '#003399' },
-  '邮储银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
-  '邮政储蓄银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
-  '宁波银行': { logo: '/static/bank/ningbo.png', color: '#F39800' },
-  '江苏银行': { logo: '/static/bank/jiangsu.png', color: '#E4002B' },
-  '南京银行': { logo: '/static/bank/nanjing.png', color: '#E4002B' },
-  '上海银行': { logo: '/static/bank/shanghai.png', color: '#0066B3' },
-  '盛京银行': { logo: '/static/bank/shengjing.png', color: '#E4002B' },
-  '汇丰银行': { logo: '/static/bank/huifeng.png', color: '#DB0011' },
-  '网商银行': { logo: '/static/bank/wangshang.png', color: '#FF6600' }
-};
-
-// 获取银行配置（logo 和颜色）
-function getBankConfig(bankName) {
-  if (!bankName) {
-    return { logo: '/static/bank/none.png', color: '#4A90E2' };
-  }
-  
-  // 精确匹配
-  if (bankConfig[bankName]) {
-    return bankConfig[bankName];
-  }
-  
-  // 模糊匹配（支持部分匹配）
-  for (const key in bankConfig) {
-    // 移除"中国"、"银行"等通用词后匹配
-    const simplifiedKey = key.replace(/中国|银行/g, '');
-    const simplifiedName = bankName.replace(/中国|银行/g, '');
-    if (simplifiedName.includes(simplifiedKey) || simplifiedKey.includes(simplifiedName)) {
-      return bankConfig[key];
-    }
-  }
-  
-  // 默认返回通用银行图标
-  return { logo: '/static/bank/none.png', color: '#4A90E2' };
-}
-
-// 银行图标映射（根据银行名称返回图标文本）- 保留用于向后兼容
-function getBankIcon(bankName) {
-  if (!bankName) return '🏦';
-  
-  const bankIconMap = {
-    '中国工商银行': '工',
-    '中国建设银行': '建',
-    '中国农业银行': '农',
-    '中国银行': '中',
-    '交通银行': '交',
-    '招商银行': '招',
-    '浦发银行': '浦',
-    '中信银行': '信',
-    '光大银行': '光',
-    '华夏银行': '华',
-    '民生银行': '民',
-    '广发银行': '广',
-    '平安银行': '平',
-    '兴业银行': '兴',
-    '邮储银行': '邮',
-    '其他银行': '🏦'
-  };
-  
-  // 精确匹配
-  if (bankIconMap[bankName]) {
-    return bankIconMap[bankName];
-  }
-  
-  // 模糊匹配（支持部分匹配）
-  for (const key in bankIconMap) {
-    // 移除"中国"、"银行"等通用词后匹配
-    const simplifiedKey = key.replace(/中国|银行/g, '');
-    const simplifiedName = bankName.replace(/中国|银行/g, '');
-    if (simplifiedName.includes(simplifiedKey) || simplifiedKey.includes(simplifiedName)) {
-      return bankIconMap[key];
-    }
-  }
-  
-  // 默认返回首字符（去除"中国"）
-  const displayName = bankName.replace(/^中国/, '');
-  return displayName.substring(0, 1);
-}
+// 引入银行配置：统一使用全局挂载的 wx.$banks（在 app.js 中挂载）
+const getBankConfig = () => wx.$banks.getBankConfig;
+const getBankIcon = () => wx.$banks.getBankIcon;
 
 // 持卡人类型转换：英文 -> 中文（用于显示）
 function holderTypeToDisplay(holderType) {
@@ -284,7 +188,7 @@ Page({
         
         // 转换数据格式，匹配前端需要的字段名
         const formattedCards = bankCards.map(card => {
-          const config = getBankConfig(card.bankName);
+          const config = wx.$banks.getBankConfig(card.bankName);
           return {
             id: card.id,
             holderType: holderTypeToDisplay(card.holderType), // 转换为中文显示
@@ -295,7 +199,7 @@ Page({
             cardNumber: card.cardNo || '',
             reservedMobile: card.reservedMobile || '',
             cardFrontImage: card.cardFrontUrl || '',
-            bankIcon: getBankIcon(card.bankName),
+            bankIcon: wx.$banks.getBankIcon(card.bankName),
             bankLogo: config.logo,
             bankColor: config.color
           };
@@ -319,10 +223,10 @@ Page({
         
         // 为每个银行卡添加图标、logo 和颜色
         bankCards = bankCards.map(card => {
-          const config = getBankConfig(card.bankName);
+          const config = wx.$banks.getBankConfig(card.bankName);
           return {
             ...card,
-            bankIcon: getBankIcon(card.bankName),
+            bankIcon: wx.$banks.getBankIcon(card.bankName),
             bankLogo: config.logo,
             bankColor: config.color
           };
@@ -343,10 +247,10 @@ Page({
       
       // 为每个银行卡添加图标、logo 和颜色
       bankCards = bankCards.map(card => {
-        const config = getBankConfig(card.bankName);
+        const config = wx.$banks.getBankConfig(card.bankName);
         return {
           ...card,
-          bankIcon: getBankIcon(card.bankName),
+          bankIcon: wx.$banks.getBankIcon(card.bankName),
           bankLogo: config.logo,
           bankColor: config.color
         };

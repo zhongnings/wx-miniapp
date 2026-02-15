@@ -1,5 +1,7 @@
-const BASE_URL = 'http://127.0.0.1:8081';
+const config = require('../config/config');
 const logger = require('./logger');
+
+const BASE_URL = config.API_BASE_URL;
 
 /**
  * 统一的请求方法

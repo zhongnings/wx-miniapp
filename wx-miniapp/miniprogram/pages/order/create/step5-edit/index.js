@@ -1019,6 +1019,14 @@ Page({
         if (prevPage && prevPage.data) {
           let bankCards = prevPage.data.bankCards || [];
           
+          // 获取银行配置（logo 和颜色）
+          const config = wx.$banks.getBankConfig(bankCard.bankName);
+          
+          // 添加银行图标、logo 和颜色
+          bankCard.bankIcon = wx.$banks.getBankIcon(bankCard.bankName);
+          bankCard.bankLogo = config.logo;
+          bankCard.bankColor = config.color;
+          
           if (this.data.mode === 'edit' && this.data.cardIndex >= 0) {
             // 编辑模式：更新指定索引
             bankCards[this.data.cardIndex] = bankCard;
@@ -1033,9 +1041,9 @@ Page({
           // 清除刷新标志，避免返回时重复加载
           prevPage._needRefreshOnShow = false;
           
-          // 保存到本地存储（移除 bankIcon）
+          // 保存到本地存储（移除 bankIcon、bankLogo、bankColor，这些是运行时计算的）
           const bankCardsToSave = bankCards.map(card => {
-            const { bankIcon, ...cardWithoutIcon } = card;
+            const { bankIcon, bankLogo, bankColor, ...cardWithoutIcon } = card;
             return cardWithoutIcon;
           });
           wx.setStorageSync('orderFormData_step5', { bankCards: bankCardsToSave });

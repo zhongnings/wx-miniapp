@@ -1,6 +1,9 @@
 /**
  * 图片缓存工具
  * 用于从服务器加载静态资源并缓存到本地
+ * 
+ * 注意：由于微信小程序本地存储限制（10MB），不建议预加载大量图片
+ * 建议采用按需加载策略，在使用时才下载并缓存
  */
 
 const IMAGE_CACHE_KEY_PREFIX = 'image_cache_';
@@ -22,19 +25,23 @@ function getCachedImage(imageUrl) {
     const cacheKey = IMAGE_CACHE_KEY_PREFIX + encodeURIComponent(imageUrl);
     
     // 检查缓存
-    const cachedData = wx.getStorageSync(cacheKey);
-    if (cachedData && cachedData.localPath && cachedData.expireTime > Date.now()) {
-      // 验证本地文件是否存在
-      const fs = wx.getFileSystemManager();
-      try {
-        fs.accessSync(cachedData.localPath);
-        console.log('[图片缓存] 使用缓存:', imageUrl);
-        resolve(cachedData.localPath);
-        return;
-      } catch (e) {
-        // 文件不存在，清除缓存
-        wx.removeStorageSync(cacheKey);
+    try {
+      const cachedData = wx.getStorageSync(cacheKey);
+      if (cachedData && cachedData.localPath && cachedData.expireTime > Date.now()) {
+        // 验证本地文件是否存在
+        const fs = wx.getFileSystemManager();
+        try {
+          fs.accessSync(cachedData.localPath);
+          console.log('[图片缓存] 使用缓存:', imageUrl);
+          resolve(cachedData.localPath);
+          return;
+        } catch (e) {
+          // 文件不存在，清除缓存
+          wx.removeStorageSync(cacheKey);
+        }
       }
+    } catch (e) {
+      console.warn('[图片缓存] 读取缓存失败:', e);
     }
 
     // 下载图片
@@ -45,7 +52,7 @@ function getCachedImage(imageUrl) {
         if (res.statusCode === 200) {
           const tempPath = res.tempFilePath;
           
-          // 保存到本地永久存储
+          // 尝试保存到本地永久存储（如果失败则直接使用临时路径）
           const fs = wx.getFileSystemManager();
           const savedPath = `${wx.env.USER_DATA_PATH}/cache_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
           
@@ -53,16 +60,21 @@ function getCachedImage(imageUrl) {
             fs.saveFileSync(tempPath, savedPath);
             
             // 保存缓存信息
-            wx.setStorageSync(cacheKey, {
-              localPath: savedPath,
-              expireTime: Date.now() + CACHE_EXPIRE_TIME
-            });
-            
-            console.log('[图片缓存] 下载成功:', imageUrl);
-            resolve(savedPath);
-          } catch (e) {
-            console.error('[图片缓存] 保存失败:', e);
+            try {
+              wx.setStorageSync(cacheKey, {
+                localPath: savedPath,
+                expireTime: Date.now() + CACHE_EXPIRE_TIME
+              });
+              console.log('[图片缓存] 下载并缓存成功:', imageUrl);
+              resolve(savedPath);
+            } catch (storageErr) {
+              // 存储空间不足，直接使用临时路径（不缓存）
+              console.warn('[图片缓存] 存储空间不足，使用临时路径:', storageErr);
+              resolve(tempPath);
+            }
+          } catch (saveErr) {
             // 保存失败，直接使用临时路径
+            console.warn('[图片缓存] 保存失败，使用临时路径:', saveErr);
             resolve(tempPath);
           }
         } else {
@@ -81,6 +93,8 @@ function getCachedImage(imageUrl) {
  * 预加载图片列表
  * @param {Array<string>} imageUrls - 图片URL列表
  * @returns {Promise<Object>} 图片路径映射 { url: localPath }
+ * 
+ * 注意：不建议预加载大量图片，可能导致存储空间不足
  */
 function preloadImages(imageUrls) {
   const promises = imageUrls.map(url => 
@@ -107,26 +121,35 @@ function clearExpiredCache() {
   try {
     const info = wx.getStorageInfoSync();
     const now = Date.now();
+    let clearedCount = 0;
     
     info.keys.forEach(key => {
       if (key.startsWith(IMAGE_CACHE_KEY_PREFIX)) {
-        const cachedData = wx.getStorageSync(key);
-        if (cachedData && cachedData.expireTime < now) {
-          // 删除过期文件
-          if (cachedData.localPath) {
-            const fs = wx.getFileSystemManager();
-            try {
-              fs.unlinkSync(cachedData.localPath);
-            } catch (e) {
-              // 文件可能已被删除
+        try {
+          const cachedData = wx.getStorageSync(key);
+          if (cachedData && cachedData.expireTime < now) {
+            // 删除过期文件
+            if (cachedData.localPath) {
+              const fs = wx.getFileSystemManager();
+              try {
+                fs.unlinkSync(cachedData.localPath);
+              } catch (e) {
+                // 文件可能已被删除
+              }
             }
+            // 删除缓存记录
+            wx.removeStorageSync(key);
+            clearedCount++;
           }
-          // 删除缓存记录
-          wx.removeStorageSync(key);
-          console.log('[图片缓存] 清除过期缓存:', key);
+        } catch (e) {
+          // 忽略单个缓存项的错误
         }
       }
     });
+    
+    if (clearedCount > 0) {
+      console.log('[图片缓存] 清除过期缓存:', clearedCount, '项');
+    }
   } catch (e) {
     console.error('[图片缓存] 清除缓存失败:', e);
   }
@@ -138,23 +161,29 @@ function clearExpiredCache() {
 function clearAllCache() {
   try {
     const info = wx.getStorageInfoSync();
+    let clearedCount = 0;
     
     info.keys.forEach(key => {
       if (key.startsWith(IMAGE_CACHE_KEY_PREFIX)) {
-        const cachedData = wx.getStorageSync(key);
-        if (cachedData && cachedData.localPath) {
-          const fs = wx.getFileSystemManager();
-          try {
-            fs.unlinkSync(cachedData.localPath);
-          } catch (e) {
-            // 忽略错误
+        try {
+          const cachedData = wx.getStorageSync(key);
+          if (cachedData && cachedData.localPath) {
+            const fs = wx.getFileSystemManager();
+            try {
+              fs.unlinkSync(cachedData.localPath);
+            } catch (e) {
+              // 忽略错误
+            }
           }
+          wx.removeStorageSync(key);
+          clearedCount++;
+        } catch (e) {
+          // 忽略单个缓存项的错误
         }
-        wx.removeStorageSync(key);
       }
     });
     
-    console.log('[图片缓存] 已清除所有缓存');
+    console.log('[图片缓存] 已清除所有缓存:', clearedCount, '项');
   } catch (e) {
     console.error('[图片缓存] 清除缓存失败:', e);
   }

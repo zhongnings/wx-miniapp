@@ -1,7 +1,6 @@
 package com.example.loanminiapp.controller;
 
 import com.example.loanminiapp.security.OrderAccessCheck;
-import com.example.loanminiapp.dto.step.Step1LoanInfoDTO;
 import com.example.loanminiapp.entity.OrderLoanInfo;
 import com.example.loanminiapp.service.OrderLoanInfoService;
 import com.example.loanminiapp.service.OrderStepService;

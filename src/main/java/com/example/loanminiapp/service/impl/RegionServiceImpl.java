@@ -25,7 +25,7 @@ public class RegionServiceImpl implements RegionService {
         return regionMapper.selectList(
             new LambdaQueryWrapper<Region>()
                 .eq(Region::getLevel, 1)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
                 .orderByAsc(Region::getSortOrder)
         );
     }
@@ -37,7 +37,7 @@ public class RegionServiceImpl implements RegionService {
             new LambdaQueryWrapper<Region>()
                 .eq(Region::getParentCode, provinceCode)
                 .eq(Region::getLevel, 2)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
                 .orderByAsc(Region::getSortOrder)
         );
     }
@@ -49,7 +49,7 @@ public class RegionServiceImpl implements RegionService {
             new LambdaQueryWrapper<Region>()
                 .eq(Region::getParentCode, cityCode)
                 .eq(Region::getLevel, 3)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
                 .orderByAsc(Region::getSortOrder)
         );
     }
@@ -60,7 +60,7 @@ public class RegionServiceImpl implements RegionService {
         return regionMapper.selectList(
             new LambdaQueryWrapper<Region>()
                 .eq(Region::getParentCode, parentCode)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
                 .orderByAsc(Region::getSortOrder)
         );
     }
@@ -70,7 +70,7 @@ public class RegionServiceImpl implements RegionService {
         return regionMapper.selectList(
             new LambdaQueryWrapper<Region>()
                 .like(Region::getName, name)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
                 .orderByAsc(Region::getLevel, Region::getSortOrder)
                 .last("LIMIT 50")
         );
@@ -80,8 +80,8 @@ public class RegionServiceImpl implements RegionService {
     @Cacheable(value = "region:pinyin", key = "#pinyinAbbr + '_' + #level", unless = "#result == null || #result.isEmpty()")
     public List<Region> searchByPinyinAbbr(String pinyinAbbr, Integer level) {
         LambdaQueryWrapper<Region> wrapper = new LambdaQueryWrapper<Region>()
-            .eq(Region::getPinyinAbbr, pinyinAbbr)
-            .eq(Region::getIsEnabled, 1);
+            .like(Region::getPinyin, pinyinAbbr)
+            .eq(Region::getStatus, 1);
         
         if (level != null) {
             wrapper.eq(Region::getLevel, level);
@@ -96,7 +96,7 @@ public class RegionServiceImpl implements RegionService {
         return regionMapper.selectOne(
             new LambdaQueryWrapper<Region>()
                 .eq(Region::getCode, code)
-                .eq(Region::getIsEnabled, 1)
+                .eq(Region::getStatus, 1)
         );
     }
 }
