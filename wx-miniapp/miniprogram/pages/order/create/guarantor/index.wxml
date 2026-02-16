@@ -217,13 +217,13 @@
       </view>
 
       <!-- 经办人手机号 -->
-      <view class="form-item">
+      <!--<view class="form-item">
         <view class="form-label required">经办人手机号</view>
         <input class="form-input" type="number" placeholder="请填写经办人手机号" value="{{agentMobile}}" bindinput="onAgentMobileInput" maxlength="11" />
-      </view>
+      </view>-->
 
       <!-- 上传公证材料 -->
-      <view class="notary-section">
+      <!--<view class="notary-section">
         <view class="notary-title-row">
           <text class="notary-main-title">上传公证材料</text>
         </view>
@@ -255,7 +255,7 @@
             </block>
           </block>
         </view>
-      </view>
+      </view>-->
 
       <!-- 上传身份证照片 -->
       <view class="upload-section">

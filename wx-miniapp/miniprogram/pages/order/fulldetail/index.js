@@ -1,63 +1,6 @@
 const logger = require('../../../utils/logger');
 const req = wx.$request;
 
-// 银行配置（包含 logo 路径和品牌色）- 完全复用 step5 的配置
-const bankConfig = {
-  '中国工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
-  '工商银行': { logo: '/static/bank/gongshang.png', color: '#C8161D' },
-  '中国建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
-  '建设银行': { logo: '/static/bank/jianshe.png', color: '#0066B3' },
-  '中国农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
-  '农业银行': { logo: '/static/bank/nongye.png', color: '#00843D' },
-  '中国银行': { logo: '/static/bank/zhongguo.png', color: '#B20838' },
-  '交通银行': { logo: '/static/bank/jiaotong.png', color: '#0066B3' },
-  '招商银行': { logo: '/static/bank/zhaoshang.png', color: '#E4002B' },
-  '浦发银行': { logo: '/static/bank/pufa.png', color: '#003399' },
-  '浦东发展银行': { logo: '/static/bank/pufa.png', color: '#003399' },
-  '中信银行': { logo: '/static/bank/zhongxin.png', color: '#E4002B' },
-  '光大银行': { logo: '/static/bank/guangda.png', color: '#6F2C91' },
-  '华夏银行': { logo: '/static/bank/huaxia.png', color: '#E4002B' },
-  '民生银行': { logo: '/static/bank/minsheng.png', color: '#006EB6' },
-  '广发银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
-  '广东发展银行': { logo: '/static/bank/guangfa.png', color: '#E4002B' },
-  '平安银行': { logo: '/static/bank/pingan.png', color: '#FF6600' },
-  '兴业银行': { logo: '/static/bank/xingye.png', color: '#003399' },
-  '邮储银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
-  '邮政储蓄银行': { logo: '/static/bank/youchu.png', color: '#00843D' },
-  '宁波银行': { logo: '/static/bank/ningbo.png', color: '#F39800' },
-  '江苏银行': { logo: '/static/bank/jiangsu.png', color: '#E4002B' },
-  '南京银行': { logo: '/static/bank/nanjing.png', color: '#E4002B' },
-  '上海银行': { logo: '/static/bank/shanghai.png', color: '#0066B3' },
-  '盛京银行': { logo: '/static/bank/shengjing.png', color: '#E4002B' },
-  '汇丰银行': { logo: '/static/bank/huifeng.png', color: '#DB0011' },
-  '网商银行': { logo: '/static/bank/wangshang.png', color: '#FF6600' }
-};
-
-// 获取银行配置（logo 和颜色）- 完全复用 step5 的逻辑
-function getBankConfig(bankName) {
-  if (!bankName) {
-    return { logo: '/static/bank/none.png', color: '#4A90E2' };
-  }
-  
-  // 精确匹配
-  if (bankConfig[bankName]) {
-    return bankConfig[bankName];
-  }
-  
-  // 模糊匹配（支持部分匹配）
-  for (const key in bankConfig) {
-    // 移除"中国"、"银行"等通用词后匹配
-    const simplifiedKey = key.replace(/中国|银行/g, '');
-    const simplifiedName = bankName.replace(/中国|银行/g, '');
-    if (simplifiedName.includes(simplifiedKey) || simplifiedKey.includes(simplifiedName)) {
-      return bankConfig[key];
-    }
-  }
-  
-  // 默认返回通用银行图标
-  return { logo: '/static/bank/none.png', color: '#4A90E2' };
-}
-
 Page({
   data: {
     orderId: null,
@@ -130,9 +73,9 @@ Page({
       const bankCards = res.data || [];
       logger.info('[银行卡] 后端返回银行卡数据', { count: bankCards.length, bankCards });
       
-      // 转换数据格式，匹配前端需要的字段名，并添加 logo 和颜色
+      // 转换数据格式，匹配前端需要的字段名，并添加 logo 和颜色（使用全局配置）
       const formattedCards = bankCards.map(card => {
-        const config = getBankConfig(card.bankName);
+        const config = wx.$banks.getBankConfig(card.bankName);
         return {
           id: card.id,
           holderType: card.holderType,
@@ -143,6 +86,7 @@ Page({
           cardNumber: card.cardNo || '',
           reservedMobile: card.reservedMobile || '',
           cardFrontImage: card.cardFrontUrl || '',
+          bankIcon: wx.$banks.getBankIcon(card.bankName),
           bankLogo: config.logo,
           bankColor: config.color
         };

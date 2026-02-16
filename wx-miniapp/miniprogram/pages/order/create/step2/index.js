@@ -344,8 +344,6 @@ Page({
             'formData.idEffectiveDate': '',
             'formData.idExpiryDate': ''
           });
-          // 保存到本地存储
-          this.saveFormData();
           wx.showToast({
             title: '已删除',
             icon: 'success'
@@ -383,8 +381,6 @@ Page({
             'formData.gender': '',
             'formData.idAddress': ''
           });
-          // 保存到本地存储
-          this.saveFormData();
           wx.showToast({
             title: '已删除',
             icon: 'success'
@@ -1076,7 +1072,6 @@ Page({
     this.setData({
       'formData.name': e.detail.value
     });
-    this.saveFormData(); // 自动保存
   },
 
   // 证件号输入
@@ -1087,7 +1082,6 @@ Page({
     });
     // 自动识别性别和出生日期
     this.parseIdNumber(idNumber);
-    this.saveFormData(); // 自动保存
   },
 
   // 解析身份证号

@@ -604,6 +604,27 @@ Page({
    */
   onCreateOrder() {
     logger.info('点击新建订单按钮');
+    
+    // 清空全局订单ID和所有步骤的缓存数据，避免加载上一个订单的数据
+    wx.removeStorageSync('currentOrderId');
+    wx.removeStorageSync('orderFormData_step1');
+    wx.removeStorageSync('orderFormData_step2');
+    wx.removeStorageSync('orderFormData_step3');
+    wx.removeStorageSync('orderFormData_step4');
+    
+    // 清空全局订单上下文
+    const app = getApp();
+    if (app && app.globalData && app.globalData.orderContext) {
+      app.globalData.orderContext = {
+        orderId: null,
+        orderStatus: null,
+        mode: null,
+        fromOrderDetail: false
+      };
+    }
+    
+    logger.info('已清空订单缓存数据和全局上下文');
+    
     wx.navigateTo({
       url: '/pages/order/create/step1/index',
       success: () => {

@@ -203,7 +203,7 @@
 .bank-card {
   position: relative;
   width: 100%;
-  height: 180rpx;
+  height: 220rpx;
   background: linear-gradient(135deg, #ff6f6f 0%, #ff8e8e 100%);
   border-radius: 24rpx;
   padding: 32rpx;
@@ -216,7 +216,7 @@
   display: flex;
   align-items: center;
   gap: 20rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 28rpx;
 }
 
 .bank-logo {
