@@ -83,21 +83,13 @@ Page({
     // 加载字典数据
     this.loadDictOptions();
     
-    // 数据加载逻辑：
-    // 1. 如果有 orderId，从服务器加载数据
-    // 2. 如果没有 orderId，从本地缓存加载（首次创建）
+    // 数据加载逻辑：只从服务器加载数据，不使用缓存
+    // 如果有 orderId，从服务器加载数据；否则使用空表单
     if (context.orderId) {
       // 从服务器加载订单数据
       this.loadBorrowerInfoFromOrder(context.orderId);
-    } else {
-      // 没有 orderId，从本地缓存加载
-      const savedData = wx.getStorageSync('orderFormData_step2');
-      if (savedData) {
-        this.setData({
-          formData: { ...this.data.formData, ...savedData }
-        });
-      }
     }
+    // 移除缓存加载逻辑，避免业务员录入多个订单时数据混乱
     
     // 计算并设置导航栏滚动位置
     this.calculateTabsScroll();
@@ -1134,7 +1126,6 @@ Page({
     this.setData({
       'formData.idEffectiveDate': e.detail.value
     });
-    this.saveFormData(); // 自动保存
   },
 
   // 证件有效期改变
@@ -1277,11 +1268,6 @@ Page({
     return true;
   },
 
-  // 保存表单数据到本地存储
-  saveFormData() {
-    wx.setStorageSync('orderFormData_step2', this.data.formData);
-  },
-
   // 下一步
   goNext() {
     // 只读模式下不允许保存
@@ -1297,10 +1283,7 @@ Page({
       return;
     }
 
-    // 先本地缓存，避免网络失败数据丢失
     const formData = { ...this.data.formData };
-    wx.setStorageSync('orderFormData_step2', formData);
-
     const orderId = this.data.orderId;
     wx.showLoading({ title: '保存中...' });
     
@@ -1320,6 +1303,9 @@ Page({
           orderStatus: result.orderStatus,
           mode: this.data.readonly ? 'view' : 'create'
         });
+        
+        // 保存成功后清理本步骤的缓存，避免影响下一个订单
+        wx.removeStorageSync('orderFormData_step2');
         
         logger.info('步骤2保存成功', result);
         wx.hideLoading();

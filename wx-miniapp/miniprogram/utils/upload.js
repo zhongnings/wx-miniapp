@@ -228,9 +228,11 @@ function uploadGenericFile(filePath, bizType) {
 
 /**
  * 上传订单文件（支持多个文件类型）
- * 使用 bizType 参数走通用上传逻辑，不会触发 OCR
  * @param {string} filePath 文件本地路径
- * @param {string} fileType 文件类型：'notaryDoc'（法人证明书）、'attachment'（附件）等
+ * @param {string} fileType 文件类型：
+ *   - 单一文件（不带时间戳）：'coBorrower-businessLicense'、'coBorrower-idFront'、'coBorrower-idBack'、
+ *     'guarantor-businessLicense'、'guarantor-propertyOwnershipCert'、'guarantor-idFront'、'guarantor-idBack'
+ *   - 多个文件（带时间戳）：'notaryDoc'（法人证明书）、'attachment'（附件）
  * @param {number|string} orderId 订单ID（必需）
  * @returns {Promise<Object>} 返回上传结果
  */
@@ -240,14 +242,25 @@ function uploadOrderFile(filePath, fileType, orderId) {
     return Promise.reject(new Error('订单ID缺失'));
   }
   
-  // 使用 orderId + bizType 组合
-  // 后端会走通用上传逻辑：文件保存在订单目录下，文件名为 bizType-时间戳.ext
-  // 不会触发 OCR 逻辑
-  return uploadFile({
-    filePath: filePath,
-    orderId,
-    bizType: fileType
-  });
+  // 判断是否需要时间戳：只有 notaryDoc 和 attachment 需要时间戳
+  const needsTimestamp = fileType === 'notaryDoc' || fileType === 'attachment';
+  
+  if (needsTimestamp) {
+    // 使用 bizType 参数，后端会自动添加时间戳
+    return uploadFile({
+      filePath: filePath,
+      orderId,
+      bizType: fileType
+    });
+  } else {
+    // 使用 imageType 参数，后端不会添加时间戳
+    return uploadFile({
+      filePath: filePath,
+      orderId,
+      imageType: fileType,
+      enableOcr: false // 营业执照、房产证等不需要OCR
+    });
+  }
 }
 
 /**

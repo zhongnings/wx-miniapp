@@ -5,14 +5,15 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 担保人信息（支持个人和对公）
+ * 担保人信息（支持个人、对公、房产）
+ * 说明：对公/房产类型的个人信息字段用于存储经办人信息
  */
 @Data
 public class Step4GuarantorDTO {
-    /** 担保人类型：personal-个人，company-对公 */
+    /** 担保人类型：personal-个人，company-对公，property-房产 */
     private String borrowerType;
     
-    // ========== 个人信息 ==========
+    // ========== 个人信息（个人类型使用，对公/房产类型作为经办人信息使用） ==========
     /** 身份证正面图片 */
     private String idCardFront;
     
@@ -52,53 +53,23 @@ public class Step4GuarantorDTO {
     /** 婚姻状况 */
     private String maritalStatus;
     
-    // ========== 对公信息 ==========
-    /** 营业执照图片 */
+    // ========== 对公/房产信息 ==========
+    /** 营业执照/房产证图片 */
     private String businessLicense;
     
-    /** 公司名称 */
+    /** 公司名称/房产证号码 */
     private String companyName;
     
     /** 公司信用代码 */
     private String companyCreditCode;
     
-    /** 注册地省市区 */
+    /** 公司注册地/房产地省市区 */
     private String companyArea;
     
-    /** 公司详细地址 */
+    /** 公司/房产详细地址 */
     private String companyAddress;
     
-    /** 经办人手机号 */
-    private String agentPhone;
-    
-    /** 经办人身份证正面 */
-    private String agentIdCardFront;
-    
-    /** 经办人身份证反面 */
-    private String agentIdCardBack;
-    
-    /** 经办人证件类型 */
-    private String agentIdType;
-    
-    /** 经办人姓名 */
-    private String agentName;
-    
-    /** 经办人手机号2 */
-    private String agentPhone2;
-    
-    /** 经办人证件号码 */
-    private String agentIdNumber;
-    
-    /** 经办人证件生效日期 */
-    private String agentIdStartDate;
-    
-    /** 经办人证件有效期 */
-    private String agentIdEndDate;
-    
-    /** 经办人证件地址 */
-    private String agentIdAddress;
-    
-    /** 与主借人关系（对公） */
-    private String companyRelationship;
+    /** 经办人手机号（对公/房产类型时使用） */
+    private String agentMobile;
 
 }

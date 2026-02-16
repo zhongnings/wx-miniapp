@@ -89,13 +89,14 @@ public class OrderCoBorrowerController {
     }
 
     /**
-     * 新增共借人
+     * 保存共借人（自动判断新增或更新）
+     * 根据 orderId 查询，如果存在则更新，不存在则新增
      */
-    @PostMapping("/add")
+    @PostMapping("/save")
     @OrderAccessCheck
-    public Map<String, Object> addCoBorrower(@PathVariable Long orderId, 
-                                             @RequestBody Step3CoBorrowerDTO dto) {
-        log.info("新增共借人: orderId={}, type={}, name={}, company={}", 
+    public Map<String, Object> saveCoBorrower(@PathVariable Long orderId, 
+                                              @RequestBody Step3CoBorrowerDTO dto) {
+        log.info("保存共借人: orderId={}, type={}, name={}, company={}", 
             orderId, dto.getBorrowerType(), dto.getName(), dto.getCompanyName());
         
         // 验证必填字段
@@ -107,28 +108,59 @@ public class OrderCoBorrowerController {
             return result;
         }
         
-        // 构建实体
-        OrderCoBorrower borrower = OrderCoBorrower.builder()
-                .orderId(orderId)
-                .status(0) // 待审核
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        // 查询是否已存在共借人
+        LambdaQueryWrapper<OrderCoBorrower> query = new LambdaQueryWrapper<>();
+        query.eq(OrderCoBorrower::getOrderId, orderId);
+        OrderCoBorrower existingBorrower = coBorrowerMapper.selectOne(query);
         
-        mapDTOToEntity(dto, borrower);
+        OrderCoBorrower borrower;
+        boolean isUpdate = false;
         
-        // 保存
-        coBorrowerMapper.insert(borrower);
+        if (existingBorrower != null) {
+            // 更新现有记录
+            borrower = existingBorrower;
+            mapDTOToEntity(dto, borrower);
+            borrower.setUpdatedAt(LocalDateTime.now());
+            coBorrowerMapper.updateById(borrower);
+            isUpdate = true;
+            log.info("更新共借人: id={}, orderId={}", borrower.getId(), orderId);
+        } else {
+            // 新增记录
+            borrower = OrderCoBorrower.builder()
+                    .orderId(orderId)
+                    .status(0) // 待审核
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            
+            mapDTOToEntity(dto, borrower);
+            coBorrowerMapper.insert(borrower);
+            log.info("新增共借人: id={}, orderId={}", borrower.getId(), orderId);
+        }
 
         // 标记步骤完成
         orderStepService.markStepCompleted(orderId, 3);
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
-        result.put("message", "新增成功");
+        result.put("message", isUpdate ? "更新成功" : "新增成功");
         result.put("data", convertToDTO(borrower));
         
         return result;
+    }
+
+    /**
+     * 新增共借人（保留兼容性）
+     */
+    @PostMapping("/add")
+    @OrderAccessCheck
+    public Map<String, Object> addCoBorrower(@PathVariable Long orderId, 
+                                             @RequestBody Step3CoBorrowerDTO dto) {
+        log.info("新增共借人(兼容接口): orderId={}, type={}, name={}, company={}", 
+            orderId, dto.getBorrowerType(), dto.getName(), dto.getCompanyName());
+        
+        // 直接调用 save 方法
+        return saveCoBorrower(orderId, dto);
     }
 
     /**
@@ -200,43 +232,27 @@ public class OrderCoBorrowerController {
         // 删除关联的文件
         int deletedFileCount = 0;
         
-        // 删除个人身份证正面
+        // 删除身份证正面
         if (StringUtils.isNotEmpty(dbEntry.getFaceFrontUrl())) {
             if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceFrontUrl())) {
                 deletedFileCount++;
-                log.info("删除个人身份证正面: url={}", dbEntry.getFaceFrontUrl());
+                log.info("删除身份证正面: url={}", dbEntry.getFaceFrontUrl());
             }
         }
         
-        // 删除个人身份证反面
+        // 删除身份证反面
         if (StringUtils.isNotEmpty(dbEntry.getFaceBackUrl())) {
             if (fileDeleteUtil.deleteFileByUrl(dbEntry.getFaceBackUrl())) {
                 deletedFileCount++;
-                log.info("删除个人身份证反面: url={}", dbEntry.getFaceBackUrl());
+                log.info("删除身份证反面: url={}", dbEntry.getFaceBackUrl());
             }
         }
         
-        // 删除营业执照
+        // 删除营业执照/房产证
         if (StringUtils.isNotEmpty(dbEntry.getBusinessLicenseUrl())) {
             if (fileDeleteUtil.deleteFileByUrl(dbEntry.getBusinessLicenseUrl())) {
                 deletedFileCount++;
-                log.info("删除营业执照: url={}", dbEntry.getBusinessLicenseUrl());
-            }
-        }
-        
-        // 删除经办人身份证正面
-        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceFrontUrl())) {
-            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceFrontUrl())) {
-                deletedFileCount++;
-                log.info("删除经办人身份证正面: url={}", dbEntry.getAgentFaceFrontUrl());
-            }
-        }
-        
-        // 删除经办人身份证反面
-        if (StringUtils.isNotEmpty(dbEntry.getAgentFaceBackUrl())) {
-            if (fileDeleteUtil.deleteFileByUrl(dbEntry.getAgentFaceBackUrl())) {
-                deletedFileCount++;
-                log.info("删除经办人身份证反面: url={}", dbEntry.getAgentFaceBackUrl());
+                log.info("删除营业执照/房产证: url={}", dbEntry.getBusinessLicenseUrl());
             }
         }
         
@@ -397,22 +413,31 @@ public class OrderCoBorrowerController {
             if (dto.getIdCardBack() == null || dto.getIdCardBack().trim().isEmpty()) {
                 return "请上传身份证反面";
             }
-        } else if ("company".equals(dto.getBorrowerType())) {
-            // 对公类型验证
+        } else if ("company".equals(dto.getBorrowerType()) || "property".equals(dto.getBorrowerType())) {
+            // 对公/房产类型验证
+            String entityName = "company".equals(dto.getBorrowerType()) ? "公司" : "房产证";
+            
             if (dto.getCompanyName() == null || dto.getCompanyName().trim().isEmpty()) {
-                return "请填写公司名称";
-            }
-            if (dto.getCompanyCreditCode() == null || dto.getCompanyCreditCode().trim().isEmpty()) {
-                return "请填写公司信用代码";
+                return "请填写" + ("company".equals(dto.getBorrowerType()) ? "公司名称" : "房产证号码");
             }
             if (dto.getBusinessLicense() == null || dto.getBusinessLicense().trim().isEmpty()) {
-                return "请上传营业执照";
+                return "请上传" + ("company".equals(dto.getBorrowerType()) ? "营业执照" : "房产证");
             }
-            if (dto.getAgentName() == null || dto.getAgentName().trim().isEmpty()) {
+            // 验证经办人信息（使用个人信息字段）
+            if (dto.getName() == null || dto.getName().trim().isEmpty()) {
                 return "请填写经办人姓名";
             }
-            if (dto.getAgentIdNumber() == null || dto.getAgentIdNumber().trim().isEmpty()) {
+            if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
+                return "请填写经办人手机号";
+            }
+            if (dto.getIdNumber() == null || dto.getIdNumber().trim().isEmpty()) {
                 return "请填写经办人证件号码";
+            }
+            if (dto.getIdCardFront() == null || dto.getIdCardFront().trim().isEmpty()) {
+                return "请上传经办人身份证正面";
+            }
+            if (dto.getIdCardBack() == null || dto.getIdCardBack().trim().isEmpty()) {
+                return "请上传经办人身份证反面";
             }
         }
         
@@ -427,7 +452,7 @@ public class OrderCoBorrowerController {
         
         dto.setBorrowerType(entity.getBorrowerType());
         
-        // 个人信息
+        // 个人信息（个人类型使用，对公/房产类型作为经办人信息）
         dto.setName(entity.getName());
         dto.setIdType(entity.getIdType());
         dto.setIdNumber(entity.getIdNo());
@@ -442,23 +467,13 @@ public class OrderCoBorrowerController {
         dto.setIdCardFront(entity.getFaceFrontUrl());
         dto.setIdCardBack(entity.getFaceBackUrl());
         
-        // 对公信息
+        // 对公/房产信息
         dto.setBusinessLicense(entity.getBusinessLicenseUrl());
         dto.setCompanyName(entity.getCompanyName());
         dto.setCompanyCreditCode(entity.getCompanyCreditCode());
         dto.setCompanyArea(entity.getCompanyArea());
         dto.setCompanyAddress(entity.getCompanyAddress());
-        dto.setAgentName(entity.getAgentName());
-        dto.setAgentPhone(entity.getAgentMobile());
-        dto.setAgentPhone2(entity.getAgentMobile());
-        dto.setAgentIdType(entity.getAgentIdType());
-        dto.setAgentIdNumber(entity.getAgentIdNo());
-        dto.setAgentIdStartDate(entity.getAgentIdIssueDate() != null ? entity.getAgentIdIssueDate().toString() : null);
-        dto.setAgentIdEndDate(entity.getAgentIdExpireDate() != null ? entity.getAgentIdExpireDate().toString() : null);
-        dto.setAgentIdAddress(entity.getAgentIdAddress());
-        dto.setAgentIdCardFront(entity.getAgentFaceFrontUrl());
-        dto.setAgentIdCardBack(entity.getAgentFaceBackUrl());
-        dto.setCompanyRelationship(entity.getRelationship());
+        dto.setAgentMobile(entity.getAgentMobile());
         
         // 公证材料
         if (entity.getNotaryDocumentsJson() != null && !entity.getNotaryDocumentsJson().isEmpty()) {
@@ -482,7 +497,7 @@ public class OrderCoBorrowerController {
     private void mapDTOToEntity(Step3CoBorrowerDTO dto, OrderCoBorrower entity) {
         entity.setBorrowerType(dto.getBorrowerType());
         
-        // 个人信息
+        // 个人信息（个人类型使用，对公/房产类型作为经办人信息）
         entity.setName(dto.getName());
         entity.setIdType(dto.getIdType());
         entity.setIdNo(dto.getIdNumber());
@@ -492,32 +507,18 @@ public class OrderCoBorrowerController {
         entity.setIdAddress(dto.getIdAddress());
         entity.setProvinceCity(dto.getResidenceArea());
         entity.setAddressDetail(dto.getDetailAddress());
+        entity.setRelationship(dto.getRelationship());
         entity.setMaritalStatus(dto.getMaritalStatus());
         entity.setFaceFrontUrl(dto.getIdCardFront());
         entity.setFaceBackUrl(dto.getIdCardBack());
         
-        // 关系字段：个人类型使用 relationship，对公类型使用 companyRelationship
-        if ("personal".equals(dto.getBorrowerType())) {
-            entity.setRelationship(dto.getRelationship());
-        } else if ("company".equals(dto.getBorrowerType())) {
-            entity.setRelationship(dto.getCompanyRelationship());
-        }
-        
-        // 对公信息
+        // 对公/房产信息
         entity.setBusinessLicenseUrl(dto.getBusinessLicense());
         entity.setCompanyName(dto.getCompanyName());
         entity.setCompanyCreditCode(dto.getCompanyCreditCode());
         entity.setCompanyArea(dto.getCompanyArea());
         entity.setCompanyAddress(dto.getCompanyAddress());
-        entity.setAgentName(dto.getAgentName());
-        entity.setAgentMobile(dto.getAgentPhone() != null ? dto.getAgentPhone() : dto.getAgentPhone2());
-        entity.setAgentIdType(dto.getAgentIdType());
-        entity.setAgentIdNo(dto.getAgentIdNumber());
-        entity.setAgentIdIssueDate(parseDate(dto.getAgentIdStartDate()));
-        entity.setAgentIdExpireDate(parseDate(dto.getAgentIdEndDate()));
-        entity.setAgentIdAddress(dto.getAgentIdAddress());
-        entity.setAgentFaceFrontUrl(dto.getAgentIdCardFront());
-        entity.setAgentFaceBackUrl(dto.getAgentIdCardBack());
+        entity.setAgentMobile(dto.getAgentMobile());
         
         // 公证材料
         if (dto.getNotaryDocuments() != null && !dto.getNotaryDocuments().isEmpty()) {

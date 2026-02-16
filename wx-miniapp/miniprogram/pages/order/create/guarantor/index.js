@@ -12,10 +12,10 @@ const dictManager = require('../../../../utils/dict-manager');
 
 Page({
   data: {
-    // 担保人类型：personal-个人，company-对公
+    // 担保人类型：personal-个人，company-对公，property-房产
     borrowerType: 'personal',
     
-    // 个人信息
+    // 个人信息（个人类型使用，对公/房产类型作为经办人信息使用）
     idCardFront: '',
     idCardBack: '',
     idType: '',
@@ -30,23 +30,13 @@ Page({
     relationship: '',
     maritalStatus: '',
     
-    // 对公信息
+    // 对公/房产信息
     businessLicense: '',
     companyName: '',
     companyCreditCode: '',
     companyArea: '',
     companyAddress: '',
-    agentPhone: '',
-    agentIdCardFront: '',
-    agentIdCardBack: '',
-    agentIdType: '',
-    agentName: '',
-    agentPhone2: '',
-    agentIdNumber: '',
-    agentIdStartDate: '',
-    agentIdEndDate: '长期',
-    agentIdAddress: '',
-    companyRelationship: '',
+    agentMobile: '', // 经办人手机号
     notaryDocuments: [], // 公证材料列表
     
     // 省市区选择器相关
@@ -148,9 +138,6 @@ Page({
     if (!this.data.idType && dictData.id_type && dictData.id_type.length > 0) {
       updates.idType = dictData.id_type[0];
     }
-    if (!this.data.agentIdType && dictData.id_type && dictData.id_type.length > 0) {
-      updates.agentIdType = dictData.id_type[0];
-    }
     
     if (Object.keys(updates).length > 0) {
       this.setData(updates);
@@ -184,12 +171,10 @@ Page({
       if (result && result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
         const guarantor = result.data[0];
         logger.info('[担保人] 从后端加载成功', guarantor);
-        // 保存担保人ID，用于更新
-        this._guarantorId = guarantor.id;
         // 映射后端数据到页面
         this.setData({
           borrowerType: guarantor.borrowerType || 'personal',
-          // 个人信息
+          // 个人信息（个人类型使用，对公/房产类型作为经办人信息）
           idCardFront: guarantor.idCardFront || '',
           idCardBack: guarantor.idCardBack || '',
           idType: guarantor.idType || '身份证',
@@ -203,25 +188,18 @@ Page({
           detailAddress: guarantor.detailAddress || '',
           relationship: guarantor.relationship || '',
           maritalStatus: guarantor.maritalStatus || '',
-          // 对公信息
+          // 对公/房产信息
           businessLicense: guarantor.businessLicense || '',
           companyName: guarantor.companyName || '',
           companyCreditCode: guarantor.companyCreditCode || '',
           companyArea: guarantor.companyArea || '',
           companyAddress: guarantor.companyAddress || '',
-          agentPhone: guarantor.agentPhone || '',
-          agentIdCardFront: guarantor.agentIdCardFront || '',
-          agentIdCardBack: guarantor.agentIdCardBack || '',
-          agentIdType: guarantor.agentIdType || '身份证',
-          agentName: guarantor.agentName || '',
-          agentPhone2: guarantor.agentPhone2 || '',
-          agentIdNumber: guarantor.agentIdNumber || '',
-          agentIdStartDate: guarantor.agentIdStartDate || '',
-          agentIdEndDate: guarantor.agentIdEndDate || '长期',
-          agentIdAddress: guarantor.agentIdAddress || '',
-          companyRelationship: guarantor.companyRelationship || '',
+          agentMobile: guarantor.agentMobile || '',
           notaryDocuments: guarantor.notaryDocuments || []
         });
+        // 保存担保人ID，用于更新（必须在 setData 之后）
+        this._guarantorId = guarantor.id;
+        logger.info('[担保人] 保存ID用于更新', { id: this._guarantorId });
       } else {
         logger.info('[担保人] 后端无数据，尝试从本地加载');
         this.loadFromLocal();
@@ -233,25 +211,65 @@ Page({
     }
   },
 
-  // 从本地存储加载
+  // 从本地存储加载（已废弃，不再使用缓存）
   loadFromLocal() {
-    const savedData = wx.getStorageSync('orderFormData_step4');
-    if (savedData && savedData.guarantor) {
-      const data = savedData.guarantor;
-      logger.info('[担保人] 从本地加载成功', data);
-      this.setData({
-        borrowerType: data.borrowerType || 'personal',
-        ...data
-      });
-    }
+    // 不再从本地缓存加载数据，避免业务员录入多个订单时数据混乱
+    logger.info('[担保人] 跳过本地缓存加载');
   },
 
   // 选择类型
   selectType(e) {
     const type = e.currentTarget.dataset.type;
-    this.setData({
-      borrowerType: type
-    });
+    const currentType = this.data.borrowerType;
+    
+    // 如果类型没有变化，不做任何操作
+    if (type === currentType) {
+      return;
+    }
+    
+    // 切换类型时，只清空当前类型特有的字段，保留可能复用的字段
+    const updates = { borrowerType: type };
+    
+    if (type === 'personal') {
+      // 切换到个人类型，清空对公/房产特有字段
+      updates.businessLicense = '';
+      updates.companyName = '';
+      updates.companyCreditCode = '';
+      updates.companyArea = '';
+      updates.companyAddress = '';
+      updates.agentMobile = '';
+      updates.notaryDocuments = [];
+      // 保留个人信息字段（可能已填写）
+    } else if (type === 'company') {
+      // 切换到对公类型，清空个人特有字段
+      updates.residenceArea = '';
+      updates.detailAddress = '';
+      updates.maritalStatus = '';
+      // 清空房产特有字段（如果从房产切换过来）
+      if (currentType === 'property') {
+        // 从房产切换到对公，保留 businessLicense、companyArea、companyAddress
+        // 但清空 companyCreditCode（房产证号码对对公无意义）
+        updates.companyCreditCode = '';
+      }
+      // 保留个人信息字段（作为经办人信息）
+    } else if (type === 'property') {
+      // 切换到房产类型，清空个人特有字段
+      updates.residenceArea = '';
+      updates.detailAddress = '';
+      updates.maritalStatus = '';
+      // 清空对公特有字段（如果从对公切换过来）
+      if (currentType === 'company') {
+        // 从对公切换到房产，保留 businessLicense、companyArea、companyAddress
+        // 但清空 companyName（公司名称对房产无意义）、agentMobile、notaryDocuments
+        updates.companyName = '';
+        updates.agentMobile = '';
+        updates.notaryDocuments = [];
+      }
+      // 保留个人信息字段（作为经办人信息）
+    }
+    
+    this.setData(updates);
+    logger.info('[担保人] 切换类型', { from: currentType, to: type, updates: updates });
   },
 
   // 上传身份证正面（复用step2逻辑：上传+OCR+预览）
@@ -279,10 +297,9 @@ Page({
   },
 
   // 选择身份证图片并上传+OCR识别
-  // personType: 'guarantor' 表示担保人，'agent' 表示经办人
-  chooseIdCardImage(field, imageType, personType = 'guarantor') {
+  chooseIdCardImage(field, imageType) {
     const that = this;
-    logger.info('[担保人OCR] 开始选择身份证图片', { field, imageType, personType });
+    logger.info('[担保人OCR] 开始选择身份证图片', { field, imageType });
     
     wx.chooseImage({
       count: 1,
@@ -300,7 +317,7 @@ Page({
             
             // 上传图片到服务器（后端会自动进行OCR识别）
             wx.showLoading({ title: '上传中...', mask: true });
-            that.uploadIdCardImageWithOcr(finalPath, imageType, personType)
+            that.uploadIdCardImageWithOcr(finalPath, imageType)
               .then((result) => {
                 const uploadUrl = result.url || result;
                 logger.info('[担保人上传] 图片上传成功', { uploadUrl, hasOcr: !!result.ocr });
@@ -323,8 +340,8 @@ Page({
                   });
                   wx.hideLoading();
                   
-                  // 解析OCR结果并填充表单（经办人和担保人使用不同的字段前缀）
-                  that.parseOcrResult(ocrData, actualSide, personType);
+                  // 解析OCR结果并填充表单
+                  that.parseOcrResult(ocrData, actualSide);
                   wx.showToast({
                     title: '识别成功',
                     icon: 'success',
@@ -419,42 +436,35 @@ Page({
   },
 
   // 上传担保人身份证图片（带OCR识别）
-  // personType: 'guarantor' 表示担保人本人，'agent' 表示经办人
-  uploadIdCardImageWithOcr(imagePath, imageType, personType = 'guarantor') {
+  uploadIdCardImageWithOcr(imagePath, imageType) {
     if (!imagePath) {
       return Promise.reject(new Error('图片路径为空'));
     }
 
     const orderId = wx.getStorageSync('currentOrderId');
-    // 根据 personType 获取对应的身份证号
-    const idNumber = personType === 'agent' ? (this.data.agentIdNumber || '') : (this.data.idNumber || '');
+    const idNumber = this.data.idNumber || '';
 
-    // 使用全局上传工具，传入 personType 区分担保人和经办人
+    // 使用全局上传工具
     const uploadUtil = wx.$upload;
-    const finalPersonType = personType === 'agent' ? 'guarantor-agent' : 'guarantor';
-    return uploadUtil.uploadIdCardImage(imagePath, orderId, idNumber, imageType, finalPersonType);
+    return uploadUtil.uploadIdCardImage(imagePath, orderId, idNumber, imageType, 'guarantor');
   },
 
   // 解析OCR结果并填充表单
-  // personType: 'guarantor' 表示担保人本人，'agent' 表示经办人
-  parseOcrResult(ocrData, side, personType = 'guarantor') {
-    logger.info('[担保人OCR] 开始解析OCR结果', { side, personType, ocrDataKeys: Object.keys(ocrData || {}) });
+  parseOcrResult(ocrData, side) {
+    logger.info('[担保人OCR] 开始解析OCR结果', { side, ocrDataKeys: Object.keys(ocrData || {}) });
     const updates = {};
     let hasValidData = false;
     
-    // 根据 personType 确定字段前缀
-    const prefix = personType === 'agent' ? 'agent' : '';
-    
     if (side === 'front') {
       // 解析人像面信息：姓名、身份证号、地址
-      logger.debug('[担保人OCR] 解析身份证人像面信息', { ocrData, personType });
+      logger.debug('[担保人OCR] 解析身份证人像面信息', { ocrData });
       
       if (ocrData.name) {
         const name = ocrData.name.trim();
         if (name) {
-          updates[prefix ? `${prefix}Name` : 'name'] = name;
+          updates.name = name;
           hasValidData = true;
-          logger.info('[担保人OCR] 识别到姓名', { name, personType });
+          logger.info('[担保人OCR] 识别到姓名', { name });
         }
       }
       
@@ -462,12 +472,11 @@ Page({
       if (idNumber) {
         const cleanIdNumber = String(idNumber).replace(/\s+/g, '').replace(/[^\dXx]/g, '');
         if (cleanIdNumber && cleanIdNumber.length === 18) {
-          updates[prefix ? `${prefix}IdNumber` : 'idNumber'] = cleanIdNumber;
+          updates.idNumber = cleanIdNumber;
           hasValidData = true;
           logger.info('[担保人OCR] 识别到身份证号', { 
             original: idNumber, 
-            cleaned: cleanIdNumber,
-            personType
+            cleaned: cleanIdNumber
           });
         }
       }
@@ -475,18 +484,18 @@ Page({
       const address = ocrData.addr || ocrData.address;
       if (address && address.trim()) {
         const addr = address.trim();
-        updates[prefix ? `${prefix}IdAddress` : 'idAddress'] = addr;
+        updates.idAddress = addr;
         hasValidData = true;
-        logger.info('[担保人OCR] 识别到证件地址', { address: addr, personType });
+        logger.info('[担保人OCR] 识别到证件地址', { address: addr });
       }
       
     } else if (side === 'back') {
       // 解析国徽面信息：有效期
-      logger.debug('[担保人OCR] 解析身份证国徽面信息', { ocrData, personType });
+      logger.debug('[担保人OCR] 解析身份证国徽面信息', { ocrData });
       
       const validPeriod = ocrData.valid_date || ocrData.validPeriod || ocrData.validDate;
       if (validPeriod) {
-        logger.debug('[担保人OCR] 解析有效期', { validPeriod, personType });
+        logger.debug('[担保人OCR] 解析有效期', { validPeriod });
         
         const periodMatch = validPeriod.match(/(\d{4})[年.\-/]?(\d{1,2})[月.\-/]?(\d{1,2})[日]?\s*[-至]\s*(\d{4})[年.\-/]?(\d{1,2})[月.\-/]?(\d{1,2})[日]?/);
         if (periodMatch) {
@@ -494,13 +503,12 @@ Page({
           const startDay = periodMatch[3].padStart(2, '0');
           const endMonth = periodMatch[5].padStart(2, '0');
           const endDay = periodMatch[6].padStart(2, '0');
-          updates[prefix ? `${prefix}IdStartDate` : 'idStartDate'] = `${periodMatch[1]}-${startMonth}-${startDay}`;
-          updates[prefix ? `${prefix}IdEndDate` : 'idEndDate'] = `${periodMatch[4]}-${endMonth}-${endDay}`;
+          updates.idStartDate = `${periodMatch[1]}-${startMonth}-${startDay}`;
+          updates.idEndDate = `${periodMatch[4]}-${endMonth}-${endDay}`;
           hasValidData = true;
           logger.info('[担保人OCR] 识别到有效期', { 
-            startDate: updates[prefix ? `${prefix}IdStartDate` : 'idStartDate'],
-            endDate: updates[prefix ? `${prefix}IdEndDate` : 'idEndDate'],
-            personType
+            startDate: updates.idStartDate,
+            endDate: updates.idEndDate
           });
         }
       }
@@ -508,7 +516,7 @@ Page({
       if (ocrData.name) {
         const name = ocrData.name.trim();
         if (name) {
-          updates[prefix ? `${prefix}Name` : 'name'] = name;
+          updates.name = name;
           hasValidData = true;
         }
       }
@@ -516,13 +524,13 @@ Page({
       if (ocrData.idNumber) {
         const cleanIdNumber = ocrData.idNumber.replace(/\s+/g, '').replace(/[^\dXx]/g, '');
         if (cleanIdNumber && cleanIdNumber.length === 18) {
-          updates[prefix ? `${prefix}IdNumber` : 'idNumber'] = cleanIdNumber;
+          updates.idNumber = cleanIdNumber;
           hasValidData = true;
         }
       }
       
       if (ocrData.address && ocrData.address.trim()) {
-        updates[prefix ? `${prefix}IdAddress` : 'idAddress'] = ocrData.address.trim();
+        updates.idAddress = ocrData.address.trim();
         hasValidData = true;
       }
     }
@@ -530,15 +538,14 @@ Page({
     if (Object.keys(updates).length > 0) {
       logger.info('[担保人OCR] 准备填充表单数据', { 
         side, 
-        personType,
         updateCount: Object.keys(updates).length,
         hasValidData
       });
       this.setData(updates);
-      logger.info('[担保人OCR] 表单数据填充完成', { side, personType, updates });
+      logger.info('[担保人OCR] 表单数据填充完成', { side, updates });
       
       if (!hasValidData) {
-        logger.warn('[担保人OCR] 识别结果中没有有效数据', { side, personType, ocrData });
+        logger.warn('[担保人OCR] 识别结果中没有有效数据', { side, ocrData });
         wx.showToast({
           title: '识别失败，请手动填写',
           icon: 'none',
@@ -546,7 +553,7 @@ Page({
         });
       }
     } else {
-      logger.warn('[担保人OCR] 没有可填充的数据', { side, personType, ocrData });
+      logger.warn('[担保人OCR] 没有可填充的数据', { side, ocrData });
       wx.showToast({
         title: '识别失败，请手动填写',
         icon: 'none',
@@ -651,7 +658,7 @@ Page({
             idCardBack: '',
             // 清除相关OCR数据
             idStartDate: '',
-            idEndDate: ''
+            idEndDate: '长期' // 恢复默认值
           });
           wx.showToast({
             title: '已删除',
@@ -680,60 +687,6 @@ Page({
           
           // 清除页面数据
           this.setData({ businessLicense: '' });
-          wx.showToast({
-            title: '已删除',
-            icon: 'success'
-          });
-        }
-      }
-    });
-  },
-
-  // 删除经办人身份证正面（同时删除服务器上的图片文件）
-  deleteAgentIdCardFront(e) {
-    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
-    const imageUrl = this.data.agentIdCardFront;
-    
-    wx.showModal({
-      title: '提示',
-      content: '确定要删除经办人身份证正面照片吗？',
-      success: (res) => {
-        if (res.confirm) {
-          // 先删除服务器上的图片文件
-          const orderId = wx.getStorageSync('currentOrderId');
-          if (imageUrl && orderId) {
-            wx.$upload.deleteImageByUrl(imageUrl, orderId);
-          }
-          
-          // 清除页面数据
-          this.setData({ agentIdCardFront: '' });
-          wx.showToast({
-            title: '已删除',
-            icon: 'success'
-          });
-        }
-      }
-    });
-  },
-
-  // 删除经办人身份证反面（同时删除服务器上的图片文件）
-  deleteAgentIdCardBack(e) {
-    // catchtap 已经阻止冒泡，不需要再调用 stopPropagation
-    const imageUrl = this.data.agentIdCardBack;
-    
-    wx.showModal({
-      title: '提示',
-      content: '确定要删除经办人身份证反面照片吗？',
-      success: (res) => {
-        if (res.confirm) {
-          // 先删除服务器上的图片文件
-          const orderId = wx.getStorageSync('currentOrderId');
-          if (imageUrl && orderId) {
-            wx.$upload.deleteImageByUrl(imageUrl, orderId);
-          }
-          
-          // 清除页面数据
-          this.setData({ agentIdCardBack: '' });
           wx.showToast({
             title: '已删除',
             icon: 'success'
@@ -778,30 +731,6 @@ Page({
           });
       }
     });
-  },
-
-  // 上传经办人身份证正面（复用身份证上传逻辑）
-  uploadAgentIdCardFront() {
-    if (this.data.readonly) {
-      wx.showToast({
-        title: '当前为只读模式',
-        icon: 'none'
-      });
-      return;
-    }
-    this.chooseIdCardImage('agentIdCardFront', 'idFront', 'agent');
-  },
-
-  // 上传经办人身份证反面（复用身份证上传逻辑）
-  uploadAgentIdCardBack() {
-    if (this.data.readonly) {
-      wx.showToast({
-        title: '当前为只读模式',
-        icon: 'none'
-      });
-      return;
-    }
-    this.chooseIdCardImage('agentIdCardBack', 'idBack', 'agent');
   },
 
   // 上传公证材料（使用 step6 的逻辑）
@@ -953,24 +882,8 @@ Page({
     this.setData({ companyAddress: e.detail.value });
   },
 
-  onAgentPhoneInput(e) {
-    this.setData({ agentPhone: e.detail.value });
-  },
-
-  onAgentNameInput(e) {
-    this.setData({ agentName: e.detail.value });
-  },
-
-  onAgentPhone2Input(e) {
-    this.setData({ agentPhone2: e.detail.value });
-  },
-
-  onAgentIdNumberInput(e) {
-    this.setData({ agentIdNumber: e.detail.value });
-  },
-
-  onAgentIdAddressInput(e) {
-    this.setData({ agentIdAddress: e.detail.value });
+  onAgentMobileInput(e) {
+    this.setData({ agentMobile: e.detail.value });
   },
 
   // 选择证件类型
@@ -987,19 +900,6 @@ Page({
     });
   },
 
-  selectAgentIdType() {
-    if (this.data.readonly) {
-      return;
-    }
-    this.setData({
-      showPicker: true,
-      pickerTitle: '选择证件类型',
-      pickerOptions: this.data.idTypeOptions,
-      pickerCurrentValue: this.data.agentIdType,
-      pickerField: 'agentIdType'
-    });
-  },
-
   // 个人证件生效日期改变
   onIdStartDateChange(e) {
     this.setData({
@@ -1011,20 +911,6 @@ Page({
   onIdEndDateChange(e) {
     this.setData({
       idEndDate: e.detail.value
-    });
-  },
-
-  // 经办人证件生效日期改变
-  onAgentIdStartDateChange(e) {
-    this.setData({
-      agentIdStartDate: e.detail.value
-    });
-  },
-
-  // 经办人证件有效期改变
-  onAgentIdEndDateChange(e) {
-    this.setData({
-      agentIdEndDate: e.detail.value
     });
   },
 
@@ -1084,19 +970,6 @@ Page({
     });
   },
 
-  selectCompanyRelationship() {
-    if (this.data.readonly) {
-      return;
-    }
-    this.setData({
-      showPicker: true,
-      pickerTitle: '选择与主借人关系',
-      pickerOptions: this.data.relationshipOptions,
-      pickerCurrentValue: this.data.companyRelationship,
-      pickerField: 'companyRelationship'
-    });
-  },
-
   // 选择婚姻状况
   selectMaritalStatus() {
     if (this.data.readonly) {
@@ -1141,6 +1014,80 @@ Page({
     wx.navigateBack();
   },
 
+  // 删除担保人数据
+  deleteData() {
+    const that = this;
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除担保人信息吗？删除后将无法恢复。',
+      confirmText: '确认删除',
+      cancelText: '取消',
+      confirmColor: '#ff6f6f',
+      success: (res) => {
+        if (res.confirm) {
+          const orderId = wx.getStorageSync('currentOrderId');
+          if (!orderId) {
+            wx.showToast({ title: '订单ID缺失', icon: 'none' });
+            return;
+          }
+
+          wx.showLoading({ title: '删除中...', mask: true });
+
+          // 调用后端删除接口
+          const req = wx.$request;
+          
+          // 先查询担保人ID
+          req.get(`/public/orders/${orderId}/guarantor/list`)
+            .then((response) => {
+              const result = response.data;
+              if (result && result.success && result.data && result.data.length > 0) {
+                const guarantorId = result.data[0].id;
+                
+                // 调用删除接口
+                return req.delete(`/public/orders/${orderId}/guarantor/${guarantorId}`);
+              } else {
+                throw new Error('未找到担保人数据');
+              }
+            })
+            .then((response) => {
+              wx.hideLoading();
+              const result = response.data;
+              
+              if (result && result.success) {
+                logger.info('[担保人] 删除成功', result);
+                wx.showToast({
+                  title: '删除成功',
+                  icon: 'success'
+                });
+                
+                // 清空本地存储
+                wx.removeStorageSync('orderFormData_step4');
+                
+                setTimeout(() => {
+                  wx.navigateBack();
+                }, 1500);
+              } else {
+                logger.error('[担保人] 删除失败', result);
+                wx.showToast({
+                  title: result.message || '删除失败',
+                  icon: 'none'
+                });
+              }
+            })
+            .catch((err) => {
+              wx.hideLoading();
+              logger.error('[担保人] 删除异常', err);
+              wx.showToast({
+                title: '删除失败，请重试',
+                icon: 'none'
+              });
+            });
+        }
+      }
+    });
+  },
+
   // 保存
   async save() {
     // 只读模式下不允许保存
@@ -1171,6 +1118,7 @@ Page({
         return;
       }
     } else if (this.data.borrowerType === 'company') {
+      // 对公类型验证
       if (!this.data.businessLicense) {
         wx.showToast({ title: '请上传营业执照', icon: 'none' });
         return;
@@ -1179,17 +1127,55 @@ Page({
         wx.showToast({ title: '请填写公司名称', icon: 'none' });
         return;
       }
-      if (!this.data.companyCreditCode) {
-        wx.showToast({ title: '请填写公司信用代码', icon: 'none' });
+      // 验证经办人信息（使用个人信息字段）
+      if (!this.data.idCardFront || !this.data.idCardBack) {
+        wx.showToast({ title: '请上传身份证照片', icon: 'none' });
+        return;
+      }
+      if (!this.data.name) {
+        wx.showToast({ title: '请填写姓名', icon: 'none' });
+        return;
+      }
+      if (!this.data.phone) {
+        wx.showToast({ title: '请填写手机号', icon: 'none' });
+        return;
+      }
+      if (!this.data.idNumber) {
+        wx.showToast({ title: '请填写证件号码', icon: 'none' });
         return;
       }
     } else if (this.data.borrowerType === 'property') {
+      // 房产类型验证
+      logger.info('[担保人保存] 房产类型验证', {
+        businessLicense: this.data.businessLicense,
+        companyCreditCode: this.data.companyCreditCode,
+        companyArea: this.data.companyArea,
+        companyAddress: this.data.companyAddress
+      });
       if (!this.data.businessLicense) {
         wx.showToast({ title: '请上传房产证', icon: 'none' });
         return;
       }
       if (!this.data.companyCreditCode) {
+        logger.error('[担保人保存] 房产证号码为空', { companyCreditCode: this.data.companyCreditCode });
         wx.showToast({ title: '请填写房产证号码', icon: 'none' });
+        return;
+      }
+      // 验证经办人信息（使用个人信息字段）
+      if (!this.data.idCardFront || !this.data.idCardBack) {
+        wx.showToast({ title: '请上传经办人身份证照片', icon: 'none' });
+        return;
+      }
+      if (!this.data.name) {
+        wx.showToast({ title: '请填写经办人姓名', icon: 'none' });
+        return;
+      }
+      if (!this.data.phone) {
+        wx.showToast({ title: '请填写经办人手机号', icon: 'none' });
+        return;
+      }
+      if (!this.data.idNumber) {
+        wx.showToast({ title: '请填写经办人证件号码', icon: 'none' });
         return;
       }
     }
@@ -1235,28 +1221,29 @@ Page({
       guarantorData.relationship = this.data.relationship;
       guarantorData.maritalStatus = this.data.maritalStatus;
     } else if (this.data.borrowerType === 'company' || this.data.borrowerType === 'property') {
-      // 对公/房产类型：传递公司信息和经办人信息
+      // 对公/房产类型：传递公司/房产信息和个人信息（作为经办人信息）
       guarantorData.businessLicense = this.data.businessLicense;
       guarantorData.companyName = this.data.companyName;
       guarantorData.companyCreditCode = this.data.companyCreditCode;
       guarantorData.companyArea = this.data.companyArea;
       guarantorData.companyAddress = this.data.companyAddress;
-      guarantorData.agentPhone = this.data.agentPhone;
-      guarantorData.agentIdCardFront = this.data.agentIdCardFront;
-      guarantorData.agentIdCardBack = this.data.agentIdCardBack;
-      guarantorData.agentIdType = this.data.agentIdType;
-      guarantorData.agentName = this.data.agentName;
-      guarantorData.agentPhone2 = this.data.agentPhone2;
-      guarantorData.agentIdNumber = this.data.agentIdNumber;
-      guarantorData.agentIdStartDate = this.data.agentIdStartDate;
-      guarantorData.agentIdEndDate = this.data.agentIdEndDate;
-      guarantorData.agentIdAddress = this.data.agentIdAddress;
-      guarantorData.companyRelationship = this.data.companyRelationship;
+      guarantorData.agentMobile = this.data.agentMobile;
+      
+      // 个人信息（经办人）
+      guarantorData.idCardFront = this.data.idCardFront;
+      guarantorData.idCardBack = this.data.idCardBack;
+      guarantorData.idType = this.data.idType;
+      guarantorData.name = this.data.name;
+      guarantorData.phone = this.data.phone;
+      guarantorData.idNumber = this.data.idNumber;
+      guarantorData.idStartDate = this.data.idStartDate;
+      guarantorData.idEndDate = this.data.idEndDate;
+      guarantorData.idAddress = this.data.idAddress;
+      guarantorData.relationship = this.data.relationship;
+      
+      // 公证材料
       guarantorData.notaryDocuments = uploadedNotaryDocs.length > 0 ? uploadedNotaryDocs : this.data.notaryDocuments;
     }
-
-    // 先保存到本地存储（作为备份）
-    wx.setStorageSync('orderFormData_step4', { guarantor: guarantorData });
 
     // 调用后端接口保存
     const orderId = wx.getStorageSync('currentOrderId');
@@ -1269,15 +1256,8 @@ Page({
 
     try {
       const req = wx.$request;
-      let response;
-      
-      // 如果有 _guarantorId，说明是编辑模式，调用更新接口
-      if (this._guarantorId) {
-        response = await req.put(`/public/orders/${orderId}/guarantor/${this._guarantorId}`, guarantorData);
-      } else {
-        // 否则是新增模式，调用新增接口
-        response = await req.post(`/public/orders/${orderId}/guarantor/add`, guarantorData);
-      }
+      // 统一调用 save 接口，后端会自动判断新增或更新
+      const response = await req.post(`/public/orders/${orderId}/guarantor/save`, guarantorData);
       
       wx.hideLoading();
       
@@ -1291,6 +1271,10 @@ Page({
         if (result.data && result.data.id) {
           this._guarantorId = result.data.id;
         }
+        
+        // 保存成功后清理本地缓存，避免影响下一个订单
+        wx.removeStorageSync('orderFormData_step4');
+        
         wx.showToast({
           title: result.message || '保存成功',
           icon: 'success'

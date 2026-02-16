@@ -1,13 +1,12 @@
 .co-borrower-container {
   min-height: 100vh;
   background: #f5f5f5;
-  /* padding-bottom: 128rpx; */
 }
 
 /* 内容区域 */
 .content {
   height: calc(100vh - 128rpx);
-  padding-bottom: 180rpx; /* 底部按钮高度 + 额外空间，确保最后一个字段不被遮挡 */
+  box-sizing: border-box;
 }
 
 /* 区块 */

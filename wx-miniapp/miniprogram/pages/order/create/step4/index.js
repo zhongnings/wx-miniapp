@@ -27,6 +27,8 @@ Page({
     tabsScrollLeft: 0, // 导航栏滚动位置
     hasGuarantor: false, // 是否有担保人
     guarantor: null, // 担保人信息（单个）
+    // 图标URL
+    deleteIconUrl: '',
     // 是否只读（从订单详情进入查看模式时为 true，或订单状态为0/2时为true）
     readonly: false,
     // 是否从订单详情页进入（用于判断导航栏tab是否可点击）
@@ -39,6 +41,14 @@ Page({
 
   onLoad(options) {
     logger.info('订单创建步骤4：担保人信息页面加载', options);
+    
+    // 初始化图标URL
+    this.setData({
+      deleteIconUrl: wx.$placeholders.DELETE_ICON
+    });
+    
+    // 标记首次显示，避免 onShow 重复加载
+    this._isFirstShow = true;
     
     // 使用导航工具初始化订单上下文
     // step4 只读取全局上下文，不主动设置（除非从订单详情进入）
@@ -66,14 +76,18 @@ Page({
   },
 
   onShow() {
-    // 每次页面显示时重新加载担保人数据（但跳过首次加载，避免与 onLoad 重复）
-    if (this.data.guarantor !== null || this.data.hasGuarantor) {
-      const orderId = this.data.orderId || wx.getStorageSync('currentOrderId');
-      if (orderId) {
-        this.loadGuarantorFromServer(orderId);
-      } else {
-        this.loadGuarantorFromLocal();
-      }
+    // 跳过首次显示（避免与 onLoad 重复加载）
+    if (this._isFirstShow) {
+      this._isFirstShow = false;
+      return;
+    }
+    
+    // 非首次显示，重新加载担保人数据
+    const orderId = this.data.orderId || wx.getStorageSync('currentOrderId');
+    if (orderId) {
+      this.loadGuarantorFromServer(orderId);
+    } else {
+      this.loadGuarantorFromLocal();
     }
   },
 

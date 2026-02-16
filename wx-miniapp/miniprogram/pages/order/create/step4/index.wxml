@@ -45,7 +45,7 @@
     <view class="co-borrower-card" wx:if="{{hasGuarantor}}" bindtap="editGuarantor">
       <!-- 删除图标 -->
       <view class="card-delete-icon" catchtap="deleteGuarantor">
-        <image class="icon-image" src="/static/delete_icon.png" mode="aspectFit"></image>
+        <image class="icon-image" src="{{deleteIconUrl}}" mode="aspectFit"></image>
       </view>
       
       <!-- 个人类型 -->

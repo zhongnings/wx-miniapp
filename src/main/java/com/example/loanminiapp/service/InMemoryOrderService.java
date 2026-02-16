@@ -478,11 +478,11 @@ public class InMemoryOrderService implements OrderService {
         if (guarantor != null) {
             OrderDetail.PersonInfo p = new OrderDetail.PersonInfo();
             p.setIdType(guarantor.getIdType());
-            p.setName(guarantor.getAgentName());
+            p.setName(guarantor.getName());
             p.setIdNo(guarantor.getIdNo());
             p.setIdIssueDate(guarantor.getIdIssueDate() == null ? null : guarantor.getIdIssueDate().toString());
             p.setIdExpireDate(guarantor.getIdExpireDate() == null ? null : guarantor.getIdExpireDate().toString());
-            p.setMobile(guarantor.getAgentMobile());
+            p.setMobile(guarantor.getMobile());
             p.setProvinceCity(guarantor.getProvinceCity());
             p.setAddressDetail(guarantor.getAddressDetail());
             p.setMaritalStatus(guarantor.getMaritalStatus());

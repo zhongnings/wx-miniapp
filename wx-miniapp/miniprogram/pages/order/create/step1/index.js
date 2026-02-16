@@ -1231,10 +1231,7 @@ Page({
       return;
     }
 
-    // 先本地缓存，避免网络失败数据丢失
     const formData = this.data.formData;
-    wx.setStorageSync('orderFormData_step1', formData);
-
     const orderId = this.data.orderId;
     wx.showLoading({ title: '保存中...' });
     
@@ -1254,6 +1251,9 @@ Page({
           orderStatus: result.orderStatus,
           mode: 'create'
         });
+        
+        // 保存成功后清理本步骤的缓存，避免影响下一个订单
+        wx.removeStorageSync('orderFormData_step1');
         
         logger.info('步骤1保存成功', result);
         wx.hideLoading();
@@ -1293,7 +1293,17 @@ Page({
       formData.orderId = orderId;
     }
 
-    return req.post(`/public/orders/step1`, formData).then(res => {
+    // 处理预约时间：如果选择"否"，不传该字段或传 null
+    const submitData = { ...formData };
+    if (submitData.isNotarization === '否') {
+      // 选择"否"时，删除预约时间字段，避免传空字符串导致数据库错误
+      delete submitData.appointmentTime;
+    } else if (submitData.appointmentTime === '') {
+      // 如果是空字符串，也删除该字段
+      delete submitData.appointmentTime;
+    }
+
+    return req.post(`/public/orders/step1`, submitData).then(res => {
       // 返回完整的订单信息（包括 orderId 和 orderStatus）
       const result = {
         orderId: null,
