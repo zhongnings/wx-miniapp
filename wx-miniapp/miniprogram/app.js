@@ -19,6 +19,11 @@ const config = require('/config/config');
 // 数据字典 API
 const dictApi = require('/api/dict');
 
+// 引入分包使用的工具，避免主包未使用警告
+const bankCardUtil = require('/utils/bank-card-util');
+const dictManager = require('/utils/dict-manager');
+const navigation = require('/utils/navigation');
+
 App({
   onLaunch() {
     // 挂载到 wx 全局对象

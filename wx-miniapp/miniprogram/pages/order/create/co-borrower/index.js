@@ -1,12 +1,5 @@
-// 内联 logger
-const DEBUG = true;
-const logger = {
-  log: (...args) => DEBUG && console.log('[LOG]', ...args),
-  error: (...args) => console.error('[ERROR]', ...args),
-  warn: (...args) => DEBUG && console.warn('[WARN]', ...args),
-  info: (...args) => DEBUG && console.info('[INFO]', ...args),
-  debug: (...args) => DEBUG && console.log('[DEBUG]', ...args)
-};
+// 使用统一的 logger 工具
+const logger = require('../../../../utils/logger.js');
 
 const dictManager = require('../../../../utils/dict-manager');
 

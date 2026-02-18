@@ -8,20 +8,27 @@
     "pages/order/fulldetail/index",
     "pages/order/progress/index",
     "pages/order/contracts/index",
-    "pages/order/create/step1/index",
-    "pages/order/create/step2/index",
-    "pages/order/create/step3/index",
-    "pages/order/create/co-borrower/index",
-    "pages/order/create/step4/index",
-    "pages/order/create/guarantor/index",
-    "pages/order/create/step5/index",
-    "pages/order/create/step5-edit/index",
-    "pages/order/create/step6/index",
     "pages/order/voucher-list/index",
     "pages/order/voucher-add/index",
     "pages/order/voucher-confirm/index",
-    "pages/order/payee-select/index",
-    "components/region-picker/region-picker"
+    "pages/order/payee-select/index"
+  ],
+  "subPackages": [
+    {
+      "root": "pages/order/create",
+      "name": "orderCreate",
+      "pages": [
+        "step1/index",
+        "step2/index",
+        "step3/index",
+        "co-borrower/index",
+        "step4/index",
+        "guarantor/index",
+        "step5/index",
+        "step5-edit/index",
+        "step6/index"
+      ]
+    }
   ],
   "window": {
     "navigationBarTitleText": "益信通",
@@ -29,6 +36,7 @@
     "navigationBarTextStyle": "white",
     "backgroundColor": "#f5f5f5"
   },
+  "lazyCodeLoading": "requiredComponents",
   "pageStyle": "default",
   "sitemapLocation": "sitemap.json",
   "style": "v2",

@@ -1,22 +1,5 @@
-// 内联 logger，避免微信小程序预加载时路径解析问题
-const DEBUG = true;
-const logger = {
-  log: (...args) => DEBUG && console.log('[LOG]', ...args),
-  error: (...args) => console.error('[ERROR]', ...args),
-  warn: (...args) => DEBUG && console.warn('[WARN]', ...args),
-  info: (...args) => DEBUG && console.info('[INFO]', ...args),
-  debug: (...args) => DEBUG && console.log('[DEBUG]', ...args),
-  request: (url, method, data) => DEBUG && console.log('[REQUEST]', { url, method, data, time: new Date().toLocaleTimeString() }),
-  response: (url, statusCode, data) => DEBUG && console.log('[RESPONSE]', { url, statusCode, data, time: new Date().toLocaleTimeString() }),
-  table: (data) => DEBUG && console.table(data),
-  group: (label, callback) => {
-    if (DEBUG) {
-      console.group(label);
-      callback();
-      console.groupEnd();
-    }
-  }
-};
+// 使用统一的 logger 工具
+const logger = require('../../../../utils/logger.js');
 
 // 引入导航工具
 const navigation = require('../../../../utils/navigation.js');
