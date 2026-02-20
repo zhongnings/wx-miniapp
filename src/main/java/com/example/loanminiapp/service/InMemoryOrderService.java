@@ -77,13 +77,14 @@ public class InMemoryOrderService implements OrderService {
 
     @Override
     public List<OrderSummary> list(String tab, String keyword, String status) {
-        List<Order> orders = orderMapper.selectList(new LambdaQueryWrapper<>());
-
-        // 角色过滤
-        Set<Long> allowedIds = filterOrderIdsByRole(orders);
-        orders = orders.stream()
-                .filter(o -> allowedIds.isEmpty() || allowedIds.contains(o.getId()))
-                .collect(Collectors.toList());
+        // 构建查询条件，直接在SQL层面过滤权限
+        LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
+        
+        // 根据角色添加权限过滤条件
+        addRoleFilter(queryWrapper);
+        
+        // 执行查询
+        List<Order> orders = orderMapper.selectList(queryWrapper);
 
         // tab 过滤
         orders = orders.stream().filter(o -> {
@@ -526,31 +527,67 @@ public class InMemoryOrderService implements OrderService {
         return d;
     }
 
-    private Set<Long> filterOrderIdsByRole(List<Order> orders) {
+    /**
+     * 根据用户角色添加权限过滤条件到查询中
+     * - ADMIN：不添加任何过滤条件（查看所有订单）
+     * - SALES/APPLICANT：通过子查询关联 t_order_user_relation 表
+     */
+    private void addRoleFilter(LambdaQueryWrapper<Order> queryWrapper) {
         CurrentUser cu = CurrentUserContext.get();
         if (cu == null || cu.getRoles() == null || cu.getRoles().isEmpty()) {
-            return Collections.emptySet();
+            // 未登录，返回空结果
+            queryWrapper.eq(Order::getId, -1);
+            return;
         }
+        
+        // ADMIN 角色可以查看所有订单，不添加过滤条件
         if (cu.getRoles().contains("ADMIN")) {
-            return orders.stream().map(Order::getId).collect(Collectors.toSet());
+            return;
         }
+        
         Long uid = cu.getUserId();
         if (uid == null) {
-            return Collections.emptySet();
+            // 用户ID为空，返回空结果
+            queryWrapper.eq(Order::getId, -1);
+            return;
         }
-        Map<String, List<OrderUserRelation>> relationMap = orderUserRelationMapper.selectList(new LambdaQueryWrapper<OrderUserRelation>()
-                .eq(OrderUserRelation::getUserId, uid))
-                .stream()
-                .collect(Collectors.groupingBy(OrderUserRelation::getRelationType));
+        
+        // 查询用户有权限的订单ID列表
+        List<OrderUserRelation> relations = orderUserRelationMapper.selectList(
+                new LambdaQueryWrapper<OrderUserRelation>()
+                        .eq(OrderUserRelation::getUserId, uid)
+        );
+        
+        if (relations.isEmpty()) {
+            // 没有关联订单，返回空结果
+            queryWrapper.eq(Order::getId, -1);
+            return;
+        }
+        
+        // 根据角色过滤关系类型
+        List<Long> allowedOrderIds = new ArrayList<>();
+        
         if (cu.getRoles().contains("SALES")) {
-            return relationMap.getOrDefault("SALES_OWNER", Collections.emptyList()).stream()
-                    .map(OrderUserRelation::getOrderId).collect(Collectors.toSet());
+            // SALES 角色只能看到自己作为业务员的订单
+            allowedOrderIds = relations.stream()
+                    .filter(r -> "SALES_OWNER".equals(r.getRelationType()))
+                    .map(OrderUserRelation::getOrderId)
+                    .collect(Collectors.toList());
+        } else if (cu.getRoles().contains("APPLICANT")) {
+            // APPLICANT 角色只能看到自己作为申请人的订单
+            allowedOrderIds = relations.stream()
+                    .filter(r -> "APPLICANT_OWNER".equals(r.getRelationType()))
+                    .map(OrderUserRelation::getOrderId)
+                    .collect(Collectors.toList());
         }
-        if (cu.getRoles().contains("APPLICANT")) {
-            return relationMap.getOrDefault("APPLICANT_OWNER", Collections.emptyList()).stream()
-                    .map(OrderUserRelation::getOrderId).collect(Collectors.toSet());
+        
+        if (allowedOrderIds.isEmpty()) {
+            // 没有符合条件的订单，返回空结果
+            queryWrapper.eq(Order::getId, -1);
+        } else {
+            // 添加 IN 条件，只查询有权限的订单
+            queryWrapper.in(Order::getId, allowedOrderIds);
         }
-        return Collections.emptySet();
     }
 
     @Override

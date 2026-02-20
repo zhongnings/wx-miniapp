@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "新增资金账户",
+  "navigationBarBackgroundColor": "#ff6f6f",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "bank-picker": "/components/bank-picker/bank-picker"
+  }
+}
+

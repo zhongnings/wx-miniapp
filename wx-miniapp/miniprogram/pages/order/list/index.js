@@ -15,6 +15,7 @@ Page({
     historyCount: 0,
     currentMenu: 'order',
     menuList: [],
+    menuIconUrl: '', // 菜单图标URL
     // 分页相关
     page: 1,
     size: 10,
@@ -40,6 +41,12 @@ Page({
 
   onLoad() {
     logger.info('订单列表页面加载');
+    
+    // 初始化菜单图标URL
+    this.setData({
+      menuIconUrl: wx.$placeholders.MENU_ICON
+    });
+    
     this.loadUserMenu();
     // 进入页面时加载统计和订单列表
     this.loadStats(() => {
@@ -54,7 +61,37 @@ Page({
     if (!this.data.hasLoadedOnce) {
       return;
     }
+    
+    // 重新识别当前页面对应的菜单项
+    const pages = getCurrentPages();
+    const currentPage = pages[pages.length - 1];
+    const currentRoute = currentPage ? currentPage.route : '';
+    const currentPath = '/' + currentRoute;
+    
+    // 查找匹配的菜单项
+    const matchedMenu = this.data.menuList.find(item => {
+      if (item.path === currentPath) {
+        return true;
+      }
+      // 兼容处理：如果 path 是相对路径，也尝试匹配
+      if (item.path && currentRoute.includes(item.path.replace(/^\//, ''))) {
+        return true;
+      }
+      return false;
+    });
+    
+    const currentMenuKey = matchedMenu ? matchedMenu.key : (this.data.menuList.length > 0 ? this.data.menuList[0].key : 'order');
+    
+    logger.info('onShow 重新设置菜单:', {
+      currentRoute,
+      currentPath,
+      matchedMenu,
+      currentMenuKey
+    });
+    
+    // 重新设置当前菜单
     this.setData({
+      currentMenu: currentMenuKey,
       page: 1,
       orders: [],
       hasMore: true
@@ -140,7 +177,7 @@ Page({
     this.setData({ currentMenu: key, showMenuDrawer: false });
     
     if (path) {
-      wx.redirectTo({ url: path });
+      wx.navigateTo({ url: path });
     } else {
       wx.showToast({
         title: '功能待实现',

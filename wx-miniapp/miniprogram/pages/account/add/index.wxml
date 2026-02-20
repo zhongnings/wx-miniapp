@@ -1,0 +1,148 @@
+<view class="account-add-container {{showBankPicker ? 'picker-open' : ''}}">
+  <!-- 表单内容 -->
+  <scroll-view class="form-content" scroll-y="{{!showBankPicker}}" enhanced="true" show-scrollbar="false">
+    
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-header">
+        <text class="section-title">基本信息</text>
+      </view>
+
+      <!-- 受让方 -->
+      <view class="form-item" bindtap="selectAssignee">
+        <text class="label required">受让方</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.assignee || '请选择受让方'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 支付渠道 -->
+      <view class="form-item" bindtap="selectPaymentChannel">
+        <text class="label required">支付渠道</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.paymentChannel || '请选择支付渠道'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 小贷机构 -->
+      <view class="form-item" bindtap="selectMicroloanOrg">
+        <text class="label required">小贷机构</text>
+        <view class="value-wrapper">
+          <text class="value">{{formData.microloanOrg || '请选择小贷机构'}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 银行账户信息 -->
+    <view class="form-section">
+      <view class="section-header">
+        <text class="section-title">银行账户信息</text>
+      </view>
+
+      <!-- 开户行号 -->
+      <view class="form-item">
+        <text class="label required">开户行号</text>
+        <input 
+          class="input" 
+          placeholder="请填写开户行号" 
+          value="{{formData.bankBranchNumber}}"
+          bindinput="onBankCodeInput"
+          type="number"
+        />
+      </view>
+
+      <!-- 绑定银行 -->
+      <view class="form-item" bindtap="showBankPickerDialog">
+        <text class="label required">绑定银行</text>
+        <view class="input-wrapper">
+          <input 
+            class="input" 
+            placeholder="请选择绑定银行" 
+            value="{{formData.boundBank}}"
+            disabled="{{true}}"
+          />
+          <text class="arrow">›</text>
+        </view>
+      </view>
+
+      <!-- 绑定银行账号 -->
+      <view class="form-item">
+        <text class="label required">绑定银行账号</text>
+        <input 
+          class="input" 
+          placeholder="输入账号自动识别银行" 
+          value="{{formData.accountNumber}}"
+          bindinput="onBankAccountInput"
+          type="number"
+        />
+      </view>
+
+      <!-- 支付密码 -->
+      <view class="form-item">
+        <text class="label {{isEditMode ? '' : 'required'}}">支付密码</text>
+        <input 
+          class="input" 
+          placeholder="{{isEditMode ? '不修改请留空' : '请输入支付密码'}}" 
+          value="{{formData.paymentPassword}}"
+          bindinput="onPaymentPasswordInput"
+          type="text"
+          password="{{true}}"
+        />
+      </view>
+
+      <!-- 确认密码 -->
+      <view class="form-item">
+        <text class="label {{isEditMode ? '' : 'required'}}">确认密码</text>
+        <input 
+          class="input" 
+          placeholder="{{isEditMode ? '不修改请留空' : '请再次输入支付密码'}}" 
+          value="{{formData.confirmPassword}}"
+          bindinput="onConfirmPasswordInput"
+          type="text"
+          password="{{true}}"
+        />
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部提交按钮 -->
+  <view class="footer">
+    <button class="submit-btn" bindtap="submit">提交</button>
+  </view>
+
+  <!-- 银行选择器 -->
+  <bank-picker 
+    show="{{showBankPicker}}"
+    bankList="{{bankList}}"
+    value="{{formData.boundBank}}"
+    bind:confirm="onBankPickerConfirm"
+    bind:cancel="onBankPickerCancel"
+  />
+
+  <!-- 选择器弹窗 -->
+  <view class="picker-mask {{showPicker ? 'show' : ''}}" bindtap="hidePicker" catchtouchmove="stopScroll">
+    <view class="picker-container" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">{{pickerTitle}}</text>
+        <text class="picker-close" bindtap="hidePicker">×</text>
+      </view>
+      <scroll-view class="picker-content" scroll-y="true" enhanced="true" show-scrollbar="false">
+        <view 
+          class="picker-item {{pickerCurrentValue === item ? 'selected' : ''}}"
+          wx:for="{{pickerOptions}}" 
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="onPickerItemTap"
+        >
+          {{item}}
+          <text class="picker-check" wx:if="{{pickerCurrentValue === item}}">✓</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+</view>
+

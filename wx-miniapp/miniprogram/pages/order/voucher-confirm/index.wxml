@@ -48,9 +48,11 @@
       <input 
         class="password-input" 
         type="password" 
+        password="{{true}}"
         placeholder="请输入支付密码"
         value="{{paymentPassword}}"
         bindinput="onPasswordInput"
+        maxlength="20"
       />
     </view>
   </view>

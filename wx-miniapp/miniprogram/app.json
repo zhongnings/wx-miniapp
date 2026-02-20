@@ -28,6 +28,14 @@
         "step5-edit/index",
         "step6/index"
       ]
+    },
+    {
+      "root": "pages/account",
+      "name": "account",
+      "pages": [
+        "list/index",
+        "add/index"
+      ]
     }
   ],
   "window": {

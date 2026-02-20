@@ -6,12 +6,14 @@ const BASE_URL = config.API_BASE_URL;
 /**
  * 统一的请求方法
  * 自动添加日志，方便调试
+ * 自动处理Token失效，跳转登录页
  */
 function request(options) {
   const { 
     url, 
     method = 'GET',
     data = null,
+    skipAuthCheck = false, // 是否跳过认证检查（登录接口使用）
     ...rest 
   } = options;
 
@@ -41,6 +43,56 @@ function request(options) {
         // 记录响应日志
         logger.response(fullUrl, res.statusCode, res.data);
 
+        // 统一处理Token失效（401未授权）
+        if (res.statusCode === 401 && !skipAuthCheck) {
+          logger.warn('Token已失效，跳转登录页');
+          
+          // 清除本地存储的认证信息
+          wx.removeStorageSync('TOKEN');
+          wx.removeStorageSync('USER_ID');
+          wx.removeStorageSync('ROLES');
+          wx.removeStorageSync('PERMISSIONS');
+          
+          // 显示提示
+          wx.showToast({
+            title: res.data?.message || '登录已过期，请重新登录',
+            icon: 'none',
+            duration: 2000
+          });
+          
+          // 延迟跳转到登录页
+          setTimeout(() => {
+            wx.reLaunch({
+              url: '/pages/login/index'
+            });
+          }, 2000);
+          
+          reject({
+            statusCode: 401,
+            message: '登录已过期',
+            data: res.data
+          });
+          return;
+        }
+
+        // 统一处理权限不足（403禁止访问）
+        if (res.statusCode === 403) {
+          logger.warn('权限不足:', res.data);
+          
+          wx.showToast({
+            title: res.data?.message || '您没有权限执行此操作',
+            icon: 'none',
+            duration: 2500
+          });
+          
+          reject({
+            statusCode: 403,
+            message: res.data?.message || '权限不足',
+            data: res.data
+          });
+          return;
+        }
+
         // 统一处理响应
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res);
@@ -61,7 +113,11 @@ function request(options) {
           if (rest.fail) {
             rest.fail(res);
           }
-          reject(res);
+          reject({
+            statusCode: res.statusCode,
+            message: res.data?.message || '请求失败',
+            data: res.data
+          });
         }
       },
       fail: (err) => {
@@ -80,7 +136,11 @@ function request(options) {
         if (rest.fail) {
           rest.fail(err);
         }
-        reject(err);
+        reject({
+          statusCode: 0,
+          message: '网络错误',
+          error: err
+        });
       },
       complete: (res) => {
         logger.debug('请求完成:', fullUrl);

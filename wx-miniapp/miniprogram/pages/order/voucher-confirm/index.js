@@ -53,19 +53,19 @@ Page({
       data: {
         paymentPassword: this.data.paymentPassword
       }
-    }).then(() => {
+    }).then(res => {
+      const data = res.data || res;
       wx.showToast({
-        title: '申请成功',
+        title: data.message || '申请成功',
         icon: 'success'
       });
       setTimeout(() => {
         wx.navigateBack({ delta: 2 }); // 返回到制单列表
       }, 1500);
     }).catch(err => {
-      wx.showToast({
-        title: err.message || '申请失败',
-        icon: 'none'
-      });
+      // request.js已经统一处理了401和403错误
+      // 这里只需要处理其他错误即可
+      console.error('放款申请失败:', err);
     }).finally(() => {
       wx.hideLoading();
     });

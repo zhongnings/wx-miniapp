@@ -5,7 +5,7 @@
   <!-- 搜索栏 -->
   <view class="search-section">
     <view class="menu-icon" bindtap="showMenu">
-      <text class="icon-text">🏠</text>
+      <image class="menu-icon-image" src="{{menuIconUrl}}" mode="aspectFit"></image>
     </view>
     <view class="search-input-wrapper">
       <text class="search-icon">🔍</text>
@@ -57,9 +57,9 @@
   >
     <block wx:for="{{orders}}" wx:key="id">
       <view class="order-item">
-        <view class="order-row">
-          <text class="label">借款人：</text>
-          <text class="value">{{item.borrowerName || '未填写'}}</text>
+        <view class="order-row order-header-row">
+          <text class="label label-large">借款人：</text>
+          <text class="value value-large">{{item.borrowerName || '未填写'}}</text>
           <view class="status-link" wx:if="{{item.statusLabel}}" bindtap="goDetail" data-id="{{item.id}}">
             {{item.statusLabel}} >
           </view>

@@ -7,6 +7,7 @@ import com.example.loanminiapp.entry.LoginResponse;
 import com.example.loanminiapp.entry.RegisterRequest;
 import com.example.loanminiapp.entry.MenuItem;
 import com.example.loanminiapp.mapper.SysPermissionMapper;
+import com.example.loanminiapp.service.TokenService;
 import com.example.loanminiapp.service.UserService;
 import com.example.loanminiapp.service.UserService.UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -24,24 +25,42 @@ public class AuthController {
 
     private final UserService userService;
     private final SysPermissionMapper sysPermissionMapper;
+    private final TokenService tokenService;
 
     /**
      * 说明：
      * - 请求体：明文 JSON { "username": "...", "password": "..." }
-     * - 响应体：直接返回 token、roles、permissions、menus 等字段
+     * - 响应体：返回 JWT token（30分钟有效期，存储在Redis中）、roles、permissions、menus 等字段
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         UserInfo user = userService.validate(request.getUsername(), request.getPassword());
         List<MenuItem> menus = buildMenus(user.getPermissions());
 
+        // 生成Token并存储到Redis（30分钟有效期，支持单点登录）
+        String token = tokenService.generateAndStoreToken(
+            user.getUserId(),
+            request.getUsername(),
+            user.getRoles(),
+            user.getPermissions()
+        );
+
         LoginResponse resp = new LoginResponse();
-        resp.setToken("MOCK_TOKEN");
+        resp.setToken(token);
         resp.setUserId(user.getUserId());
         resp.setRoles(user.getRoles());
         resp.setPermissions(user.getPermissions());
         resp.setMenus(menus);
         return ResponseEntity.ok(resp);
+    }
+
+    /**
+     * 登出接口
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("X-Token") String token) {
+        tokenService.removeToken(token);
+        return ResponseEntity.ok().build();
     }
 
     /**

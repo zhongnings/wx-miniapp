@@ -22,6 +22,11 @@
   justify-content: center;
 }
 
+.menu-icon-image {
+  width: 40rpx;
+  height: 40rpx;
+}
+
 .icon-text {
   font-size: 36rpx;
   color: #666;
@@ -157,17 +162,24 @@
   padding: 30rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  /*border-left: 4rpx solid #ff6f6f;*/
 }
 
 .order-row {
   display: flex;
   align-items: center;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
   font-size: 28rpx;
 }
 
 .order-row:last-child {
   margin-bottom: 0;
+}
+
+.order-header-row {
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
 .order-no-row {
@@ -177,11 +189,23 @@
 
 .label {
   color: #666;
-  margin-right: 8rpx;
+  margin-right: 16rpx;
+  min-width: 140rpx;
+}
+
+.label-large {
+  font-size: 38rpx;
+  font-weight: 500;
 }
 
 .value {
   color: #333;
+  flex: 1;
+}
+
+.value-large {
+  font-size: 32rpx;
+  font-weight: 500;
 }
 
 .amount {

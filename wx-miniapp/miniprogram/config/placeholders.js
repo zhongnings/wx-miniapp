@@ -52,6 +52,16 @@ module.exports = {
     return `${getBaseUrl()}/img/delete_icon.png`;
   },
   
+  // 菜单图标
+  get MENU_ICON() {
+    return `${getBaseUrl()}/img/menu.png`;
+  },
+  
+  // 设置图标
+  get SETTING_ICON() {
+    return `${getBaseUrl()}/img/setting.png`;
+  },
+  
   // 获取占位图（带缓存）
   getPlaceholder(type) {
     const app = getApp();
