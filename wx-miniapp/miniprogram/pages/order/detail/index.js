@@ -24,11 +24,18 @@ Page({
     buttonText: '立即提交',
     showContractList: false,
     showApproveButton: false,
-    showVoucherInfo: false
+    showVoucherInfo: false,
+    showButton: true,  // 新增：控制是否显示底部按钮
+    statusBarHeight: 0  // 状态栏高度
   },
 
   onLoad(query) {
-    this.setData({ id: query.id });
+    // 获取系统信息，设置状态栏高度
+    const systemInfo = wx.getSystemInfoSync();
+    this.setData({ 
+      id: query.id,
+      statusBarHeight: systemInfo.statusBarHeight || 20
+    });
     this.loadDetail();
     // 合同列表改为进入合同页时再加载，避免切换页面时仍触发请求
   },
@@ -113,6 +120,12 @@ Page({
       let showContractList = false;
       let showApproveButton = false;
       let showVoucherInfo = false;
+      let showButton = true;  // 默认显示按钮
+      
+      // 判断是否隐藏按钮（状态4、5、6等不显示按钮）
+      if (detail.orderStatus >= 4) {
+        showButton = false;  // 你可以后续根据需要修改这个逻辑
+      }
       
       if (isRiskReviewing) {
         // 风控审核中：显示"驳回"和"通过"按钮
@@ -141,7 +154,8 @@ Page({
         buttonText,
         showContractList,
         showApproveButton,
-        showVoucherInfo
+        showVoucherInfo,
+        showButton
       });
       logger.info('订单详情加载成功:', detail);
     }).catch(err => {

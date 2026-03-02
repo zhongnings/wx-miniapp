@@ -1,4 +1,14 @@
 <view class="detail-container">
+  <!-- 自定义导航栏（已注释，需要时取消注释并修改index.json中的navigationStyle为custom）
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <view class="navbar-title">订单详情</view>
+    <view class="navbar-right"></view>
+  </view>
+  -->
+
   <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
     <!-- 订单摘要卡片 -->
     <view class="summary-card">
@@ -113,11 +123,11 @@
   </scroll-view>
 
   <!-- 底部按钮 -->
-  <view class="submit-button" wx:if="{{showApproveButton}}">
+  <view class="submit-button" wx:if="{{showButton && showApproveButton}}">
     <button class="reject-button" bindtap="onSubmit">{{buttonText}}</button>
     <button class="approve-button" bindtap="approveOrder">通过</button>
   </view>
-  <view class="submit-button" wx:else>
+  <view class="submit-button" wx:elif="{{showButton}}">
     <button class="submit-text" bindtap="onSubmit">{{buttonText}}</button>
   </view>
 </view>

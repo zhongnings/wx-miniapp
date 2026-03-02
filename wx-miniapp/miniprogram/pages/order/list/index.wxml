@@ -2,6 +2,14 @@
 <wxs src="../../../utils/formatMoney.wxs" module="formatTool" />
 
 <view class="order-list-container">
+  <!-- 自定义导航栏（已注释，需要时取消注释并修改index.json中的navigationStyle为custom）
+  <view class="custom-navbar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="navbar-left"></view>
+    <view class="navbar-title">订单列表</view>
+    <view class="navbar-right"></view>
+  </view>
+  -->
+
   <!-- 搜索栏 -->
   <view class="search-section">
     <view class="menu-icon" bindtap="showMenu">

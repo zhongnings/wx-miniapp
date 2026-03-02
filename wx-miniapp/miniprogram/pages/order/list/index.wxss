@@ -5,6 +5,36 @@
   /* padding-bottom: 120rpx; */
 }
 
+/* 自定义导航栏样式（已注释，需要时取消注释）
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: #ff6f6f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16rpx;
+  z-index: 1000;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.navbar-left,
+.navbar-right {
+  width: 80rpx;
+}
+
+.navbar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #ffffff;
+}
+*/
+
 /* 搜索栏 */
 .search-section {
   display: flex;
@@ -12,6 +42,12 @@
   padding: 20rpx 30rpx;
   background: #ffffff;
   gap: 20rpx;
+  /* 如果启用自定义导航栏，取消下面这些注释 */
+  /* position: fixed; */
+  /* top: calc(44px + var(--status-bar-height, 20px)); */
+  /* left: 0; */
+  /* right: 0; */
+  /* z-index: 999; */
 }
 
 .menu-icon {
@@ -62,6 +98,12 @@
   padding: 20rpx 30rpx;
   background: #ffffff;
   border-bottom: 1rpx solid #f0f0f0;
+  /* 如果启用自定义导航栏，取消下面这些注释 */
+  /* position: fixed; */
+  /* top: calc(44px + var(--status-bar-height, 20px) + 104rpx); */
+  /* left: 0; */
+  /* right: 0; */
+  /* z-index: 998; */
 }
 
 .tabs {

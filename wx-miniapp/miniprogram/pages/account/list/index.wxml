@@ -23,13 +23,13 @@
     <view class="account-card" wx:for="{{accountList}}" wx:key="id" bindtap="editAccount" data-id="{{item.id}}">
       <!-- 右上角图标组 -->
       <view class="card-icons">
-        <!-- 设置图标 -->
-        <view class="card-icon" catchtap="settingAccount" data-id="{{item.id}}">
-          <image class="icon-image" src="{{settingIconUrl}}" mode="aspectFit"></image>
-        </view>
         <!-- 删除图标 -->
         <view class="card-icon" catchtap="deleteAccount" data-id="{{item.id}}">
           <image class="icon-image" src="{{deleteIconUrl}}" mode="aspectFit"></image>
+        </view>
+        <!-- 设置图标 -->
+        <view class="card-icon" catchtap="settingAccount" data-id="{{item.id}}">
+          <image class="icon-image" src="{{settingIconUrl}}" mode="aspectFit"></image>
         </view>
       </view>
 

@@ -16,6 +16,7 @@ Page({
     currentMenu: 'order',
     menuList: [],
     menuIconUrl: '', // 菜单图标URL
+    statusBarHeight: 0, // 状态栏高度
     // 分页相关
     page: 1,
     size: 10,
@@ -42,9 +43,13 @@ Page({
   onLoad() {
     logger.info('订单列表页面加载');
     
+    // 获取系统信息，设置状态栏高度
+    const systemInfo = wx.getSystemInfoSync();
+    
     // 初始化菜单图标URL
     this.setData({
-      menuIconUrl: wx.$placeholders.MENU_ICON
+      menuIconUrl: wx.$placeholders.MENU_ICON,
+      statusBarHeight: systemInfo.statusBarHeight || 20
     });
     
     this.loadUserMenu();
