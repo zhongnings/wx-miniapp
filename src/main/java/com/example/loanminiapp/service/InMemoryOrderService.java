@@ -44,7 +44,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -623,10 +622,16 @@ public class InMemoryOrderService implements OrderService {
     public void submitAsync(Long id) {
         log.info("开始异步提交订单: orderId={}", id);
         
-        // 设置初始状态为处理中
         Map<String, Object> status = new HashMap<>();
         status.put("status", "processing");
         status.put("message", "订单提交中，正在生成合同...");
+
+        // 防止同一订单被并发重复提交
+        Map<String, Object> exists = submitStatusCache.putIfAbsent(id, status);
+        if (exists != null && "processing".equals(exists.get("status"))) {
+            log.warn("订单已在提交处理中，忽略重复请求: orderId={}", id);
+            return;
+        }
         submitStatusCache.put(id, status);
         
         try {

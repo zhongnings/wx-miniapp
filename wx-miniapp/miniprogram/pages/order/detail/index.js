@@ -26,7 +26,10 @@ Page({
     showApproveButton: false,
     showVoucherInfo: false,
     showButton: true,  // 新增：控制是否显示底部按钮
-    statusBarHeight: 0  // 状态栏高度
+    statusBarHeight: 0,  // 状态栏高度
+    submitting: false,
+    submitLoadingText: '订单提交中',
+    submitLoadingVisible: false
   },
 
   onLoad(query) {
@@ -217,7 +220,11 @@ Page({
    * 立即提交/立即完善资料/驳回
    */
   onSubmit() {
-    const { buttonText, infoStatus } = this.data;
+    const { buttonText, infoStatus, submitting } = this.data;
+    if (submitting) {
+      logger.warn('订单正在提交中，忽略重复点击');
+      return;
+    }
     
     // 如果是"立即完善资料"，跳转到第一个未完成的必填项
     if (buttonText === '立即完善资料') {
@@ -273,6 +280,13 @@ Page({
    * 提交订单（异步提交 + 轮询状态）
    */
   submitOrder() {
+    if (this.data.submitting) {
+      logger.warn('submitOrder重复触发，已拦截');
+      return;
+    }
+    this.setData({ submitting: true });
+    this.startSubmitLoadingAnimation();
+
     const that = this;
     wx.showLoading({ title: '提交中...', mask: true });
     
@@ -284,6 +298,8 @@ Page({
       logger.info('订单提交请求已发送，开始轮询状态');
       that.pollSubmitStatus();
     }).catch(err => {
+      that.setData({ submitting: false });
+      that.stopSubmitLoadingAnimation();
       wx.hideLoading();
       logger.error('提交订单失败:', err);
       wx.showToast({
@@ -316,6 +332,8 @@ Page({
         logger.info(`轮询状态 (${pollCount}/${maxPollCount}):`, statusData);
         
         if (status === 'success') {
+          that.setData({ submitting: false });
+          that.stopSubmitLoadingAnimation();
           // 提交成功
           wx.hideLoading();
           wx.showToast({
@@ -327,6 +345,8 @@ Page({
             that.loadDetail();
           }, 1500);
         } else if (status === 'failed') {
+          that.setData({ submitting: false });
+          that.stopSubmitLoadingAnimation();
           // 提交失败
           wx.hideLoading();
           wx.showToast({
@@ -345,6 +365,8 @@ Page({
           if (pollCount < maxPollCount) {
             setTimeout(poll, pollInterval);
           } else {
+            that.setData({ submitting: false });
+            that.stopSubmitLoadingAnimation();
             // 超时
             wx.hideLoading();
             wx.showModal({
@@ -361,6 +383,8 @@ Page({
           if (pollCount < maxPollCount) {
             setTimeout(poll, pollInterval);
           } else {
+            that.setData({ submitting: false });
+            that.stopSubmitLoadingAnimation();
             wx.hideLoading();
             wx.showToast({
               title: '提交超时，请稍后查看',
@@ -376,6 +400,8 @@ Page({
         if (pollCount < maxPollCount) {
           setTimeout(poll, pollInterval);
         } else {
+          that.setData({ submitting: false });
+          that.stopSubmitLoadingAnimation();
           wx.hideLoading();
           wx.showToast({
             title: '提交状态查询失败',
@@ -388,6 +414,40 @@ Page({
     
     // 开始第一次轮询
     poll();
+  },
+
+  startSubmitLoadingAnimation() {
+    this.stopSubmitLoadingAnimation();
+    this.setData({
+      submitLoadingVisible: true,
+      submitLoadingText: '订单提交中'
+    });
+    let dotCount = 0;
+    this.submitLoadingTimer = setInterval(() => {
+      dotCount = (dotCount + 1) % 4;
+      this.setData({
+        submitLoadingText: `订单提交中${'.'.repeat(dotCount)}`
+      });
+    }, 500);
+  },
+
+  stopSubmitLoadingAnimation() {
+    if (this.submitLoadingTimer) {
+      clearInterval(this.submitLoadingTimer);
+      this.submitLoadingTimer = null;
+    }
+    this.setData({
+      submitLoadingVisible: false,
+      submitLoadingText: '订单提交中'
+    });
+  },
+
+  onHide() {
+    this.stopSubmitLoadingAnimation();
+  },
+
+  onUnload() {
+    this.stopSubmitLoadingAnimation();
   },
 
   /**

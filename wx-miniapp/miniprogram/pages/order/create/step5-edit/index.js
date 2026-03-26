@@ -634,9 +634,10 @@ Page({
     if (value.length >= 6) {
       const currentBin = value.substring(0, 6);
       const previousBin = this._lastCardBin || '';
+      const currentBankName = (this.data.formData.bankName || '').trim();
       
-      // 如果前6位变化了，重新识别
-      if (currentBin !== previousBin) {
+      // 如果前6位变化，或当前仍未识别出银行，则重试识别
+      if (currentBin !== previousBin || !currentBankName) {
         this._lastCardBin = currentBin;
         
         const bankName = bankCardUtil.identifyBank(value);

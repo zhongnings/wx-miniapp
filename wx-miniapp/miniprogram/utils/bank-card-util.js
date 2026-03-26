@@ -296,18 +296,37 @@ function identifyBank(cardNumber) {
   if (cleanCardNumber.length < 6) {
     return null;
   }
-  
-  // 提取前6位 BIN 码
-  const bin = cleanCardNumber.substring(0, 6);
-  
-  // 精确匹配前6位
-  if (BANK_BIN_MAP[bin]) {
-    return BANK_BIN_MAP[bin];
+
+  // 优先尝试长前缀精确匹配（8/7/6 位）
+  const exactPrefixLengths = [8, 7, 6];
+  for (const len of exactPrefixLengths) {
+    if (cleanCardNumber.length >= len) {
+      const prefix = cleanCardNumber.substring(0, len);
+      if (BANK_BIN_MAP[prefix]) {
+        return BANK_BIN_MAP[prefix];
+      }
+    }
   }
-  
-  // 如果前6位没有匹配，不再使用模糊匹配，避免误识别
-  // 前4位匹配容易导致错误（如 6222 会匹配到工商银行的 622200）
-  
+
+  // 兜底：使用 5/4 位前缀做“唯一归属”匹配，避免误识别
+  // 仅当候选 BIN 对应的银行唯一时返回；若存在多个银行则返回 null
+  const fallbackPrefixLengths = [5, 4];
+  for (const len of fallbackPrefixLengths) {
+    if (cleanCardNumber.length < len) {
+      continue;
+    }
+    const prefix = cleanCardNumber.substring(0, len);
+    const candidateBanks = new Set();
+    Object.keys(BANK_BIN_MAP).forEach((binKey) => {
+      if (binKey.startsWith(prefix)) {
+        candidateBanks.add(BANK_BIN_MAP[binKey]);
+      }
+    });
+    if (candidateBanks.size === 1) {
+      return Array.from(candidateBanks)[0];
+    }
+  }
+
   return null;
 }
 

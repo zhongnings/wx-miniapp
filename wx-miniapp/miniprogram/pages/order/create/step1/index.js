@@ -134,9 +134,9 @@ Page({
         const formData = this.data.formData || {};
 
         // 下拉框：默认选中第一个选项
-        if (!formData.assigneeOrg && this.data.assigneeOrgOptions?.length > 0) {
+        /*if (!formData.assigneeOrg && this.data.assigneeOrgOptions?.length > 0) {
           updates['formData.assigneeOrg'] = this.data.assigneeOrgOptions[0];
-        }
+        }*/
         if (!formData.channelOrg && this.data.microloanOrgOptions?.length > 0) {
           updates['formData.channelOrg'] = this.data.microloanOrgOptions[0];
         }
@@ -302,9 +302,9 @@ Page({
     if (dictData.assignee_org && dictData.assignee_org.length > 0) {
       updates.assigneeOrgOptions = dictData.assignee_org.map(item => item.itemValue);
       // 如果当前没有选中值，默认选中第一个
-      if (!this.data.formData.assigneeOrg) {
+      /*if (!this.data.formData.assigneeOrg) {
         updates['formData.assigneeOrg'] = dictData.assignee_org[0].itemValue;
-      }
+      }*/
     }
     
     // 小贷机构
@@ -946,7 +946,7 @@ Page({
   validateForm() {
     const { formData } = this.data;
     const requiredFields = [
-      { key: 'assigneeOrg', name: '受让机构' },
+      /*{ key: 'assigneeOrg', name: '受让机构' },*/
       { key: 'channelOrg', name: '小贷机构' },
       { key: 'payMethod', name: '支付渠道' },
       { key: 'productType', name: '产品类型' },

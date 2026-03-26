@@ -36,7 +36,7 @@ public class WeChatService {
 
     private static final String WECHAT_TOKEN_KEY = "wechat:access_token";
     private static final String WECHAT_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token";
-    private static final String WECHAT_OCR_IDCARD_URL = "https://api.weixin.qq.com/cv/ocr/idcard";
+    private static final String WECHAT_OCR_IDCARD_URL = "https://api.weixin.qq.com/cv/ocr/idcard?access_token=";
 
     /**
      * 获取微信access_token
@@ -86,17 +86,18 @@ public class WeChatService {
      */
     public Map<String, Object> ocrIdCard(String imageBase64, String side) {
         String token = getAccessToken();
+        String url = WECHAT_OCR_IDCARD_URL + token;
         
         Map<String, String> params = new HashMap<>();
-        params.put("access_token", token);
-        params.put("type", side); // front或back
+//        params.put("access_token", token);
+//        params.put("type", side); // front或back
         params.put("img", imageBase64);
 
         try {
             log.info("调用微信OCR身份证识别接口, side: {}", side);
             Map<String, Object> result = new HashMap<>();
             
-            if (StringUtils.equals(side, "front")) {
+            /*if (StringUtils.equals(side, "front")) {
                 result.put("type", "Front");
                 result.put("name", "张三");
                 result.put("id", "140105190001011579");
@@ -106,10 +107,10 @@ public class WeChatService {
             } else {
                 result.put("type", "Back");
                 result.put("valid_date", "2020-01-01至2030-01-01");
-            }
+            }*/
 
-            /* //调用微信OCR接口
-            Map<String, Object> response = httpUtil.postJson(WECHAT_OCR_IDCARD_URL, params, Map.class);
+             //调用微信OCR接口
+            Map<String, Object> response = httpUtil.postJson(url, params, Map.class);
             if (Objects.isNull(response.get("errcode")) || (Integer) response.get("errcode") != 0) {
                 throw new ValidationException("识别失败");
             }
@@ -124,7 +125,7 @@ public class WeChatService {
             } else {
                 result.put("type", "Back");
                 result.put("valid_date", response.get("valid_date"));
-            } */
+            }
 
             log.info("微信OCR识别完成");
             return result;

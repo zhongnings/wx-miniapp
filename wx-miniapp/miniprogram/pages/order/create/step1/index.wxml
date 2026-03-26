@@ -25,7 +25,7 @@
     <view class="form-section">
       <!-- 受让机构 -->
       <view class="form-item" bindtap="selectAssigneeOrg">
-        <text class="label required">受让机构</text>
+        <text class="label">受让机构</text>
         <view class="value-wrapper">
           <text class="value">{{formData.assigneeOrg || '请选择受让机构'}}</text>
           <text class="arrow">›</text>

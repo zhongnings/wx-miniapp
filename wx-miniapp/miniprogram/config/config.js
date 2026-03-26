@@ -3,8 +3,45 @@
  * 统一管理 API 地址、超时时间等配置
  */
 
-// API 基础地址配置
-const API_BASE_URL = 'http://127.0.0.1:8081';
+// 按环境配置 API 基础地址
+const ENV_API_BASE_URL = {
+  test: 'http://localhost:8081',
+  prod: 'https://yixinjr.cn'
+};
+
+/**
+ * 获取 API 基础地址
+ * 统一出口，避免业务侧分散硬编码默认值
+ */
+function getApiBaseUrl() {
+  // 小程序运行环境：develop | trial | release
+  const envVersion = getMiniProgramEnvVersion();
+  const envMap = {
+    develop: 'test',
+    trial: 'prod',
+    release: 'prod'
+  };
+  const envKey = envMap[envVersion] || 'prod';
+
+  return ENV_API_BASE_URL[envKey] || ENV_API_BASE_URL.prod;
+}
+
+/**
+ * 获取小程序环境标识
+ */
+function getMiniProgramEnvVersion() {
+  try {
+    if (typeof wx !== 'undefined' && wx.getAccountInfoSync) {
+      const accountInfo = wx.getAccountInfoSync();
+      return accountInfo && accountInfo.miniProgram
+        ? accountInfo.miniProgram.envVersion
+        : 'release';
+    }
+  } catch (e) {
+    // 非小程序上下文或 API 不可用时，回退生产环境
+  }
+  return 'release';
+}
 
 // 请求超时时间（毫秒）
 const REQUEST_TIMEOUT = 30000;
@@ -17,8 +54,8 @@ const DEBUG = true;
 
 // 导出配置
 module.exports = {
-  // API 基础地址
-  API_BASE_URL,
+  // API 基础地址统一读取入口
+  getApiBaseUrl,
   
   // 请求超时时间
   REQUEST_TIMEOUT,

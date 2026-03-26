@@ -52,8 +52,10 @@ rsa:
 
 # 微信配置
 wechat:
-  appid: wx17abb46c748b3702
-  secret: ddcec17a2dd36ad257802eb9ac461799
+  appid: wx777f96d4ff9b4c76
+  secret: 1ba330c26e80a0335e98f49c2bed06d0
+#  appid: wx17abb46c748b3702
+#  secret: ddcec17a2dd36ad257802eb9ac461799
 
 # 文件上传配置
 file:

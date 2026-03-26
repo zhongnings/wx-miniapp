@@ -74,13 +74,19 @@ public class StaticResourceConfig implements WebMvcConfigurer {
                 .setCachePeriod(3600); // 缓存1小时
 
         log.info("静态资源映射配置完成: /uploads/** -> {}", resourceLocation);
-        
+
         // 映射 /img/** 到 classpath:/img/ (用于占位图等静态资源)
         registry.addResourceHandler("/img/**")
                 .addResourceLocations("classpath:/img/")
                 .setCachePeriod(86400); // 缓存24小时
 
         log.info("静态资源映射配置完成: /img/** -> classpath:/img/");
+
+        // 映射 /agreements/** 到 classpath:/agreements/ (用于用户协议、隐私协议文档)
+        registry.addResourceHandler("/agreements/**")
+                .addResourceLocations("classpath:/agreements/")
+                .setCachePeriod(86400); // 缓存24小时
+
+        log.info("静态资源映射配置完成: /agreements/** -> classpath:/agreements/");
     }
 }
-

@@ -34,9 +34,9 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
   redis:
-    host: YOUR_REDIS_HOST
+    host: 127.0.0.1
     port: 6379
-    password: YOUR_REDIS_PASSWORD   # 如无密码可留空
+    password: yixinjr.cn!   # 如无密码可留空
     database: 0
     timeout: 3000ms
     lettuce:
@@ -62,8 +62,10 @@ rsa:
   private-key: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCjkmezGfmG3WdzHnYim7ferK+TuCsbt1O6Lq+UnB1vodC9OpE8p5liotP4C0K0iE8g12PPmK05drypQoBPGMbwEAgNJa2xqjb5uILittExxgPbmZ7wYQzybsxf4E/Fdas9I70iNv70LIHZXqsUeFoGKuYeIhugAvTRYFOwYdDnRGz2bfp4J8mGAVSw37X8ax5jJ1KgLmpgP//yEB7MS2Mco4Vx8wL1CbHr9c+FZZKmZptTwxMIhKpxVkyeyZw4Pwvxm1C4ctM3stdFQkz7bxGZMdupNjPI5PYvbj9YJFnpy9xUSnMkJccH5VtxJwJygtolXw7bgfkRpbK48hgX0uBzAgMBAAECggEANDGTRWMUbCRZzjH6IDDwCu2vWMN7feyRmucqv5DRE73ejYMStPgFyaOLX6q4LkMQfLo97xAYti1dJeVCa/rL/+4do5RSSE64HBb0LMOJHQjCUmBChxFwwCr6q903lxpk+a1dvH0v/Vn2VRYQIQgGMdGefB8GEZjf5a+HBNExh5ma0RXppw4ojswgAk7uST3SxT0JiV0v9xp/Gj3lykokNhB2OwJVv+1qekYhEGMaa4RUt/pk9HztDb++UQdZRLUt/LjLhxuhz6o9QekgT4MTxb6ilECA+6B504KE7tyaCKgES/qRFZeb8ygFk1QCWm1gckT5ozG5s/sQHmheiSo4AQKBgQDfhTpQVxZy+vfM8QIgORJryaL3FxoIIytAa23GhXTHgMhmzgkLvpuryj1aP9xBhwgj3zSrz1MxHuK3JRTpxgtmhCjHZV1NMumLxcwJbfKjR1I3F/BsyQYDe9QAa6fc5Tqe8U5p+uYs92abWTO1+bqioxPahUtyQmJ4CKNRq4bCswKBgQC7VyRzhN1wCxPtCFmP+5u7xJxEvIK9Q87xahL4AU5NQklwX3N0vI+WADg4qyQd0mhz+Y/P1LCS2aPQ0Gf8iFqXTT3xVPSCKK23E6f8vQplM64uno3K9tfUfTIi5c7XDY1cFs49EHZtFCsB9lbtGmB4Jl14ZiKWBHsAZlyF9qtLQQKBgE34PmA6EMWpD/m4dIJjBi79VlCVCWqfQf4lu1RNx2+0V7Os2XD0W38we/hYYG+nN8qzmL76Ak4XNQSn9cSaZe2r2kG79TDxupAcPlFnvgUA4wf+3MpF0Ugz0L8YzqR6fdll2XGUqOg0oOE925D1/Qmwk0NdzfScfZbbhIT/rXGLAoGBAK3/KM7WF2kKEO61M6IEGceSu2UoBPHOefVFBOstI1GkgFsLfEtvGplCCPWxFnFQTE1y+7wXGgy6cWjvN7WX2zPtvNtZgWMmbvm8GukllvMZxexsvNtG2nzz7s30zWB1qNZgJBsZIDT9Z1iCOIgtWG4fi+7YRcU50hgz+jk+OihBAoGAdhwhsI85mebRa9p28RoeeB1NsqPuP8BSrpKSBtUq8e5b7EvqumDfbqAZbsfn5SzFKFvHAaGg0WLZv4K5EJx4af4PFllCqoR9f/QyDgzSUzSfRXVjQSq4hNiTihEeWPzqX3l8HPLy62mRRwCEEImzZB4aGcxA9agN3mwqrIW5d1c=
 
 wechat:
-  appid: wxae17d38853fd1bee
-  secret: 93033886ba0066b79c29b6c793be9fb8
+  appid: wx777f96d4ff9b4c76
+  secret: 1ba330c26e80a0335e98f49c2bed06d0
+#  appid: wxae17d38853fd1bee
+#  secret: 93033886ba0066b79c29b6c793be9fb8
 
 file:
   upload-path: /var/data/miniapp/uploads

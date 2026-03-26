@@ -1,4 +1,5 @@
 const logger = require('../../utils/logger');
+const config = require('../../config/config');
 // 统一请求工具：直接使用全局挂载的 wx.$request（在 app.js 中挂载）
 const req = wx.$request;
 // 说明：密码加密统一移到后端（BCrypt），前端只负责传明文（依赖 HTTPS 保证传输安全）
@@ -135,8 +136,8 @@ Page({
 
     wx.showLoading({ title: '加载中...', mask: true });
 
-    // 组装完整 URL：支持相对路径（依赖后端 BASE_URL）或完整 http(s) 地址
-    const baseUrl = req.BASE_URL || '';
+    // 组装完整 URL：支持相对路径或完整 http(s) 地址，BASE_URL 统一从 config 读取
+    const baseUrl = config.getApiBaseUrl();
     const isAbsolute = /^https?:\/\//i.test(fileUrl);
     const fullUrl = isAbsolute ? fileUrl : `${baseUrl}${fileUrl}`;
 

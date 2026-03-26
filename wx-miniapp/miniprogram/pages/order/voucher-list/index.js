@@ -20,6 +20,13 @@ Page({
     this.loadLimitInfo();
   },
 
+  onShow() {
+    // 从新增/编辑页返回时刷新列表
+    if (this.data.orderId) {
+      this.loadVoucherList();
+    }
+  },
+
   /**
    * 加载制单列表
    */

@@ -8,7 +8,7 @@ const config = require('../config/config');
  * 获取 app 实例和 API 基础 URL
  */
 function getApiBaseUrl() {
-  return config.API_BASE_URL;
+  return config.getApiBaseUrl();
 }
 
 /**

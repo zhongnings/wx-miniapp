@@ -89,7 +89,7 @@ App({
 
   globalData: {
     // API 基础地址（从配置文件读取）
-    apiBaseUrl: config.API_BASE_URL,
+    apiBaseUrl: config.getApiBaseUrl(),
     // 预留全局数据
     uploadUtil,
     placeholderImages: {}, // 占位图缓存映射

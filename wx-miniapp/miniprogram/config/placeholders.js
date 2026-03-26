@@ -1,19 +1,15 @@
 /**
  * 占位图配置
  * 从服务器加载，减少小程序包体积
- * 
- * 注意：不要在这里 require request.js，会导致循环依赖
- * BASE_URL 会在运行时从 wx.$request.BASE_URL 获取
+ *
+ * BASE_URL 统一从 config.getApiBaseUrl() 获取
  */
 
-// 获取 BASE_URL 的函数（运行时获取，避免循环依赖）
+const config = require('./config');
+
+// 获取 BASE_URL（统一配置入口）
 function getBaseUrl() {
-  // 如果 wx.$request 已经挂载，使用它的 BASE_URL
-  if (typeof wx !== 'undefined' && wx.$request && wx.$request.BASE_URL) {
-    return wx.$request.BASE_URL;
-  }
-  // 否则使用默认值
-  return 'http://localhost:8081';
+  return config.getApiBaseUrl();
 }
 
 module.exports = {

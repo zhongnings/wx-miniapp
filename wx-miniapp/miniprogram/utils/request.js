@@ -1,7 +1,7 @@
 const config = require('../config/config');
 const logger = require('./logger');
 
-const BASE_URL = config.API_BASE_URL;
+const BASE_URL = config.getApiBaseUrl();
 
 /**
  * 统一的请求方法

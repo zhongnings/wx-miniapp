@@ -103,7 +103,8 @@
           placeholder="输入卡号自动识别银行" 
           value="{{formData.cardNumber}}"
           bindinput="onCardNumberInput"
-          type="number"
+          type="digit"
+          maxlength="23"
         />
       </view>
 

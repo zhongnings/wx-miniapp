@@ -10,6 +10,11 @@
   -->
 
   <scroll-view class="content-area" scroll-y="true" enhanced="true" show-scrollbar="false">
+    <view class="submit-loading-panel" wx:if="{{submitLoadingVisible}}">
+      <view class="submit-loading-spinner"></view>
+      <text class="submit-loading-text">{{submitLoadingText}}</text>
+    </view>
+
     <!-- 订单摘要卡片 -->
     <view class="summary-card">
       <view class="summary-row">
