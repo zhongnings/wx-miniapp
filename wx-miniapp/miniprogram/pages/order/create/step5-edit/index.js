@@ -52,7 +52,7 @@ Page({
       '中国工商银行', '中国建设银行', '中国农业银行', '中国银行',
       '交通银行', '招商银行', '浦发银行', '中信银行',
       '光大银行', '华夏银行', '民生银行', '广发银行',
-      '平安银行', '�兴业银行', '邮储银行', '其他银行'
+      '平安银行', '兴业银行', '邮储银行', '其他银行'
     ],
     // 银行选择器显示状态
     showBankPicker: false
@@ -622,6 +622,63 @@ Page({
     });
   },
 
+  // 优先调用后端 BIN 识别，失败或未命中时降级到本地识别
+  identifyBankByServer(cardNumber) {
+    const cleanNumber = (cardNumber || '').replace(/\D/g, '');
+    if (cleanNumber.length < 6) {
+      return Promise.resolve(null);
+    }
+
+    const req = this.getRequest();
+    const cardPrefix = cleanNumber.substring(0, Math.min(8, cleanNumber.length));
+    return req.request({
+      url: '/public/banks/identify',
+      method: 'GET',
+      data: { cardPrefix }
+    }).then((res) => {
+      const data = res && res.data ? res.data : {};
+      if (data && data.matched && data.bankName) {
+        logger.info('[银行卡识别] 后端识别命中', {
+          bankCode: data.bankCode,
+          bankName: data.bankName,
+          confidence: data.confidence,
+          mapVersion: data.mapVersion
+        });
+        return data.bankName;
+      }
+      return null;
+    }).catch((err) => {
+      logger.warn('[银行卡识别] 后端识别失败，降级本地识别', err);
+      return null;
+    });
+  },
+
+  applyIdentifiedBank(bankName, cleanCardNumber, source = 'local') {
+    if (!bankName) {
+      return;
+    }
+    if (this.data.formData.bankName === bankName) {
+      return;
+    }
+    this.setData({
+      'formData.bankName': bankName
+    });
+
+    // showToast 在部分机型上对 title 长度有限制，长银行名会被截断
+    const safeBankName = (bankName && bankName.length > 8)
+      ? `${bankName.slice(0, 8)}…`
+      : bankName;
+    wx.showToast({
+      title: `已识别：${safeBankName}`,
+      icon: 'success',
+      duration: 1500
+    });
+    logger.info(`[银行卡识别] 已更新银行（${source}）`, {
+      cardPrefix: cleanCardNumber.substring(0, 6) + '****',
+      bankName
+    });
+  },
+
   // 银行卡号输入
   onCardNumberInput(e) {
     let value = e.detail.value.replace(/\s/g, ''); // 移除空格
@@ -641,32 +698,26 @@ Page({
       // 如果前6位变化，或当前仍未识别出银行，则重试识别
       if (currentBin !== previousBin || !currentBankName) {
         this._lastCardBin = currentBin;
-        
-        const bankName = bankCardUtil.identifyBank(value);
-        if (bankName) {
-          logger.info('自动识别银行:', { cardNumber: value.substring(0, 6) + '****', bankName });
-          
-          // 如果识别到的银行与当前不同，更新银行名称
-          if (this.data.formData.bankName !== bankName) {
-            this.setData({
-              'formData.bankName': bankName
-            });
-            
-            // 显示提示
-            wx.showToast({
-              title: `已识别：${bankName}`,
-              icon: 'success',
-              duration: 1500
-            });
+
+        const localBankName = bankCardUtil.identifyBank(value);
+        const requestMark = currentBin;
+        this._bankIdentifyRequestMark = requestMark;
+
+        this.identifyBankByServer(value).then((serverBankName) => {
+          // 防止异步返回覆盖用户后续输入
+          if (this._bankIdentifyRequestMark !== requestMark) {
+            return;
           }
-        } else {
-          // 无法识别时，如果是新输入的卡号（不是编辑模式加载的），清空银行名称
-          if (!this._isLoadingCard) {
+
+          const finalBankName = serverBankName || localBankName;
+          if (finalBankName) {
+            this.applyIdentifiedBank(finalBankName, value, serverBankName ? 'server' : 'local');
+          } else if (!this._isLoadingCard) {
             this.setData({
               'formData.bankName': ''
             });
           }
-        }
+        });
       }
     } else if (value.length < 4) {
       // 卡号少于4位时，清除记录的BIN码
@@ -893,11 +944,18 @@ Page({
       return false;
     }
     
-    // 验证银行卡号格式（移除空格后至少16位）
+    // 验证银行卡号格式（长度 + Luhn）
     const cardNumber = formData.cardNumber.replace(/\s/g, '');
     if (cardNumber.length < 16 || cardNumber.length > 19) {
       wx.showToast({
         title: '银行卡号格式不正确',
+        icon: 'none'
+      });
+      return false;
+    }
+    if (!bankCardUtil.validateCardNumber(cardNumber)) {
+      wx.showToast({
+        title: '银行卡号校验未通过',
         icon: 'none'
       });
       return false;

@@ -67,3 +67,8 @@ security:
       - /auth/register
       - /auth/public-key
       - /public/dict/items/batch
+      - /public/banks/**
+
+bank:
+  bin:
+    map-version: 2026-03-27
