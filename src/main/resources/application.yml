@@ -72,3 +72,13 @@ security:
 bank:
   bin:
     map-version: 2026-03-27
+
+auth:
+  register:
+    # 开启后：只有在白名单中的用户名才允许注册
+    allowlist-enabled: true
+    # 固定用户名白名单（优先级高于DB表；留空则回落查 sys_register_allowlist）
+    allowed-usernames:
+      - admin
+      - sales
+      - applicant

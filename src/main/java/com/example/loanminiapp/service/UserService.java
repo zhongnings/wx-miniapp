@@ -1,14 +1,17 @@
 package com.example.loanminiapp.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.loanminiapp.config.AuthRegisterProperties;
 import com.example.loanminiapp.entity.SysPermission;
 import com.example.loanminiapp.entity.SysRole;
 import com.example.loanminiapp.entity.SysRolePermission;
 import com.example.loanminiapp.entity.SysUser;
 import com.example.loanminiapp.entity.SysUserRole;
+import com.example.loanminiapp.entity.SysRegisterAllowlist;
 import com.example.loanminiapp.mapper.SysPermissionMapper;
 import com.example.loanminiapp.mapper.SysRoleMapper;
 import com.example.loanminiapp.mapper.SysRolePermissionMapper;
+import com.example.loanminiapp.mapper.SysRegisterAllowlistMapper;
 import com.example.loanminiapp.mapper.SysUserMapper;
 import com.example.loanminiapp.mapper.SysUserRoleMapper;
 import com.example.loanminiapp.enums.RoleEnum;
@@ -43,6 +46,8 @@ public class UserService {
     private final SysRolePermissionMapper sysRolePermissionMapper;
     private final SysPermissionMapper sysPermissionMapper;
     private final PasswordEncoder passwordEncoder;
+    private final SysRegisterAllowlistMapper sysRegisterAllowlistMapper;
+    private final AuthRegisterProperties authRegisterProperties;
 
     /**
      * 校验用户名和密码，返回用户信息
@@ -111,8 +116,13 @@ public class UserService {
             throw new RuntimeException("密码不能为空");
         }
 
+        String normalizedUsername = username.trim();
+        if (authRegisterProperties.isAllowlistEnabled() && !isUsernameAllowedToRegister(normalizedUsername)) {
+            throw new RuntimeException("该用户名不允许注册");
+        }
+
         SysUser existed = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, username));
+                .eq(SysUser::getUsername, normalizedUsername));
         if (existed != null) {
             throw new RuntimeException("用户名已存在");
         }
@@ -120,7 +130,7 @@ public class UserService {
         String encoded = passwordEncoder.encode(rawPassword);
 
         SysUser user = SysUser.builder()
-                .username(username.trim())
+                .username(normalizedUsername)
                 .password(encoded)
                 .status(1)
                 .build();
@@ -129,6 +139,25 @@ public class UserService {
         // 注册后默认设置为申请人
         SysUserRole userRole = SysUserRole.builder().userId(user.getId()).roleId(3L).build();
         sysUserRoleMapper.insert(userRole);
+    }
+
+    private boolean isUsernameAllowedToRegister(String username) {
+        List<String> fixedAllow = authRegisterProperties.getAllowedUsernames();
+        if (fixedAllow != null && !fixedAllow.isEmpty()) {
+            String u = username == null ? "" : username.trim();
+            return fixedAllow.stream()
+                    .filter(StringUtils::isNotBlank)
+                    .map(s -> s.trim())
+                    .anyMatch(s -> s.equalsIgnoreCase(u));
+        }
+
+        // 回落查 DB 表：sys_register_allowlist
+        SysRegisterAllowlist allowed = sysRegisterAllowlistMapper.selectOne(
+                new LambdaQueryWrapper<SysRegisterAllowlist>()
+                        .eq(SysRegisterAllowlist::getUsername, username)
+                        .eq(SysRegisterAllowlist::getEnabled, 1)
+        );
+        return allowed != null;
     }
 
     @Data

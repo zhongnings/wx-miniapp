@@ -60,6 +60,16 @@ CREATE TABLE IF NOT EXISTS sys_role_permission (
     CONSTRAINT fk_rp_permission FOREIGN KEY (permission_id) REFERENCES sys_permission (id)
 );
 
+-- 注册白名单：只有在白名单中的用户名才允许注册（可选启用）
+CREATE TABLE IF NOT EXISTS sys_register_allowlist (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(64) NOT NULL UNIQUE COMMENT '允许注册的用户名',
+    enabled TINYINT DEFAULT 1 COMMENT '1=启用 0=禁用',
+    remark VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 -- 可选：租户/机构表
 CREATE TABLE IF NOT EXISTS sys_tenant (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
