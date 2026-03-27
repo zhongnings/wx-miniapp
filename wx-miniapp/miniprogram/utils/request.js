@@ -19,10 +19,8 @@ function request(options) {
 
   const fullUrl = `${BASE_URL}${url}`;
 
-  // 从本地存储读取 token、userId、roles，透传给后端做简易鉴权
+  // 从本地存储读取 token，后端通过 Token 自行解析用户信息
   const token = wx.getStorageSync('TOKEN') || '';
-  const userId = wx.getStorageSync('USER_ID') || '';
-  const roles = wx.getStorageSync('ROLES') || '';
 
   // 记录请求日志
   logger.request(fullUrl, method, data);
@@ -35,32 +33,27 @@ function request(options) {
       header: {
         'Content-Type': 'application/json',
         'X-Token': token,
-        'X-User-Id': userId,
-        'X-Roles': Array.isArray(roles) ? roles.join(',') : roles,
         ...rest.header
       },
       success: (res) => {
         // 记录响应日志
         logger.response(fullUrl, res.statusCode, res.data);
 
-        // 统一处理Token失效（401未授权）
+        // 统一处理Token失效（401未授权）：清除本地信息并跳转登录页
         if (res.statusCode === 401 && !skipAuthCheck) {
           logger.warn('Token已失效，跳转登录页');
           
-          // 清除本地存储的认证信息
           wx.removeStorageSync('TOKEN');
           wx.removeStorageSync('USER_ID');
           wx.removeStorageSync('ROLES');
           wx.removeStorageSync('PERMISSIONS');
           
-          // 显示提示
           wx.showToast({
-            title: res.data?.message || '登录已过期，请重新登录',
+            title: res.data && res.data.message ? res.data.message : '登录已过期，请重新登录',
             icon: 'none',
             duration: 2000
           });
           
-          // 延迟跳转到登录页
           setTimeout(() => {
             wx.reLaunch({
               url: '/pages/login/index'
@@ -80,14 +73,14 @@ function request(options) {
           logger.warn('权限不足:', res.data);
           
           wx.showToast({
-            title: res.data?.message || '您没有权限执行此操作',
+            title: res.data && res.data.message ? res.data.message : '您没有权限执行此操作',
             icon: 'none',
             duration: 2500
           });
           
           reject({
             statusCode: 403,
-            message: res.data?.message || '权限不足',
+            message: res.data && res.data.message ? res.data.message : '权限不足',
             data: res.data
           });
           return;
@@ -103,9 +96,8 @@ function request(options) {
             data: res.data
           });
           
-          // 显示错误提示
           wx.showToast({
-            title: res.data?.message || '请求失败',
+            title: res.data && res.data.message ? res.data.message : '请求失败',
             icon: 'none',
             duration: 2000
           });
@@ -115,7 +107,7 @@ function request(options) {
           }
           reject({
             statusCode: res.statusCode,
-            message: res.data?.message || '请求失败',
+            message: res.data && res.data.message ? res.data.message : '请求失败',
             data: res.data
           });
         }
@@ -126,7 +118,6 @@ function request(options) {
           error: err
         });
 
-        // 显示网络错误提示
         wx.showToast({
           title: '网络错误，请检查网络连接',
           icon: 'none',
@@ -155,7 +146,6 @@ function request(options) {
 
 /**
  * GET 请求便捷方法
- * 用法：wx.$request.get('/path', { data, ...options })
  */
 function get(url, options = {}) {
   return request({
@@ -167,7 +157,6 @@ function get(url, options = {}) {
 
 /**
  * POST 请求便捷方法
- * 用法：wx.$request.post('/path', data, { ...options })
  */
 function post(url, data = {}, options = {}) {
   return request({
@@ -184,4 +173,3 @@ module.exports = {
   get,
   post
 };
-

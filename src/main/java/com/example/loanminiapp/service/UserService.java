@@ -125,6 +125,10 @@ public class UserService {
                 .status(1)
                 .build();
         sysUserMapper.insert(user);
+
+        // 注册后默认设置为申请人
+        SysUserRole userRole = SysUserRole.builder().userId(user.getId()).roleId(3L).build();
+        sysUserRoleMapper.insert(userRole);
     }
 
     @Data

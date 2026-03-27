@@ -34,6 +34,18 @@ public class OrderVoucherController {
     }
 
     /**
+     * 获取制单详情
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<VoucherInfo> getById(@PathVariable Long orderId, @PathVariable Long id) {
+        VoucherInfo info = orderVoucherService.getVoucherById(id);
+        if (info == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(info);
+    }
+
+    /**
      * 获取收款方列表
      */
     @GetMapping("/payees")
@@ -56,6 +68,17 @@ public class OrderVoucherController {
     public ResponseEntity<Void> add(@PathVariable Long orderId, @RequestBody VoucherInfo voucherInfo) {
         voucherInfo.setOrderId(orderId);
         orderVoucherService.addVoucher(voucherInfo);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 修改制单
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long orderId, @PathVariable Long id,
+                                       @RequestBody VoucherInfo voucherInfo) {
+        voucherInfo.setOrderId(orderId);
+        orderVoucherService.updateVoucher(id, voucherInfo);
         return ResponseEntity.ok().build();
     }
 
@@ -89,7 +112,7 @@ public class OrderVoucherController {
             }
 
             if (!currentUser.getPermissions().contains("order:pay")) {
-                log.warn("用户无放款权限: userId={}, permissions={}", 
+                log.warn("用户无放款权限: userId={}, permissions={}",
                     currentUser.getUserId(), currentUser.getPermissions());
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("code", 403);
@@ -105,7 +128,7 @@ public class OrderVoucherController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
 
-            log.info("用户申请放款: userId={}, orderId={}, voucherId={}", 
+            log.info("用户申请放款: userId={}, orderId={}, voucherId={}",
                 currentUser.getUserId(), orderId, voucherId);
 
             // TODO: 实现放款申请逻辑
@@ -119,7 +142,7 @@ public class OrderVoucherController {
             return ResponseEntity.ok(successResponse);
             
         } catch (Exception e) {
-            log.error("放款申请失败: orderId={}, voucherId={}, error={}", 
+            log.error("放款申请失败: orderId={}, voucherId={}, error={}",
                 orderId, voucherId, e.getMessage(), e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("code", 500);
@@ -128,4 +151,3 @@ public class OrderVoucherController {
         }
     }
 }
-

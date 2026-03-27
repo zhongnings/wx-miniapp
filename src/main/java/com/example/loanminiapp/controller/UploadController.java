@@ -184,19 +184,19 @@ public class UploadController {
             if (needOcr) {
                 try {
                     // 读取已保存的文件并转换为base64
-                    Path root = resolveUploadRoot();
+                    /*Path root = resolveUploadRoot();
                     Path targetFile = orderId != null 
                         ? root.resolve(String.valueOf(orderId)).resolve(fileName)
                         : root.resolve(fileName);
                     byte[] fileBytes = Files.readAllBytes(targetFile);
-                    String imageBase64 = Base64.getEncoder().encodeToString(fileBytes);
+                    String imageBase64 = Base64.getEncoder().encodeToString(fileBytes);*/
                     
                     // 转换side：idFront -> front（人像面），idBack -> back（国徽面）
                     // 微信OCR定义：front=人像面（姓名、身份证号、地址），back=国徽面（有效期）
                     String side = "idFront".equals(imageType) ? "front" : "back";
                     
                     log.info("开始OCR识别: orderId={}, imageType={}, side={}, ext={}", orderId, imageType, side, ext);
-                    Map<String, Object> ocrResult = weChatService.ocrIdCard(imageBase64, side);
+                    Map<String, Object> ocrResult = weChatService.ocrIdCard(url, side);
                     
                     resp.put("ocr", ocrResult);
                     resp.put("ocrSuccess", true);

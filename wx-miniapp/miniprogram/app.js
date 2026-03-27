@@ -40,6 +40,19 @@ App({
     wx.$banks = banks;
     // 地区数据缓存工具
     wx.$regionCache = regionCache;
+
+    // 仅开发环境启用 vConsole（生产/体验版不显示）
+    if (config.ENABLE_VCONSOLE) {
+      try {
+        const VConsole = require('/utils/vconsole.min.js');
+        if (!wx.__vConsoleInstance) {
+          wx.__vConsoleInstance = new VConsole();
+          console.log('[App] vConsole 已启用（开发环境）');
+        }
+      } catch (e) {
+        console.warn('[App] 未检测到 vConsole 资源，已跳过初始化');
+      }
+    }
     
     // 清除过期的图片缓存
     imageCache.clearExpiredCache();

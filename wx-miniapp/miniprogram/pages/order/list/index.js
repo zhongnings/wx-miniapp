@@ -106,6 +106,25 @@ Page({
   },
 
   /**
+   * 下拉刷新
+   */
+  onPullDownRefresh() {
+    logger.info('下拉刷新触发');
+    this.setData({
+      page: 1,
+      orders: [],
+      hasMore: true,
+      statsLoaded: false
+    }, () => {
+      this.loadStats(() => {
+        this.loadOrders(true, () => {
+          wx.stopPullDownRefresh();
+        });
+      });
+    });
+  },
+
+  /**
    * 加载用户菜单（根据权限）
    */
   loadUserMenu() {

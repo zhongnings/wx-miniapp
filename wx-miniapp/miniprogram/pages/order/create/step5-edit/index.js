@@ -629,10 +629,12 @@ Page({
     // 每4位添加一个空格
     const formattedValue = bankCardUtil.formatCardNumber(value);
     
-    // 当输入达到6位时，尝试识别银行
-    // 修改逻辑：如果卡号前6位变化了，重新识别银行（即使已有银行名称）
-    if (value.length >= 6) {
-      const currentBin = value.substring(0, 6);
+    // 当输入达到4位时，尝试识别银行
+    // bankCardUtil 内部支持 8/7/6 精确匹配 + 5/4 兜底匹配
+    if (value.length >= 4) {
+      // 对于少于 6 位的输入，使用当前可用前缀参与变化判断
+      const prefixLength = Math.min(6, value.length);
+      const currentBin = value.substring(0, prefixLength);
       const previousBin = this._lastCardBin || '';
       const currentBankName = (this.data.formData.bankName || '').trim();
       
@@ -666,8 +668,8 @@ Page({
           }
         }
       }
-    } else if (value.length < 6) {
-      // 卡号少于6位时，清除记录的BIN码
+    } else if (value.length < 4) {
+      // 卡号少于4位时，清除记录的BIN码
       this._lastCardBin = '';
     }
     

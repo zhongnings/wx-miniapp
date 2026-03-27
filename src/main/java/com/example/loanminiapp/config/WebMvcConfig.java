@@ -11,14 +11,18 @@ import org.springframework.web.servlet.config.annotation.*;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final CurrentUserInterceptor currentUserInterceptor;
+    private final AuthExcludeProperties authExcludeProperties;
 
     @Value("${file.upload-path}")
     private String uploadPath;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(currentUserInterceptor)
+        InterceptorRegistration registration = registry.addInterceptor(currentUserInterceptor)
                 .addPathPatterns("/**");
+        if (authExcludeProperties.getExcludePaths() != null && !authExcludeProperties.getExcludePaths().isEmpty()) {
+            registration.excludePathPatterns(authExcludeProperties.getExcludePaths());
+        }
     }
 
     /**

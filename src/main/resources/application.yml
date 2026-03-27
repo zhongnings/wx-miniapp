@@ -58,3 +58,12 @@ rsa:
 wechat:
   appid: # 请配置微信小程序AppID
   secret: # 请配置微信小程序Secret
+
+security:
+  auth:
+    # CurrentUserInterceptor 免 token 校验接口（支持 Ant 风格路径）
+    exclude-paths:
+      - /auth/login
+      - /auth/register
+      - /auth/public-key
+      - /public/dict/items/batch

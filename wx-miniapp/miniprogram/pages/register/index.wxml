@@ -4,14 +4,14 @@
       <view class="navbar-left" bindtap="goBack">
         <text class="navbar-icon">〈</text>
       </view>
-      <view class="navbar-title">金斗云</view>
+      <view class="navbar-title">益信通</view>
     </view>
   </view> -->
 
   <view class="logo-section">
     <view class="logo-cloud-large">☁️</view>
     <view class="logo-cloud-small">☁️</view>
-    <view class="app-title">金斗云</view>
+    <view class="app-title">益信通</view>
     <view class="welcome-text">欢迎注册账号信息</view>
   </view>
 

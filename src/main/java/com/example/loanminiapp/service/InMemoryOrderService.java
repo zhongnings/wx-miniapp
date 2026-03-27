@@ -12,7 +12,6 @@ import com.example.loanminiapp.enums.OrderStatusEnum;
 import com.example.loanminiapp.enums.RiskStatusEnum;
 import com.example.loanminiapp.enums.RepaymentStatusEnum;
 import com.example.loanminiapp.enums.SignStatusEnum;
-import com.example.loanminiapp.entity.OrderUserRelation;
 import com.example.loanminiapp.entity.OrderContract;
 import com.example.loanminiapp.mapper.OrderAttachmentMapper;
 import com.example.loanminiapp.mapper.OrderBankCardMapper;
@@ -21,7 +20,6 @@ import com.example.loanminiapp.mapper.OrderContractMapper;
 import com.example.loanminiapp.mapper.OrderLoanInfoMapper;
 import com.example.loanminiapp.mapper.OrderMapper;
 import com.example.loanminiapp.mapper.OrderStatusFlowMapper;
-import com.example.loanminiapp.mapper.OrderUserRelationMapper;
 import com.example.loanminiapp.mapper.SysUserMapper;
 import com.example.loanminiapp.model.AttachmentItem;
 import com.example.loanminiapp.model.ContractItem;
@@ -61,7 +59,6 @@ public class InMemoryOrderService implements OrderService {
     private final OrderBorrowerMapper orderBorrowerMapper;
     private final OrderBankCardMapper orderBankCardMapper;
     private final OrderAttachmentMapper orderAttachmentMapper;
-    private final OrderUserRelationMapper orderUserRelationMapper;
     private final OrderAccessService orderAccessService;
     private final OrderContractMapper orderContractMapper;
     private final ContractService contractService;
@@ -78,7 +75,7 @@ public class InMemoryOrderService implements OrderService {
     public List<OrderSummary> list(String tab, String keyword, String status) {
         // 构建查询条件，直接在SQL层面过滤权限
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
-        
+
         // 根据角色添加权限过滤条件
         addRoleFilter(queryWrapper);
         
@@ -550,9 +547,11 @@ public class InMemoryOrderService implements OrderService {
             queryWrapper.eq(Order::getId, -1);
             return;
         }
-        
-        // 查询用户有权限的订单ID列表
-        List<OrderUserRelation> relations = orderUserRelationMapper.selectList(
+
+        queryWrapper.eq(Order::getUserId, uid);
+        log.debug("用户 {} 查询自己的订单，角色: {}", uid, cu.getRoles());
+
+        /*List<OrderUserRelation> relations = orderUserRelationMapper.selectList(
                 new LambdaQueryWrapper<OrderUserRelation>()
                         .eq(OrderUserRelation::getUserId, uid)
         );
@@ -586,7 +585,7 @@ public class InMemoryOrderService implements OrderService {
         } else {
             // 添加 IN 条件，只查询有权限的订单
             queryWrapper.in(Order::getId, allowedOrderIds);
-        }
+        }*/
     }
 
     @Override

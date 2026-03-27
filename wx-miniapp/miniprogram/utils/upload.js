@@ -91,7 +91,7 @@ function uploadFile(options) {
               hasOcr: !!data.ocr,
               ocrSuccess: data.ocrSuccess
             });
-            // 返回完整结果，包含url和ocr信息
+            // 返回完整结果，包含url和ocr信息（后端已自动进行OCR）
             resolve({
               url: url,
               ocr: data.ocr,
@@ -126,7 +126,7 @@ function uploadFile(options) {
  * @param {string} idNumber 身份证号（可选）
  * @param {string} imageType 'idFront' 或 'idBack'
  * @param {string} personType 人员类型：'borrower'（借款人）、'coBorrower'（共借人）、'guarantor'（担保人）
- * @returns {Promise<Object>} 返回上传结果，包含url和ocr结果
+ * @returns {Promise<Object>} 返回上传结果，包含url和ocr结果（后端自动进行OCR）
  */
 function uploadIdCardImage(filePath, orderId, idNumber, imageType, personType) {
   if (!orderId) {
@@ -142,6 +142,7 @@ function uploadIdCardImage(filePath, orderId, idNumber, imageType, personType) {
     finalImageType = `${personType}-${imageType}`;
   }
 
+  // 上传文件，后端会自动进行OCR识别
   return uploadFile({
     filePath: filePath,
     orderId,
@@ -397,4 +398,3 @@ module.exports = {
   deleteOrderFile,
   deleteImageByUrl
 };
-

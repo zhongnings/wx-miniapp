@@ -100,6 +100,26 @@ public class OrderVoucherServiceImpl implements OrderVoucherService {
     }
 
     @Override
+    public VoucherInfo getVoucherById(Long id) {
+        OrderVoucher voucher = orderVoucherMapper.selectById(id);
+        if (voucher == null) {
+            return null;
+        }
+        VoucherInfo info = new VoucherInfo();
+        BeanUtils.copyProperties(voucher, info);
+        info.setPayeeTypeName(PayeeTypeEnum.getNameByCode(voucher.getPayeeType()));
+        return info;
+    }
+
+    @Override
+    public void updateVoucher(Long id, VoucherInfo voucherInfo) {
+        OrderVoucher voucher = new OrderVoucher();
+        BeanUtils.copyProperties(voucherInfo, voucher);
+        voucher.setId(id);
+        orderVoucherMapper.updateById(voucher);
+    }
+
+    @Override
     public void addVoucher(VoucherInfo voucherInfo) {
         OrderVoucher voucher = new OrderVoucher();
         BeanUtils.copyProperties(voucherInfo, voucher);

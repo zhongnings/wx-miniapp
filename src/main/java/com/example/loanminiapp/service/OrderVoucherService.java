@@ -26,6 +26,16 @@ public interface OrderVoucherService {
     void addVoucher(VoucherInfo voucherInfo);
 
     /**
+     * 根据ID获取制单详情
+     */
+    VoucherInfo getVoucherById(Long id);
+
+    /**
+     * 修改制单信息
+     */
+    void updateVoucher(Long id, VoucherInfo voucherInfo);
+
+    /**
      * 删除制单信息
      */
     void deleteVoucher(Long id);

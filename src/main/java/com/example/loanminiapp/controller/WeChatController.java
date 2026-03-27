@@ -41,7 +41,7 @@ public class WeChatController {
     }
 
     /**
-     * OCR身份证识别接口
+     * OCR身份证识别接口（传base64）
      * @param request 包含图片base64和身份证面（front/back）
      */
     @PostMapping("/ocr/idcard")

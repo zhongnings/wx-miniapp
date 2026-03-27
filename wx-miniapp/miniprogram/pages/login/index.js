@@ -38,6 +38,32 @@ Page({
       username: lastLogin.username || '',
       password: lastLogin.password || ''
     });
+
+    // 开启页面分享能力（右上角菜单）
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline']
+    });
+  },
+
+  /**
+   * 分享给好友
+   */
+  onShareAppMessage() {
+    return {
+      title: '益信通 - 便捷信贷业务办理',
+      path: '/pages/login/index'
+    };
+  },
+
+  /**
+   * 分享到朋友圈
+   */
+  onShareTimeline() {
+    return {
+      title: '益信通 - 便捷信贷业务办理',
+      query: ''
+    };
   },
 
   /**
