@@ -156,15 +156,15 @@ public class ContractService {
         data.put("nowMonth", String.valueOf(now.getMonthValue()));
         data.put("nowDay", String.valueOf(now.getDayOfMonth()));
 
-        if (guarantor != null) {
-            /* 担保人类型：personal-个人，company-对公，property-房产 */
-            String guarantorType = "";
-            String guarantorName = "";
-            String otherGuarantorType = "";
-            String propertyGuarantorName = "";
-            String propertyCode = "";
-            String propertyAddress = "";
+        /* 担保人类型：personal-个人，company-对公，property-房产 */
+        String guarantorType = "";
+        String guarantorName = "";
+        String otherGuarantorType = "";
+        String propertyGuarantorName = "";
+        String propertyCode = "";
+        String propertyAddress = "";
 
+        if (guarantor != null) {
             if (StringUtils.equals("personal", guarantor.getBorrowerType())) {
                 guarantorType = "贰";
                 guarantorName = guarantor.getName();
@@ -179,17 +179,17 @@ public class ContractService {
             } else {
                 guarantorType = "肆";
             }
-
-            data.put("guarantorType", guarantorType);
-            data.put("guarantorName", guarantorName);
-            data.put("otherGuarantorType", otherGuarantorType);
-            data.put("propertyGuarantorName", propertyGuarantorName);
-            data.put("propertyCode", propertyCode);
-            data.put("propertyAddress", propertyAddress);
         } else {
             // 担保方式，默认"肆. 无担保"，可根据需要调整
-            data.put("guarantorType", "肆");
+            guarantorType = "肆";
         }
+
+        data.put("guarantorType", guarantorType);
+        data.put("guarantorName", guarantorName);
+        data.put("otherGuarantorType", otherGuarantorType);
+        data.put("propertyGuarantorName", propertyGuarantorName);
+        data.put("propertyCode", propertyCode);
+        data.put("propertyAddress", propertyAddress);
 
         // 其他字段
         data.put("otherAgreedMatters", "");
