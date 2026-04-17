@@ -68,6 +68,7 @@ security:
       - /auth/public-key
       - /public/dict/items/batch
       - /public/banks/**
+      - /public/esign/callback/**
 
 bank:
   bin:

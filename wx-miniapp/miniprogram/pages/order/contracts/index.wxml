@@ -27,7 +27,7 @@
         <view class="action-buttons">
           <button class="action-btn preview-btn" data-url="{{item.pdfUrl}}" bindtap="onPreview">预览</button>
           <button class="action-btn urge-btn" data-id="{{item.id}}" bindtap="onUrgeSign">催签</button>
-          <button class="action-btn qrcode-btn" data-id="{{item.id}}" data-url="{{item.qrCodeUrl}}" bindtap="onShowQRCode">签署二维码</button>
+          <button class="action-btn qrcode-btn" data-contract-id="{{item.id}}" bindtap="onShowQRCode">签署二维码</button>
         </view>
       </view>
     </block>
@@ -40,7 +40,7 @@
     <view class="qrcode-content" catchtap="stopPropagation">
       <text class="qrcode-title">签署二维码</text>
       <image class="qrcode-image" src="{{qrCodeUrl}}" mode="aspectFit" wx:if="{{qrCodeUrl}}"></image>
-      <text class="qrcode-tip">请使用微信扫描二维码进行签署</text>
+      <text class="qrcode-tip">{{qrTip || '请使用手机浏览器扫描上方二维码进入 e宝签 完成签署'}}</text>
       <view class="qrcode-actions">
         <button class="qrcode-btn cancel" bindtap="closeQRCodeModal">关闭</button>
         <button class="qrcode-btn save" bindtap="saveQRCode">保存到相册</button>

@@ -57,6 +57,15 @@ wechat:
 #  appid: wx17abb46c748b3702
 #  secret: ddcec17a2dd36ad257802eb9ac461799
 
+# 通用电子签平台配置（当前使用 e宝签）
+esign:
+  enabled: true
+  # e签宝 应用配置（请替换为正式环境的 AppId / AppSecret 等）
+  app-id: "7439108354"
+  app-secret: "9623f6ee6c4f1da1af0974beb067bf2e"
+  project-id: ""
+  api-base-url: "https://smlopenapi.esign.cn"
+
 # 文件上传配置
 file:
   upload-path: D:/workcode/uploads

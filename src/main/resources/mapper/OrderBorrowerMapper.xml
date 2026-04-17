@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.loanminiapp.mapper.OrderBorrowerMapper">
+<mapper namespace="com.yixinjr.loanminiapp.mapper.OrderBorrowerMapper">
 
-    <resultMap id="OrderBorrowerResultMap" type="com.example.loanminiapp.entity.OrderBorrower">
+    <resultMap id="OrderBorrowerResultMap" type="com.yixinjr.loanminiapp.entity.OrderBorrower">
         <id property="id" column="id"/>
         <result property="orderId" column="order_id"/>
         <result property="roleType" column="role_type"/>

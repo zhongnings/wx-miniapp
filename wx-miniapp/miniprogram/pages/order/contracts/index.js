@@ -7,7 +7,8 @@ Page({
     id: null,
     contracts: [],
     showQRCodeModal: false,
-    qrCodeUrl: ''
+    qrCodeUrl: '',
+    qrTip: ''
   },
 
   onLoad(query) {
@@ -99,20 +100,30 @@ Page({
    */
   onUrgeSign(e) {
     const contractId = e.currentTarget.dataset.id;
+    const orderId = this.data.id;
     wx.showModal({
       title: '确认催签',
       content: '确定要向签署人发送催签提醒吗？',
       success: (res) => {
         if (res.confirm) {
           wx.showLoading({ title: '发送中...' });
-          // TODO: 调用后端催签接口
-          setTimeout(() => {
+          req.request({
+            url: `/public/orders/${orderId}/contracts/${contractId}/urge-sign`,
+            method: 'POST'
+          }).then(() => {
             wx.hideLoading();
             wx.showToast({
               title: '催签提醒已发送',
               icon: 'success'
             });
-          }, 1000);
+          }).catch(err => {
+            wx.hideLoading();
+            logger.error('催签失败:', err);
+            wx.showToast({
+              title: (err && err.message) ? err.message : '催签失败',
+              icon: 'none'
+            });
+          });
         }
       }
     });
@@ -122,37 +133,45 @@ Page({
    * 显示签署二维码
    */
   onShowQRCode(e) {
-    const contractId = e.currentTarget.dataset.id;
-    const qrCodeUrl = e.currentTarget.dataset.url;
-    
-    if (!qrCodeUrl) {
+    const contractId = e.currentTarget.dataset.contractId;
+    const orderId = this.data.id;
+    if (!orderId || !contractId) {
       wx.showToast({
-        title: '二维码生成失败',
+        title: '参数错误',
         icon: 'none'
       });
       return;
     }
-    
-    // 调用后端接口获取二维码
+
     wx.showLoading({ title: '生成中...' });
     req.request({
-      url: qrCodeUrl,
+      url: `/public/orders/${orderId}/contracts/${contractId}/qr-code`,
       method: 'GET'
     }).then(res => {
       wx.hideLoading();
-      const qrCodeImageUrl = res.data?.qrCodeUrl || qrCodeUrl;
-      // 如果是相对路径，需要拼接完整URL
-      const fullUrl = qrCodeImageUrl.startsWith('http') ? qrCodeImageUrl : (req.BASE_URL || '') + qrCodeImageUrl;
-      
+      const body = res.data || {};
+      const qrCodeImageUrl = body.qrCodeUrl;
+      if (!qrCodeImageUrl) {
+        wx.showToast({
+          title: '未返回二维码地址',
+          icon: 'none'
+        });
+        return;
+      }
+      const fullUrl = qrCodeImageUrl.startsWith('http')
+        ? qrCodeImageUrl
+        : (req.BASE_URL || '') + qrCodeImageUrl;
+
       this.setData({
         showQRCodeModal: true,
-        qrCodeUrl: fullUrl
+        qrCodeUrl: fullUrl,
+        qrTip: body.tip || ''
       });
     }).catch(err => {
       wx.hideLoading();
       logger.error('获取二维码失败:', err);
       wx.showToast({
-        title: '获取二维码失败',
+        title: (err && err.message) ? err.message : '获取二维码失败',
         icon: 'none'
       });
     });
@@ -164,7 +183,8 @@ Page({
   closeQRCodeModal() {
     this.setData({
       showQRCodeModal: false,
-      qrCodeUrl: ''
+      qrCodeUrl: '',
+      qrTip: ''
     });
   },
 
