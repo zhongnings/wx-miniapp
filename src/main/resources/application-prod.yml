@@ -71,12 +71,11 @@ wechat:
 esign:
   enabled: false
   # e签宝 应用配置（请替换为正式环境的 AppId / AppSecret 等）
-  app-id: ""
-  app-secret: ""
+  app-id: "7439108354"
+  app-secret: "9623f6ee6c4f1da1af0974beb067bf2e"
   project-id: ""
-  api-base-url: "https://openapi.esign.cn"
-  oauth-token-path: "/v1/oauth2/access_token"
-  qr-image-base-url: "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data="
+#  api-base-url: "https://openapi.esign.cn"
+  api-base-url: "https://smlopenapi.esign.cn"
 
 file:
   upload-path: /var/data/miniapp/uploads

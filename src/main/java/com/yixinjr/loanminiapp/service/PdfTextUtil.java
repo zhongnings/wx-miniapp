@@ -38,7 +38,7 @@ public class PdfTextUtil {
             PdfTextReplacer pdfTextReplacer =  new PdfTextReplacer(page);
 
             pdfTextReplacer.setOptions(textReplaceOptions);
-            pdfTextReplacer.replaceAllText("{{" + searchText + "}}", replacement);
+            pdfTextReplacer.replaceAllText(searchText, replacement);
         }
     }
 }

@@ -52,7 +52,7 @@
     <logger name="com.baomidou.mybatisplus" level="DEBUG"/>
     
     <!-- 具体 Mapper 的 SQL 日志 -->
-    <logger name="com.example.loanminiapp.mapper" level="DEBUG"/>
+    <logger name="com.yixinjr.loanminiapp.mapper" level="DEBUG"/>
 
     <!-- Root logger 只处理其他包的日志 -->
     <root level="INFO">

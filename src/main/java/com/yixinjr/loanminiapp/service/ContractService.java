@@ -97,22 +97,27 @@ public class ContractService {
 
         // 借款人信息
         if (borrower != null) {
+            String address = StringUtils.defaultString(borrower.getProvinceCity())
+                    + StringUtils.defaultString(borrower.getAddressDetail());
+            String mobile = StringUtils.defaultString(borrower.getMobile());
+
             data.put("name", borrower.getName() != null ? borrower.getName() : "");
             data.put("idNo", borrower.getIdNo() != null ? borrower.getIdNo() : "");
-            data.put("addressDetail", borrower.getAddressDetail() != null ? borrower.getAddressDetail() : "");
-            data.put("mobile", borrower.getMobile() != null ? borrower.getMobile() : "");
-            data.put("address", (borrower.getProvinceCity() != null ? borrower.getProvinceCity() : "")
-                    + (borrower.getAddressDetail() != null ? borrower.getAddressDetail() : ""));
+            data.put("address", address);
+            data.put("mobile", mobile);
+
+            data.put("sendAddress", address);
+            data.put("sendMobile", mobile);
             data.put("email", ""); // 邮箱字段，如需要可从borrower扩展
         }
 
         // 银行卡信息
         if (bankCard != null) {
-            data.put("accounName", bankCard.getAccountName() != null ? bankCard.getAccountName() : "");
+            data.put("accountName", bankCard.getAccountName() != null ? bankCard.getAccountName() : "");
             data.put("bankName", bankCard.getBankName() != null ? bankCard.getBankName() : "");
             data.put("cardNo", bankCard.getCardNo() != null ? bankCard.getCardNo() : "");
         } else {
-            data.put("accounName", "");
+            data.put("accountName", "");
             data.put("bankName", "");
             data.put("cardNo", "");
         }
@@ -122,7 +127,7 @@ public class ContractService {
         data.put("loanAmountUppercase",
                 loanInfo != null && loanInfo.getLoanAmountUppercase() != null ? loanInfo.getLoanAmountUppercase() : "");
         data.put("usageDesc", loanInfo != null && loanInfo.getUsageDesc() != null ? loanInfo.getUsageDesc() : "");
-        data.put("repayMode", loanInfo != null && loanInfo.getRepayMode() != null ? loanInfo.getRepayMode() : "");
+        data.put("loanDays", loanInfo != null && loanInfo.getLoanDays() != null ? loanInfo.getLoanDays().toString() : "");
         data.put("disputeWay", loanInfo != null && loanInfo.getDisputeWay() != null ? loanInfo.getDisputeWay() : "");
         data.put("arbitrationOrg",
                 loanInfo != null && loanInfo.getArbitrationOrg() != null ? loanInfo.getArbitrationOrg() : "");
@@ -131,29 +136,29 @@ public class ContractService {
         // 日期处理
         if (loanInfo != null && loanInfo.getStartDate() != null) {
             java.time.LocalDate startDate = loanInfo.getStartDate();
-            data.put("startDateYear", String.valueOf(startDate.getYear()));
-            data.put("startDateMonth", String.valueOf(startDate.getMonthValue()));
-            data.put("startDateDay", String.valueOf(startDate.getDayOfMonth()));
+            data.put("stdYear", String.valueOf(startDate.getYear()));
+            data.put("stdMth", String.valueOf(startDate.getMonthValue()));
+            data.put("stdDay", String.valueOf(startDate.getDayOfMonth()));
         } else {
-            data.put("startDateYear", "");
-            data.put("startDateMonth", "");
-            data.put("startDateDay", "");
+            data.put("stdYear", "");
+            data.put("stdMth", "");
+            data.put("stdDay", "");
         }
 
         if (loanInfo != null && loanInfo.getEndDate() != null) {
             java.time.LocalDate endDate = loanInfo.getEndDate();
-            data.put("endDateYear", String.valueOf(endDate.getYear()));
-            data.put("endDateMonth", String.valueOf(endDate.getMonthValue()));
-            data.put("endDateDay", String.valueOf(endDate.getDayOfMonth()));
+            data.put("endYear", String.valueOf(endDate.getYear()));
+            data.put("endMth", String.valueOf(endDate.getMonthValue()));
+            data.put("endDay", String.valueOf(endDate.getDayOfMonth()));
         } else {
-            data.put("endDateYear", "");
-            data.put("endDateMonth", "");
-            data.put("endDateDay", "");
+            data.put("endYear", "");
+            data.put("endMth", "");
+            data.put("endDay", "");
         }
 
         // 当前日期
         data.put("nowYear", String.valueOf(now.getYear()));
-        data.put("nowMonth", String.valueOf(now.getMonthValue()));
+        data.put("nowMth", String.valueOf(now.getMonthValue()));
         data.put("nowDay", String.valueOf(now.getDayOfMonth()));
 
         /* 担保人类型：personal-个人，company-对公，property-房产 */
@@ -333,15 +338,13 @@ public class ContractService {
             // 使用文本替换工具
             PdfTextUtil replacer = new PdfTextUtil(document);
             
-            contractData.forEach((k, v) -> {
-                replacer.replaceText(k, v);
-            });
+            contractData.forEach(replacer::replaceText);
             
             // 保存文件
             document.saveToFile(contractFile.toString());
 
             log.info("=== 替换完成 ===");
-            log.info("输出文件: {}", contractFile.toString());
+            log.info("输出文件: {}", contractFile);
 
         } finally {
             document.close();
